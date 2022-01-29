@@ -9,6 +9,7 @@
                 "flags": ["INTERNAL_INCLUDE"],
                 "kwargs": {
                     "KIND": 1,
+                    "TARGET_NAME": 1,
                     "OUTPUT_NAME": 1,
                     "ABSOLUTE_SOURCES": "*",
                     "INCLUDES": "*",

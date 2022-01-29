@@ -7,3 +7,6 @@ project(
     DESCRIPTION "Porth but More"
     HOMEPAGE_URL "https://gitlab.com/Phytolizer/Morth"
 )
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
+include(DeclareModule)
