@@ -37,8 +37,6 @@ function(declare_module NAME)
         ${DM_PUBLICITY}
         -Wall
         -Wextra
-        -Werror=implicit-function-declaration
-        -Werror=incompatible-pointer-types
         -Werror=return-type
         -Werror=unused-function
         -Werror=unused-parameter
