@@ -31,6 +31,7 @@ struct Stack
 #define MORTH_OPS_X                                                                                                    \
     X(PUSH)                                                                                                            \
     X(PLUS)                                                                                                            \
+    X(MINUS)                                                                                                           \
     X(DUMP)
 
 enum struct OpCode
@@ -80,6 +81,13 @@ void SimulateProgram(const std::vector<Op>& program)
             ip += 1;
             break;
         }
+        case OpCode::MINUS: {
+            auto b = stack.Pop();
+            auto a = stack.Pop();
+            stack.Push(a - b);
+            ip += 1;
+            break;
+        }
         case OpCode::DUMP: {
             auto x = stack.Pop();
             std::cout << x << "\n";
@@ -100,5 +108,14 @@ void CompileProgram(const std::vector<Op>& program)
 
 int main()
 {
-    SimulateProgram({{OpCode::PUSH, 34}, {OpCode::PUSH, 35}, {OpCode::PLUS}, {OpCode::DUMP}});
+    SimulateProgram({
+        {OpCode::PUSH, 34},
+        {OpCode::PUSH, 35},
+        {OpCode::PLUS},
+        {OpCode::DUMP},
+        {OpCode::PUSH, 500},
+        {OpCode::PUSH, 80},
+        {OpCode::MINUS},
+        {OpCode::DUMP},
+    });
 }
