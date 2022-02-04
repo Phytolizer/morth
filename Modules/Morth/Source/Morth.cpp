@@ -1,9 +1,32 @@
 #include <array>
 #include <iostream>
 #include <optional>
+#include <stack>
 #include <stdexcept>
 #include <string_view>
 #include <vector>
+
+using StackType = std::uint64_t;
+
+struct Stack
+{
+    Stack() = default;
+
+    void Push(StackType value)
+    {
+        data.push(value);
+    }
+
+    StackType Pop()
+    {
+        StackType x = data.top();
+        data.pop();
+        return x;
+    }
+
+  private:
+    std::stack<StackType> data;
+};
 
 #define MORTH_OPS_X                                                                                                    \
     X(PUSH)                                                                                                            \
@@ -20,9 +43,9 @@ enum struct OpCode
 struct Op
 {
     OpCode code;
-    std::optional<std::uint64_t> argument;
+    std::optional<StackType> argument;
 
-    constexpr Op(OpCode code, std::uint64_t argument) : code(code), argument(argument)
+    constexpr Op(OpCode code, StackType argument) : code(code), argument(argument)
     {
     }
 
@@ -39,6 +62,7 @@ constexpr std::array OPS = {
 
 void SimulateProgram(const std::vector<Op>& program)
 {
+    Stack stack;
     for (std::size_t ip = 0; ip < program.size();)
     {
         std::cout << "Evaluating [" << ip << "], a " << OPS[static_cast<std::size_t>(program[ip].code)]
@@ -46,14 +70,22 @@ void SimulateProgram(const std::vector<Op>& program)
         switch (program[ip].code)
         {
         case OpCode::PUSH:
+            stack.Push(*program[ip].argument);
             ip += 1;
             break;
-        case OpCode::PLUS:
+        case OpCode::PLUS: {
+            auto b = stack.Pop();
+            auto a = stack.Pop();
+            stack.Push(a + b);
             ip += 1;
             break;
-        case OpCode::DUMP:
+        }
+        case OpCode::DUMP: {
+            auto x = stack.Pop();
+            std::cout << x << "\n";
             ip += 1;
             break;
+        }
         default:
             throw std::runtime_error{"corrupt Op"};
         }
