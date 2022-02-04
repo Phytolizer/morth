@@ -41,6 +41,7 @@ function(declare_module NAME)
         -Werror=unused-function
         -Werror=unused-parameter
         -Werror=unused-variable
+        -Werror=switch
         -fsanitize=address,undefined
     )
     target_link_options(
