@@ -87,9 +87,15 @@ void SimulateProgram(const std::vector<Op>& program)
             break;
         }
         default:
-            throw std::runtime_error{"corrupt Op"};
+            throw std::runtime_error{"Corrupt OpCode encountered."};
         }
     }
+}
+
+void CompileProgram(const std::vector<Op>& program)
+{
+    (void)program;
+    throw std::runtime_error{"Not implemented..."};
 }
 
 int main()
