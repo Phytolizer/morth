@@ -10,3 +10,9 @@ project(
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 include(DeclareModule)
+
+declare_module(
+    Morth
+    KIND executable
+    SOURCES Morth.cpp
+)

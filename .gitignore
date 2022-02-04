@@ -4,3 +4,9 @@
 out/
 build/
 cmake-build-*/
+output.ll
+output.bc
+output
+output.exe
+
+.cache/clangd/index
