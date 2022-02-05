@@ -9,6 +9,7 @@ stages:
 build-job:
   stage: build
   script:
-    - cmake -B build
-    - cmake --build build
-    - cd build && ctest
+    - cd c++
+    - cmake --preset default
+    - cmake --build --preset default
+    - cd build/default && ctest
