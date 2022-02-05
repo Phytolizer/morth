@@ -1,3 +1,35 @@
+#[derive(Debug, PartialEq)]
+enum Op {
+    Push(u64),
+    Plus,
+    Dump,
+}
+
+fn simulate_program(program: &[Op]) {
+    let mut stack = Vec::<u64>::new();
+    let mut ip = 0;
+    while ip < program.len() {
+        println!("Executing [{}] {:?}", ip, program[ip]);
+        match &program[ip] {
+            Op::Push(x) => {
+                stack.push(*x);
+                ip += 1;
+            }
+            Op::Plus => {
+                let b = stack.pop().unwrap();
+                let a = stack.pop().unwrap();
+                stack.push(a + b);
+                ip += 1;
+            }
+            Op::Dump => {
+                let x = stack.pop().unwrap();
+                println!("{}", x);
+                ip += 1;
+            }
+        }
+    }
+}
+
 fn main() {
-    println!("Hello, world!");
+    simulate_program(&[Op::Push(34), Op::Push(35), Op::Plus, Op::Dump]);
 }
