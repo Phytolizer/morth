@@ -1,4 +1,4 @@
-#lang debug/racket
+#lang racket
 
 (define (stack-pop stack)
   (values (car stack) (cdr stack)))
@@ -55,13 +55,15 @@
   (define (loop remaining-program)
     (if (null? remaining-program)
         (void)
-        (begin
-          (case (car (car remaining-program))
-            [(PUSH) (compile-push (cadr (car remaining-program)))]
-            [(PLUS) (compile-plus)]
-            [(MINUS) (compile-minus)]
-            [(DUMP) (compile-dump)])
-          (loop (cdr remaining-program)))))
+        (let ([instruction (car remaining-program)])
+          (begin
+            (displayln (string-append-immutable ";; -- " (symbol->string (car instruction)) " --"))
+            (case (car instruction)
+              [(PUSH) (compile-push (cadr (car remaining-program)))]
+              [(PLUS) (compile-plus)]
+              [(MINUS) (compile-minus)]
+              [(DUMP) (compile-dump)])
+            (loop (cdr remaining-program))))))
   (loop program))
 
 (define program '((PUSH 34) (PUSH 35) (PLUS) (DUMP) (PUSH 500) (PUSH 80) (MINUS) (DUMP)))
