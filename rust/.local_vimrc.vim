@@ -1,1 +1,1 @@
-set makeprg=cargo\ run\ --\ sim
+set makeprg=cargo\ run\ --\ com
