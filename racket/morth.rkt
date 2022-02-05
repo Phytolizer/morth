@@ -51,7 +51,7 @@
   (map (emit out) '("pop rbx" "pop rax" "sub rax, rbx" "push rax")))
 
 (define (compile-dump out)
-  (map (emit out) '("pop rsi" "call dump")))
+  (map (emit out) '("pop rdi" "call dump")))
 
 (define (compile-program program out)
   (define (loop remaining-program)
