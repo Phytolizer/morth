@@ -48,7 +48,7 @@
   (map (emit out) '("pop rbx" "pop rax" "add rax, rbx" "push rax")))
 
 (define (compile-minus out)
-  (map (emit out) '("pop rbx" "pop rax" "isub rax, rbx" "push rax")))
+  (map (emit out) '("pop rbx" "pop rax" "sub rax, rbx" "push rax")))
 
 (define (compile-dump out)
   (map (emit out) '("pop rsi" "call dump")))
@@ -102,6 +102,26 @@
 
 (define program '((PUSH 34) (PUSH 35) (PLUS) (DUMP) (PUSH 500) (PUSH 80) (MINUS) (DUMP)))
 
+(define (run-command args)
+  (let ([command-path (find-executable-path (car args))])
+    (if (false? command-path)
+        (begin
+          (displayln (string-append-immutable "ERROR: '" (car args) "' could not be found")
+                     (current-error-port))
+          (exit 1))
+        (begin
+          (displayln (string-join args " "))
+          (let-values ([(process stdout _in _err)
+                        (apply subprocess #f #f 'stdout command-path (cdr args))])
+            (display (port->string stdout))
+            (close-input-port stdout)
+            (subprocess-wait process)
+            (if (not (eq? (subprocess-status process) 0))
+                (begin
+                  (displayln "ERROR: process reported failure")
+                  (exit 1))
+                (void)))))))
+
 (let ([args (vector->list (current-command-line-arguments))])
   (if (null? args)
       (begin
@@ -111,7 +131,10 @@
         (case subcommand
           [("sim") (simulate-program program)]
           [("com")
-           (call-with-output-file "output.asm"
-                                  (lambda (out) (compile-program program out))
-                                  #:mode 'text
-                                  #:exists 'replace)]))))
+           (begin
+             (call-with-output-file "output.asm"
+                                    (lambda (out) (compile-program program out))
+                                    #:mode 'text
+                                    #:exists 'replace)
+             (run-command '("nasm" "-felf64" "output.asm"))
+             (run-command '("ld" "-o" "output" "output.o")))]))))
