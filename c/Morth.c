@@ -147,18 +147,42 @@ void compile_program(struct op* program, const char* out_file_path)
         exit(1);
     }
     fputs("segment .text\n", out);
+    fputs("dump:\n", out);
+    fputs("sub     rsp, 40\n", out);
+    fputs("lea     rsi, [rsp + 31]\n", out);
+    fputs("mov     byte [rsp + 31], 10\n", out);
+    fputs("mov     ecx, 1\n", out);
+    fputs("mov     r8, -3689348814741910323\n", out);
+    fputs(".LBB0_1:\n", out);
+    fputs("mov     rax, rdi\n", out);
+    fputs("mul     r8\n", out);
+    fputs("shr     rdx, 3\n", out);
+    fputs("lea     eax, [rdx + rdx]\n", out);
+    fputs("lea     r9d, [rax + 4*rax]\n", out);
+    fputs("mov     eax, edi\n", out);
+    fputs("sub     eax, r9d\n", out);
+    fputs("or      al, 48\n", out);
+    fputs("mov     byte [rsi - 1], al\n", out);
+    fputs("add     rsi, -1\n", out);
+    fputs("add     rcx, 1\n", out);
+    fputs("cmp     rdi, 9\n", out);
+    fputs("mov     rdi, rdx\n", out);
+    fputs("ja      .LBB0_1\n", out);
+    fputs("mov     edi, 1\n", out);
+    fputs("mov     rdx, rcx\n", out);
+    fputs("mov     rax, 1\n", out);
+    fputs("syscall\n", out);
+    fputs("add     rsp, 40\n", out);
+    fputs("ret\n", out);
     fputs("global _start\n", out);
     fputs("_start:\n", out);
-    fputs("mov rax, 60\n", out);
-    fputs("mov rdi, 0\n", out);
-    fputs("syscall\n", out);
     for (size_t ip = 0; program[ip].code != OP_HALT; ip += 1)
     {
         fprintf(out, ";; -- %s --\n", OP_STRINGS[program[ip].code]);
         switch (program[ip].code)
         {
             case OP_PUSH:
-                fputs("push rax\n", out);
+                fprintf(out, "push %" PRIu64 "\n", program[ip].as.push_op);
                 break;
             case OP_PLUS:
                 fputs("pop rbx\n", out);
@@ -166,8 +190,27 @@ void compile_program(struct op* program, const char* out_file_path)
                 fputs("add rax, rbx\n", out);
                 fputs("push rax\n", out);
                 break;
+            case OP_MINUS:
+                fputs("pop rbx\n", out);
+                fputs("pop rax\n", out);
+                fputs("isub rax, rbx\n", out);
+                fputs("push rax\n", out);
+                break;
+            case OP_DUMP:
+                fputs("pop rdi\n", out);
+                fputs("call dump\n", out);
+                break;
+            case OP_HALT:
+                assert(false && "unreachable");
+            case OPS_COUNT:
+            default:
+                fputs("fatal: corrupt opcode encountered\n", stderr);
+                exit(1);
         }
     }
+    fputs("mov rax, 60\n", out);
+    fputs("mov rdi, 0\n", out);
+    fputs("syscall\n", out);
     fclose(out);
 }
 
