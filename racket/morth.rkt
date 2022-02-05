@@ -39,32 +39,34 @@
         (void)))
   (loop 0 '()))
 
-(define (compile-push x)
-  (map displayln (list (string-append-immutable "push " (number->string x)))))
+(define-syntax-rule (emit out) (lambda (text) (displayln text out)))
 
-(define (compile-plus)
-  (map displayln '("pop rbx" "pop rax" "add rax, rbx" "push rax")))
+(define (compile-push x out)
+  (map (emit out) (list (string-append-immutable "push " (number->string x)))))
 
-(define (compile-minus)
-  (map displayln '("pop rbx" "pop rax" "isub rax, rbx" "push rax")))
+(define (compile-plus out)
+  (map (emit out) '("pop rbx" "pop rax" "add rax, rbx" "push rax")))
 
-(define (compile-dump)
-  (map displayln '("pop rsi" "call dump")))
+(define (compile-minus out)
+  (map (emit out) '("pop rbx" "pop rax" "isub rax, rbx" "push rax")))
 
-(define (compile-program program)
+(define (compile-dump out)
+  (map (emit out) '("pop rsi" "call dump")))
+
+(define (compile-program program out)
   (define (loop remaining-program)
     (if (null? remaining-program)
         (void)
         (let ([instruction (car remaining-program)])
           (begin
-            (displayln (string-append-immutable ";; -- " (symbol->string (car instruction)) " --"))
+            ((emit out) (string-append-immutable ";; -- " (symbol->string (car instruction)) " --"))
             (case (car instruction)
-              [(PUSH) (compile-push (cadr (car remaining-program)))]
-              [(PLUS) (compile-plus)]
-              [(MINUS) (compile-minus)]
-              [(DUMP) (compile-dump)])
+              [(PUSH) (compile-push (cadr (car remaining-program)) out)]
+              [(PLUS) (compile-plus out)]
+              [(MINUS) (compile-minus out)]
+              [(DUMP) (compile-dump out)])
             (loop (cdr remaining-program))))))
-  (map displayln
+  (map (emit out)
        '("segment .text" "dump:"
                          "sub     rsp, 40"
                          "lea     rsi, [rsp + 31]"
@@ -95,7 +97,7 @@
                          "global _start"
                          "_start:"))
   (loop program)
-  (map displayln '("mov rax, 60" "mov rdi, 0" "syscall"))
+  (map (emit out) '("mov rax, 60" "mov rdi, 0" "syscall"))
   (void))
 
 (define program '((PUSH 34) (PUSH 35) (PLUS) (DUMP) (PUSH 500) (PUSH 80) (MINUS) (DUMP)))
@@ -108,4 +110,8 @@
       (let-values ([(subcommand args) (stack-pop args)])
         (case subcommand
           [("sim") (simulate-program program)]
-          [("com") (compile-program program)]))))
+          [("com")
+           (call-with-output-file "output.asm"
+                                  (lambda (out) (compile-program program out))
+                                  #:mode 'text
+                                  #:exists 'replace)]))))
