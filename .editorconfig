@@ -33,3 +33,7 @@ indent_size = 4
 
 [*.hs]
 indent_size = 2
+
+[*.nim]
+indent_size = 2
+
