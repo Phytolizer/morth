@@ -9,9 +9,17 @@
 (define (simulate-push x ip stack)
   (values (+ ip 1) (stack-push stack x)))
 
+(define (stack-pop-pair stack)
+  (values (car stack) (cadr stack) (cddr stack)))
+
+(define-syntax-rule (basic-op f ip stack)
+  (let*-values ([(y x stack) (stack-pop-pair stack)]) (values (+ ip 1) (stack-push stack (f x y)))))
+
 (define (simulate-plus ip stack)
-  (let*-values ([(y stack) (stack-pop stack)] [(x stack) (stack-pop stack)])
-    (values (+ ip 1) (stack-push stack (+ x y)))))
+  (basic-op + ip stack))
+
+(define (simulate-minus ip stack)
+  (basic-op - ip stack))
 
 (define (simulate-dump ip stack)
   (let-values ([(x stack) (stack-pop stack)])
@@ -25,9 +33,10 @@
                                    (case (car instruction)
                                      [(PUSH) (simulate-push (cadr instruction) ip stack)]
                                      [(PLUS) (simulate-plus ip stack)]
+                                     [(MINUS) (simulate-minus ip stack)]
                                      [(DUMP) (simulate-dump ip stack)]))])
           (loop ip stack))
         (void)))
   (loop 0 '()))
 
-(simulate-program (list '(PUSH 34) '(PUSH 35) '(PLUS) '(DUMP)))
+(simulate-program '((PUSH 34) (PUSH 35) (PLUS) (DUMP) (PUSH 500) (PUSH 80) (MINUS) (DUMP)))
