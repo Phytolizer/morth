@@ -95,7 +95,8 @@
                          "global _start"
                          "_start:"))
   (loop program)
-  (map displayln '("mov rax, 60" "mov rdi, 0" "syscall")))
+  (map displayln '("mov rax, 60" "mov rdi, 0" "syscall"))
+  (void))
 
 (define program '((PUSH 34) (PUSH 35) (PLUS) (DUMP) (PUSH 500) (PUSH 80) (MINUS) (DUMP)))
 
@@ -104,7 +105,7 @@
       (begin
         (displayln "ERROR: no subcommand is provided" (current-error-port))
         (exit 1))
-      (let ([subcommand (car args)])
+      (let-values ([(subcommand args) (stack-pop args)])
         (case subcommand
           [("sim") (simulate-program program)]
           [("com") (compile-program program)]))))
