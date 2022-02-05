@@ -1,2 +1,2 @@
-set makeprg=racket\ morth.rkt\ sim
+set makeprg=racket\ morth.rkt\ com
 

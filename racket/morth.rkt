@@ -43,13 +43,13 @@
   (map displayln (list (string-append-immutable "push " (number->string x)))))
 
 (define (compile-plus)
-  (map displayln '("pop rbx" "pop rax" "add rbx" "push rax")))
+  (map displayln '("pop rbx" "pop rax" "add rax, rbx" "push rax")))
 
 (define (compile-minus)
-  (map displayln '("pop rbx" "pop rax" "isub rbx" "push rax")))
+  (map displayln '("pop rbx" "pop rax" "isub rax, rbx" "push rax")))
 
 (define (compile-dump)
-  (error "TODO"))
+  (map displayln '("pop rsi" "call dump")))
 
 (define (compile-program program)
   (define (loop remaining-program)
@@ -64,7 +64,38 @@
               [(MINUS) (compile-minus)]
               [(DUMP) (compile-dump)])
             (loop (cdr remaining-program))))))
-  (loop program))
+  (map displayln
+       '("segment .text" "dump:"
+                         "sub     rsp, 40"
+                         "lea     rsi, [rsp + 31]"
+                         "mov     byte [rsp + 31], 10"
+                         "mov     ecx, 1"
+                         "mov     r8, -3689348814741910323"
+                         ".LBB0_1:"
+                         "mov     rax, rdi"
+                         "mul     r8"
+                         "shr     rdx, 3"
+                         "lea     eax, [rdx + rdx]"
+                         "lea     r9d, [rax + 4*rax]"
+                         "mov     eax, edi"
+                         "sub     eax, r9d"
+                         "or      al, 48"
+                         "mov     byte [rsi - 1], al"
+                         "add     rsi, -1"
+                         "add     rcx, 1"
+                         "cmp     rdi, 9"
+                         "mov     rdi, rdx"
+                         "ja      .LBB0_1"
+                         "mov     edi, 1"
+                         "mov     rdx, rcx"
+                         "mov     rax, 1"
+                         "syscall"
+                         "add     rsp, 40"
+                         "ret"
+                         "global _start"
+                         "_start:"))
+  (loop program)
+  (map displayln '("mov rax, 60" "mov rdi, 0" "syscall")))
 
 (define program '((PUSH 34) (PUSH 35) (PLUS) (DUMP) (PUSH 500) (PUSH 80) (MINUS) (DUMP)))
 
