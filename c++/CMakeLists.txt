@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.12...3.23)
 
-set(CMAKE_CXX_STANDARD 20)
-
 project(
     Morth
     LANGUAGES CXX
@@ -10,11 +8,5 @@ project(
     HOMEPAGE_URL "https://gitlab.com/Phytolizer/Morth"
 )
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
-include(DeclareModule)
-
-declare_module(
-    Morth
-    KIND executable
-    SOURCES Morth.cpp
-)
+add_executable(Morth Morth.cpp)
+target_compile_features(Morth PRIVATE cxx_std_20)
