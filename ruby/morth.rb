@@ -46,68 +46,55 @@ end
 def compile_program(program, out_file_path)
   out = File.open(out_file_path, "w")
   out.write <<~HEADER
-    @stack = global [1000 x i64] undef
-    @sp = global i64 undef
-
-    define void @push(i64 %val) {
-      %sp = load i64, i64* @sp
-      %addr = getelementptr [1000 x i64], [1000 x i64]* @stack, i64 0, i64 %sp
-
-      store i64 %val, i64* %addr
-
-      %newsp = add i64 %sp, 1
-      store i64 %newsp, i64* @sp
-
-      ret void
-    }
-
-    define i64 @peek() {
-      %sp = load i64, i64* @sp
-      %topsp = sub i64 %sp, 1
-      %addr = getelementptr [1000 x i64], [1000 x i64]* @stack, i64 0, i64 %topsp
-      %val = load i64, i64* %addr
-
-      ret i64 %val
-    }
-
-    define i64 @pop() {
-      %val = call i64 @peek()
-
-      %sp = load i64, i64* @sp
-      %newsp = sub i64 %sp, 1
-      store i64 %newsp, i64* @sp
-
-      ret i64 %val
-    }
-
-    declare i64 @printf(i8*, ...)
-
-    @dump = private unnamed_addr constant [5 x i8] c"%ld\\0A\\00"
-
-    define i32 @main() {
-  HEADER
-
-  reg = 1
+              segment .text
+              dump:
+              sub     rsp, 40
+              lea     rsi, [rsp + 31]
+              mov     byte [rsp + 31], 10
+              mov     ecx, 1
+              mov     r8, -3689348814741910323
+              .LBB0_1:
+              mov     rax, rdi
+              mul     r8
+              shr     rdx, 3
+              lea     eax, [rdx + rdx]
+              lea     r9d, [rax + 4*rax]
+              mov     eax, edi
+              sub     eax, r9d
+              or      al, 48
+              mov     byte [rsi - 1], al
+              add     rsi, -1
+              add     rcx, 1
+              cmp     rdi, 9
+              mov     rdi, rdx
+              ja      .LBB0_1
+              mov     edi, 1
+              mov     rdx, rcx
+              mov     rax, 1
+              syscall
+              add     rsp, 40
+              ret
+              global _start
+              _start:
+            HEADER
 
   program.each do |op|
     case op[0]
     when :PUSH
-      out.write "call void @push(i64 #{op[1]})\n"
+      out.write "push #{op[1]}\n"
     when :PLUS
-      out.write "%#{reg} = call i64 @pop()\n"
-      reg += 1
-      out.write "%#{reg} = call i64 @pop()\n"
-      reg += 1
-      out.write "%#{reg} = add i64 %#{reg - 2}, %#{reg - 1}\n"
-      reg += 1
-      out.write "call void @push(i64 %#{reg - 1})\n"
+      out.write "pop rbx\n"
+      out.write "pop rax\n"
+      out.write "add rax, rbx\n"
+      out.write "push rax\n"
     end
   end
 
   out.write <<~FOOTER
-      ret i32 0
-    }
-  FOOTER
+              mov rax, 60
+              mov rdi, 0
+              syscall
+            FOOTER
 end
 
 PROGRAM = [
@@ -123,11 +110,11 @@ PROGRAM = [
 
 def usage
   puts <<~USAGE
-    Usage: #{$PROGRAM_NAME} <SUBCOMMAND> [ARGS]
-      SUBCOMMANDS:
-        sim    Simulate the program
-        com    Compile the program
-  USAGE
+         Usage: #{$PROGRAM_NAME} <SUBCOMMAND> [ARGS]
+           SUBCOMMANDS:
+             sim    Simulate the program
+             com    Compile the program
+       USAGE
 end
 
 if ARGV.empty?
@@ -142,8 +129,10 @@ case subcommand
 when "sim"
   simulate_program(PROGRAM)
 when "com"
-  compile_program(PROGRAM, "output.ll")
-  Process.wait Process.spawn("clang", "-v", "-O3", "output.ll", "-o", "output")
+  compile_program(PROGRAM, "output.asm")
+  Process.wait Process.spawn("nasm", "-felf64", "output.asm")
+  exit $CHILD_STATUS.to_i if $CHILD_STATUS != 0
+  Process.wait Process.spawn("ld", "-o", "output", "output.o")
   exit $CHILD_STATUS.to_i if $CHILD_STATUS != 0
 else
   usage
