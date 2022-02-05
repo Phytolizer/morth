@@ -9,6 +9,7 @@ cmake-build-*/
 output
 *.exe
 *.o
+/Morth
 
 .cache/clangd/index
 porth/target

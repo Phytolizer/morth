@@ -1,2 +1,2 @@
-set makeprg=./build.sh\ rkt
+set makeprg=./build.sh\ hs
 

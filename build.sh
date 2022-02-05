@@ -18,6 +18,10 @@ case "${arg}" in
     rkt)
         racket morth.rkt "$@"
         ;;
+    hs)
+        ghc Morth
+        ./Morth
+        ;;
     *)
         echo "error: unknown language '${arg}'" >&2
         exit 1
