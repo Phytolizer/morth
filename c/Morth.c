@@ -134,6 +134,7 @@ void simulate_program(struct op* program)
                 exit(1);
         }
     }
+    free(stack.data);
 }
 
 void compile_program(struct op* program, const char* out_file_path)
