@@ -11,6 +11,4 @@ output
 *.o
 *.hi
 /Morth
-
-.cache/clangd/index
-porth/target
+/.cache/
