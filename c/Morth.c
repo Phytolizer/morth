@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -7,6 +8,63 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+char* nonstd_strtok_r(char* str, const char* delim, char** savep)
+{
+    if (str == NULL)
+    {
+        str = *savep;
+    }
+
+    str += strspn(str, delim);
+    if (*str == '\0')
+    {
+        *savep = str;
+        return NULL;
+    }
+
+    char* token = str;
+    str = strpbrk(token, delim);
+    if (str == NULL)
+    {
+        *savep = strchr(token, '\0');
+    }
+    else
+    {
+        *str = '\0';
+        *savep = str + 1;
+    }
+    return token;
+}
+
+const char** string_split_whitespace(char* str)
+{
+    const char** result = calloc(1, sizeof(char*));
+    size_t result_length = 0;
+    size_t result_capacity = 0;
+    char* save = NULL;
+    for (char* token = nonstd_strtok_r(str, " \r\n\t", &save); token != NULL;
+         token = nonstd_strtok_r(NULL, " \r\n\t", &save))
+    {
+        if (result_length + 1 > result_capacity)
+        {
+            result_capacity = result_capacity * 2 + 1;
+            const char** new_result = calloc(result_capacity + 1, sizeof(char*));
+            if (new_result == NULL)
+            {
+                perror("fatal: allocating memory");
+                exit(1);
+            }
+            memcpy(new_result, result, result_length * sizeof(char*));
+            free(result);
+            result = new_result;
+        }
+
+        result[result_length] = token;
+        result_length += 1;
+    }
+    return result;
+}
 
 #define OP_CODES_X                                                                                                     \
     X(PUSH)                                                                                                            \
@@ -52,6 +110,13 @@ struct op plus(void)
     };
 }
 
+struct op minus(void)
+{
+    return (struct op){
+        .code = OP_MINUS,
+    };
+}
+
 struct op dump(void)
 {
     return (struct op){
@@ -64,6 +129,107 @@ struct op halt(void)
     return (struct op){
         .code = OP_HALT,
     };
+}
+
+char* read_entire_file(FILE* stream)
+{
+    char* contents = calloc(1, 1);
+    size_t length = 0;
+    char buffer[1024];
+    while (fgets(buffer, sizeof buffer, stream) != NULL)
+    {
+        size_t line_length = strlen(buffer);
+        char* new_contents = realloc(contents, length + line_length + 1);
+        if (new_contents == NULL)
+        {
+            perror("fatal: allocating memory");
+            exit(1);
+        }
+        contents = new_contents;
+        memcpy(contents + length, buffer, line_length);
+        length += line_length;
+    }
+    contents[length] = '\0';
+    return contents;
+}
+
+struct op parse_token_as_op(const char* token)
+{
+    static_assert(OPS_COUNT == 5, "parse_token_as_op is out of sync");
+    if (strcmp(token, "+") == 0)
+    {
+        return plus();
+    }
+    if (strcmp(token, "-") == 0)
+    {
+        return minus();
+    }
+    if (strcmp(token, ".") == 0)
+    {
+        return dump();
+    }
+
+    char* number_end;
+    errno = 0;
+    unsigned long long result = strtoull(token, &number_end, 10);
+    if (errno == ERANGE || (number_end != NULL && *number_end != '\0'))
+    {
+        fprintf(stderr, "unknown token '%s'\n", token);
+        exit(1);
+    }
+    return push(result);
+}
+
+struct program_builder
+{
+    struct op* ops;
+    size_t length;
+    size_t capacity;
+};
+
+void program_push(struct program_builder* program, struct op op)
+{
+    if (program->length + 1 > program->capacity)
+    {
+        program->capacity = program->capacity * 2 + 1;
+        struct op* new_program = calloc(program->capacity, sizeof(struct op));
+        if (new_program == NULL)
+        {
+            perror("fatal: allocating memory");
+            exit(1);
+        }
+        memcpy(new_program, program->ops, program->length * sizeof(struct op));
+        free(program->ops);
+        program->ops = new_program;
+    }
+
+    program->ops[program->length] = op;
+    program->length += 1;
+}
+
+struct op* load_program_from_file(const char* in_file_path)
+{
+    FILE* in = fopen(in_file_path, "r");
+    if (in == NULL)
+    {
+        fprintf(stderr, "fatal: could not read %s\n", in_file_path);
+        exit(1);
+    }
+    char* contents = read_entire_file(in);
+    fclose(in);
+
+    const char** tokens = string_split_whitespace(contents);
+
+    struct program_builder program = {0};
+
+    for (size_t i = 0; tokens[i] != NULL; i += 1)
+    {
+        program_push(&program, parse_token_as_op(tokens[i]));
+    }
+    program_push(&program, halt());
+    free(tokens);
+    free(contents);
+    return program.ops;
 }
 
 struct stack
@@ -117,6 +283,13 @@ void simulate_program(struct op* program)
                 uint64_t y = stack_pop(&stack);
                 uint64_t x = stack_pop(&stack);
                 stack_push(&stack, x + y);
+                ip += 1;
+                break;
+            }
+            case OP_MINUS: {
+                uint64_t y = stack_pop(&stack);
+                uint64_t x = stack_pop(&stack);
+                stack_push(&stack, x - y);
                 ip += 1;
                 break;
             }
@@ -295,14 +468,6 @@ char* argv_next(struct argv_iterator* iter)
 
 int main(int argc, char** argv)
 {
-    struct op program[] = {
-        push(34),
-        push(35),
-        plus(),
-        dump(),
-        halt(),
-    };
-
     struct argv_iterator args = argv_iter(argc, argv);
     const char* program_name = argv_next(&args);
 
@@ -317,11 +482,20 @@ int main(int argc, char** argv)
 
     if (strcmp(subcommand, "sim") == 0)
     {
+        char* in_file_path = argv_next(&args);
+        if (in_file_path == NULL)
+        {
+            usage(program_name);
+            fputs("ERROR: no input file is provided for the simulation\n", stderr);
+            exit(1);
+        }
+        struct op* program = load_program_from_file(in_file_path);
         simulate_program(program);
+        free(program);
     }
     else if (strcmp(subcommand, "com") == 0)
     {
-        compile_program(program, "output.asm");
+        // compile_program(program, "output.asm");
         char* const nasm_args[] = {"nasm", "-felf64", "output.asm", NULL};
         run_subcommand(nasm_args);
         char* const ld_args[] = {"ld", "output.o", "-o", "output", NULL};
