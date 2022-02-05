@@ -118,6 +118,18 @@ void simulate_program(struct op* program)
     }
 }
 
+void compile_program(struct op* program, FILE* stream)
+{
+}
+
+void usage(const char* program_name)
+{
+    printf("usage: %s <SUBCOMMAND> [ARGS]\n", program_name);
+    puts("  SUBCOMMANDS:");
+    puts("    sim      Simulate the program");
+    puts("    com      Compile the program");
+}
+
 int main(int argc, char** argv)
 {
     struct op program[] = {
@@ -128,5 +140,31 @@ int main(int argc, char** argv)
         halt(),
     };
 
-    simulate_program(program);
+    if (argc < 2)
+    {
+        usage(argv[0]);
+        fputs("ERROR: no subcommand is provided\n", stderr);
+        exit(1);
+    }
+
+    if (strcmp(argv[1], "sim") == 0)
+    {
+        simulate_program(program);
+    }
+    else if (strcmp(argv[1], "com") == 0)
+    {
+        FILE* out = fopen("output.asm", "w");
+        if (out == NULL)
+        {
+            fputs("fatal: could not open output.asm\n", stderr);
+            exit(1);
+        }
+        compile_program(program, out);
+    }
+    else
+    {
+        usage(argv[0]);
+        fprintf(stderr, "ERROR: unknown subcommand '%s'\n", argv[1]);
+        exit(1);
+    }
 }
