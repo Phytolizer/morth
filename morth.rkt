@@ -39,4 +39,38 @@
         (void)))
   (loop 0 '()))
 
-(simulate-program '((PUSH 34) (PUSH 35) (PLUS) (DUMP) (PUSH 500) (PUSH 80) (MINUS) (DUMP)))
+(define (compile-push x)
+  (map displayln '((string-append-immutable "push " (number->string x)))))
+
+(define (compile-plus x)
+  (map displayln '("pop rbx" "pop rax" "add rbx" "push rax")))
+
+(define (compile-minus x)
+  (map displayln '("pop rbx" "pop rax" "isub rbx" "push rax")))
+
+(define (compile-dump x)
+  (error "TODO"))
+
+(define (compile-program program)
+  (define (loop remaining-program)
+    (if (null? remaining-program)
+        (void)
+        (begin
+          (case (car remaining-program)
+            [(PUSH) (compile-push (cadr (car remaining-program)))]
+            [(PLUS) (compile-plus)]
+            [(MINUS) (compile-minus)]
+            [(DUMP) (compile-dump)])
+          (cdr remaining-program))))
+  (loop program))
+
+(define program '((PUSH 34) (PUSH 35) (PLUS) (DUMP) (PUSH 500) (PUSH 80) (MINUS) (DUMP)))
+
+(if (vector-empty? (current-command-line-arguments))
+    (begin
+      (displayln "ERROR: no subcommand is provided" (current-error-port))
+      (exit 1))
+    (let ([subcommand (car (current-command-line-arguments))])
+      (case subcommand
+        [("sim") (simulate-program program)]
+        [("com") (compile-program program)])))
