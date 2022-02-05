@@ -1,1 +1,1 @@
-set makeprg=stack\ build\ --allow-different-user
+set makeprg=stack\ run\ --\ sim
