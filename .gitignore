@@ -4,10 +4,11 @@
 out/
 build/
 cmake-build-*/
-output.ll
-output.bc
+*.ll
+*.bc
 output
-output.exe
+*.exe
+*.o
 
 .cache/clangd/index
 porth/target
