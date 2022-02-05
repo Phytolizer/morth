@@ -1,0 +1,19 @@
+{
+  "name": "morth",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/Phytolizer/Morth.git"
+  },
+  "author": "Kyle Coffey",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/Phytolizer/Morth/issues"
+  },
+  "homepage": "https://gitlab.com/Phytolizer/Morth#readme"
+}
