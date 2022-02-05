@@ -19,15 +19,15 @@
     (values (+ ip 1) stack)))
 
 (define (simulate-program program)
-  (define (loop program ip stack)
+  (define (loop ip stack)
     (if (< ip (length program))
         (let-values ([(ip stack) (let ([instruction (list-ref program ip)])
                                    (case (car instruction)
-                                     ['PUSH (simulate-push (cadr instruction) ip stack)]
-                                     ['PLUS (simulate-plus ip stack)]
-                                     ['DUMP (simulate-dump ip stack)]))])
-          (loop program ip stack))
+                                     [(PUSH) (simulate-push (cadr instruction) ip stack)]
+                                     [(PLUS) (simulate-plus ip stack)]
+                                     [(DUMP) (simulate-dump ip stack)]))])
+          (loop ip stack))
         (void)))
-  (loop program 0 '()))
+  (loop 0 '()))
 
 (simulate-program (list '(PUSH 34) '(PUSH 35) '(PLUS) '(DUMP)))
