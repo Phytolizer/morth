@@ -495,7 +495,16 @@ int main(int argc, char** argv)
     }
     else if (strcmp(subcommand, "com") == 0)
     {
-        // compile_program(program, "output.asm");
+        char* in_file_path = argv_next(&args);
+        if (in_file_path == NULL)
+        {
+            usage(program_name);
+            fputs("ERROR: no input file is provided for the compilation\n", stderr);
+            exit(1);
+        }
+        struct op* program = load_program_from_file(in_file_path);
+        compile_program(program, "output.asm");
+        free(program);
         char* const nasm_args[] = {"nasm", "-felf64", "output.asm", NULL};
         run_subcommand(nasm_args);
         char* const ld_args[] = {"ld", "output.o", "-o", "output", NULL};
