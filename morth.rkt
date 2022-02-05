@@ -1,4 +1,4 @@
-#lang racket
+#lang debug/racket
 
 (define (stack-pop stack)
   (values (car stack) (cdr stack)))
@@ -40,15 +40,15 @@
   (loop 0 '()))
 
 (define (compile-push x)
-  (map displayln '((string-append-immutable "push " (number->string x)))))
+  (map displayln (list (string-append-immutable "push " (number->string x)))))
 
-(define (compile-plus x)
+(define (compile-plus)
   (map displayln '("pop rbx" "pop rax" "add rbx" "push rax")))
 
-(define (compile-minus x)
+(define (compile-minus)
   (map displayln '("pop rbx" "pop rax" "isub rbx" "push rax")))
 
-(define (compile-dump x)
+(define (compile-dump)
   (error "TODO"))
 
 (define (compile-program program)
@@ -56,21 +56,22 @@
     (if (null? remaining-program)
         (void)
         (begin
-          (case (car remaining-program)
+          (case (car (car remaining-program))
             [(PUSH) (compile-push (cadr (car remaining-program)))]
             [(PLUS) (compile-plus)]
             [(MINUS) (compile-minus)]
             [(DUMP) (compile-dump)])
-          (cdr remaining-program))))
+          (loop (cdr remaining-program)))))
   (loop program))
 
 (define program '((PUSH 34) (PUSH 35) (PLUS) (DUMP) (PUSH 500) (PUSH 80) (MINUS) (DUMP)))
 
-(if (vector-empty? (current-command-line-arguments))
-    (begin
-      (displayln "ERROR: no subcommand is provided" (current-error-port))
-      (exit 1))
-    (let ([subcommand (car (current-command-line-arguments))])
-      (case subcommand
-        [("sim") (simulate-program program)]
-        [("com") (compile-program program)])))
+(let ([args (vector->list (current-command-line-arguments))])
+  (if (null? args)
+      (begin
+        (displayln "ERROR: no subcommand is provided" (current-error-port))
+        (exit 1))
+      (let ([subcommand (car args)])
+        (case subcommand
+          [("sim") (simulate-program program)]
+          [("com") (compile-program program)]))))
