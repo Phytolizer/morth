@@ -1,2 +1,2 @@
-set makeprg=./test-sim.sh
+set makeprg=racket\ morth.rkt\ sim
 
