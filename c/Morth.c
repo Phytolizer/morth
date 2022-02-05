@@ -366,7 +366,7 @@ void compile_program(struct op* program, const char* out_file_path)
             case OP_MINUS:
                 fputs("pop rbx\n", out);
                 fputs("pop rax\n", out);
-                fputs("isub rax, rbx\n", out);
+                fputs("sub rax, rbx\n", out);
                 fputs("push rax\n", out);
                 break;
             case OP_DUMP:
