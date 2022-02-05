@@ -1,16 +1,30 @@
+#include <assert.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#define OP_CODES_X                                                                                                     \
+    X(PUSH)                                                                                                            \
+    X(PLUS)                                                                                                            \
+    X(MINUS)                                                                                                           \
+    X(DUMP)                                                                                                            \
+    X(HALT)
+
 enum op_code
 {
-    OP_PUSH,
-    OP_PLUS,
-    OP_DUMP,
-    OP_HALT,
-    OPS_COUNT,
+#define X(x) OP_##x,
+    OP_CODES_X
+#undef X
+        OPS_COUNT,
+};
+
+const char* const OP_STRINGS[] = {
+#define X(x) #x,
+    OP_CODES_X
+#undef X
 };
 
 struct op
@@ -87,6 +101,7 @@ uint64_t stack_pop(struct stack* stack)
 
 void simulate_program(struct op* program)
 {
+    static_assert(OPS_COUNT == 5, "simulate_program is out of sync");
     struct stack stack = {0};
     for (size_t ip = 0; program[ip].code != OP_HALT;)
     {
@@ -110,6 +125,7 @@ void simulate_program(struct op* program)
                 break;
             }
             case OP_HALT:
+                assert(false && "unreachable");
             case OPS_COUNT:
             default:
                 fputs("fatal: corrupt opcode encountered\n", stderr);
@@ -120,6 +136,23 @@ void simulate_program(struct op* program)
 
 void compile_program(struct op* program, FILE* stream)
 {
+    static_assert(OPS_COUNT == 5, "compile_program is out of sync");
+    for (size_t ip = 0; program[ip].code != OP_HALT; ip += 1)
+    {
+        fprintf(stream, ";; -- %s --\n", OP_STRINGS[program[ip].code]);
+        switch (program[ip].code)
+        {
+            case OP_PUSH:
+                fputs("push rax\n", stream);
+                break;
+            case OP_PLUS:
+                fputs("pop rbx\n", stream);
+                fputs("pop rax\n", stream);
+                fputs("add rax, rbx\n", stream);
+                fputs("push rax\n", stream);
+                break;
+        }
+    }
 }
 
 void usage(const char* program_name)
@@ -159,7 +192,14 @@ int main(int argc, char** argv)
             fputs("fatal: could not open output.asm\n", stderr);
             exit(1);
         }
+        fputs("segment .text\n", out);
+        fputs("global _start\n", out);
+        fputs("_start:\n", out);
+        fputs("mov rax, 60\n", out);
+        fputs("mov rdi, 0\n", out);
+        fputs("syscall\n", out);
         compile_program(program, out);
+        fclose(out);
     }
     else
     {
