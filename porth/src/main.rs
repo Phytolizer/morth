@@ -2,6 +2,7 @@
 enum Op {
     Push(u64),
     Plus,
+    Minus,
     Dump,
 }
 
@@ -21,6 +22,12 @@ fn simulate_program(program: &[Op]) {
                 stack.push(a + b);
                 ip += 1;
             }
+            Op::Minus => {
+                let b = stack.pop().unwrap();
+                let a = stack.pop().unwrap();
+                stack.push(a - b);
+                ip += 1;
+            }
             Op::Dump => {
                 let x = stack.pop().unwrap();
                 println!("{}", x);
@@ -30,6 +37,17 @@ fn simulate_program(program: &[Op]) {
     }
 }
 
+fn compile_program(program: &[Op]) {}
+
 fn main() {
-    simulate_program(&[Op::Push(34), Op::Push(35), Op::Plus, Op::Dump]);
+    simulate_program(&[
+        Op::Push(34),
+        Op::Push(35),
+        Op::Plus,
+        Op::Dump,
+        Op::Push(500),
+        Op::Push(80),
+        Op::Minus,
+        Op::Dump,
+    ]);
 }
