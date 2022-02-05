@@ -1,14 +1,21 @@
 image: gcc
 before_script:
- - apt-get update --yes
- - apt-get install --yes cmake
+    - apt-get update --yes
+    - apt-get install --yes cmake
 
 stages:
-  - build
+    - build
 
-build-job:
-  stage: build
-  script:
-    - cmake -B build -S c++
-    - cmake --build build
-    - cd build && ctest
+build-cpp-job:
+    stage: build
+    script:
+        - cmake -B build/c++ -S c++
+        - cmake --build build/c++
+        - cd build/c++ && ctest
+
+build-c-job:
+    stage: build
+    script:
+        - cmake -B build/c -S c
+        - cmake --build build/c
+        - cd build/c && ctest
