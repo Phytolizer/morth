@@ -1,14 +1,5 @@
 #lang racket
 
-(define (push x)
-  (list 'PUSH x))
-
-(define (plus)
-  '(PLUS))
-
-(define (dump)
-  '(DUMP))
-
 (define (stack-pop stack)
   (values (car stack) (cdr stack)))
 
@@ -39,4 +30,4 @@
         (void)))
   (loop program 0 '()))
 
-(simulate-program (list (push 34) (push 35) (plus) (dump)))
+(simulate-program (list '(PUSH 34) '(PUSH 35) '(PLUS) '(DUMP)))
