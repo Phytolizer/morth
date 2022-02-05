@@ -9,6 +9,7 @@ cmake-build-*/
 output
 *.exe
 *.o
+*.hi
 /Morth
 
 .cache/clangd/index
