@@ -262,6 +262,37 @@ void run_subcommand(char* const* args)
     }
 }
 
+struct argv_iterator
+{
+    int argc;
+    char** argv;
+    int index;
+};
+
+struct argv_iterator argv_iter(int argc, char** argv)
+{
+    return (struct argv_iterator){
+        .argc = argc,
+        .argv = argv,
+    };
+}
+
+char* argv_current(struct argv_iterator* iter)
+{
+    if (iter->index >= iter->argc)
+    {
+        return NULL;
+    }
+    return iter->argv[iter->index];
+}
+
+char* argv_next(struct argv_iterator* iter)
+{
+    char* arg = argv_current(iter);
+    iter->index += 1;
+    return arg;
+}
+
 int main(int argc, char** argv)
 {
     struct op program[] = {
@@ -272,18 +303,23 @@ int main(int argc, char** argv)
         halt(),
     };
 
-    if (argc < 2)
+    struct argv_iterator args = argv_iter(argc, argv);
+    const char* program_name = argv_next(&args);
+
+    const char* subcommand = argv_next(&args);
+
+    if (subcommand == NULL)
     {
-        usage(argv[0]);
+        usage(program_name);
         fputs("ERROR: no subcommand is provided\n", stderr);
         exit(1);
     }
 
-    if (strcmp(argv[1], "sim") == 0)
+    if (strcmp(subcommand, "sim") == 0)
     {
         simulate_program(program);
     }
-    else if (strcmp(argv[1], "com") == 0)
+    else if (strcmp(subcommand, "com") == 0)
     {
         compile_program(program, "output.asm");
         char* const nasm_args[] = {"nasm", "-felf64", "output.asm", NULL};
@@ -293,8 +329,8 @@ int main(int argc, char** argv)
     }
     else
     {
-        usage(argv[0]);
-        fprintf(stderr, "ERROR: unknown subcommand '%s'\n", argv[1]);
+        usage(program_name);
+        fprintf(stderr, "ERROR: unknown subcommand '%s'\n", subcommand);
         exit(1);
     }
 }
