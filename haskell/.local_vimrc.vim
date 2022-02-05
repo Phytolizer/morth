@@ -1,1 +1,1 @@
-set makeprg=cabal\ build
+set makeprg=stack\ build\ --allow-different-user
