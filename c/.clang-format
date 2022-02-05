@@ -1,0 +1,6 @@
+BasedOnStyle: Microsoft
+PointerAlignment: Left
+BinPackArguments: false
+BinPackParameters: false
+IncludeBlocks: Regroup
+IndentCaseLabels: true
