@@ -503,6 +503,7 @@ static void compile_program(struct op* program, const char* out_file_path)
     for (size_t ip = 0; program[ip].code != OP_HALT; ip += 1)
     {
         fprintf(out, ";; -- %s --\n", OP_STRINGS[program[ip].code]);
+        fprintf(out, "porth_addr_%zu:\n", ip);
         switch (program[ip].code)
         {
             case OP_PUSH:
@@ -533,7 +534,12 @@ static void compile_program(struct op* program, const char* out_file_path)
                 fputs("call dump\n", out);
                 break;
             case OP_IF:
+                fputs("pop rax\n", out);
+                fputs("test rax, rax\n", out);
+                fprintf(out, "jz porth_addr_%zu\n", program[ip].as.if_op);
+                break;
             case OP_END:
+                break;
             case OP_HALT:
                 assert(false && "unreachable");
             case OPS_COUNT:
@@ -666,6 +672,7 @@ int main(int argc, char** argv)
             exit(1);
         }
         struct op* program = load_program_from_file(in_file_path);
+        cross_reference_blocks(program);
         compile_program(program, "output.asm");
         free(program);
         char* const nasm_args[] = {"nasm", "-felf64", "output.asm", NULL};
