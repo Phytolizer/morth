@@ -9,6 +9,7 @@ import System.IO
   , openFile
   , stderr
   )
+import System.Process (callProcess)
 
 data Op
   = OpPush Int
@@ -119,6 +120,9 @@ compileProgram program outFilePath = do
    in do loop program
          mapM_ (hPutStrLn out) ["mov rax, 60", "mov rdi, 0", "syscall"]
          hClose out
+         callProcess "nasm" ["-felf64", "output.asm"]
+         callProcess "ld" ["-o", "output", "output.o"]
+         return ()
 
 usage :: IO ()
 usage = do
