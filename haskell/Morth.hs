@@ -82,6 +82,7 @@ compileProgram program outFilePath = do
         case remProgram of
           [] -> return ()
           (op:remProgram') -> do
+            hPutStrLn out (";; -- " ++ show op ++ " --")
             (case op of
                OpPush x -> hPutStrLn out ("push " ++ show x)
                OpPlus ->
