@@ -41,6 +41,7 @@ char* nonstd_strtok_r(char* str, const char* delim, char** savep)
     X(PUSH)                                                                                                            \
     X(PLUS)                                                                                                            \
     X(MINUS)                                                                                                           \
+    X(EQUAL)                                                                                                           \
     X(DUMP)                                                                                                            \
     X(HALT)
 
@@ -85,6 +86,13 @@ struct op minus(void)
 {
     return (struct op){
         .code = OP_MINUS,
+    };
+}
+
+struct op equal(void)
+{
+    return (struct op){
+        .code = OP_EQUAL,
     };
 }
 
@@ -240,7 +248,7 @@ struct lexed_file lex_file(const char* file_path, FILE* stream)
 
 struct op parse_token_as_op(struct token token)
 {
-    static_assert(OPS_COUNT == 5, "parse_token_as_op is out of sync");
+    static_assert(OPS_COUNT == 6, "parse_token_as_op is out of sync");
     if (strcmp(token.text, "+") == 0)
     {
         return plus();
@@ -248,6 +256,10 @@ struct op parse_token_as_op(struct token token)
     if (strcmp(token.text, "-") == 0)
     {
         return minus();
+    }
+    if (strcmp(token.text, "=") == 0)
+    {
+        return equal();
     }
     if (strcmp(token.text, ".") == 0)
     {
@@ -357,7 +369,7 @@ uint64_t stack_pop(struct stack* stack)
 
 void simulate_program(struct op* program)
 {
-    static_assert(OPS_COUNT == 5, "simulate_program is out of sync");
+    static_assert(OPS_COUNT == 6, "simulate_program is out of sync");
     struct stack stack = {0};
     for (size_t ip = 0; program[ip].code != OP_HALT;)
     {
@@ -381,6 +393,13 @@ void simulate_program(struct op* program)
                 ip += 1;
                 break;
             }
+            case OP_EQUAL: {
+                uint64_t y = stack_pop(&stack);
+                uint64_t x = stack_pop(&stack);
+                stack_push(&stack, x == y);
+                ip += 1;
+                break;
+            }
             case OP_DUMP: {
                 uint64_t x = stack_pop(&stack);
                 printf("%" PRIu64 "\n", x);
@@ -400,7 +419,7 @@ void simulate_program(struct op* program)
 
 void compile_program(struct op* program, const char* out_file_path)
 {
-    static_assert(OPS_COUNT == 5, "compile_program is out of sync");
+    static_assert(OPS_COUNT == 6, "compile_program is out of sync");
     FILE* out = fopen(out_file_path, "w");
     if (out == NULL)
     {
@@ -456,6 +475,14 @@ void compile_program(struct op* program, const char* out_file_path)
                 fputs("pop rax\n", out);
                 fputs("sub rax, rbx\n", out);
                 fputs("push rax\n", out);
+                break;
+            case OP_EQUAL:
+                fputs("mov rcx, 0\n", out);
+                fputs("pop rbx\n", out);
+                fputs("pop rax\n", out);
+                fputs("cmp rax, rbx\n", out);
+                fputs("sete cl\n", out);
+                fputs("push rcx\n", out);
                 break;
             case OP_DUMP:
                 fputs("pop rdi\n", out);
