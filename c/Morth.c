@@ -180,7 +180,7 @@ struct lexed_file lex_file(const char* file_path, FILE* stream)
                 perror("realloc");
                 exit(1);
             }
-            memcpy(new_line + line_length, buffer, buffer_len);
+            memcpy(new_line + line_length, buffer, buffer_len + 1);
             line = new_line;
             line_length += buffer_len;
             if (final_iteration || fgets(buffer, sizeof buffer, stream) == NULL)

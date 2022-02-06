@@ -10,3 +10,8 @@ project(
 
 add_executable(Morth Morth.c)
 target_compile_features(Morth PRIVATE c_std_11)
+
+if(UNIX)
+    target_compile_options(Morth PRIVATE -fsanitize=address)
+    target_link_options(Morth PRIVATE -fsanitize=address)
+endif()
