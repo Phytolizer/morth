@@ -1,2 +1,2 @@
-set makeprg=cmake\ --build\ --preset\ default\ &&\ build/default/Morth\ sim\ examples/test.porth
+set makeprg=cmake\ --build\ --preset\ default\ &&\ build/default/Morth\ com\ examples/test.porth
 

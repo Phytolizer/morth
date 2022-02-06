@@ -485,6 +485,7 @@ void usage(const char* program_name)
 
 void echo_subcommand(char* const* args)
 {
+    printf("> ");
     for (size_t i = 0; args[i] != NULL; i += 1)
     {
         printf("%s ", args[i]);
