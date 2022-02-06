@@ -477,7 +477,7 @@ void compile_program(struct op* program, const char* out_file_path)
                 fputs("push rax\n", out);
                 break;
             case OP_EQUAL:
-                fputs("mov rcx, 0\n", out);
+                fputs("xor rcx, rcx\n", out);
                 fputs("pop rbx\n", out);
                 fputs("pop rax\n", out);
                 fputs("cmp rax, rbx\n", out);
