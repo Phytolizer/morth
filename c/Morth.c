@@ -9,40 +9,14 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-char* nonstd_strtok_r(char* str, const char* delim, char** savep)
-{
-    if (str == NULL)
-    {
-        str = *savep;
-    }
-
-    str += strspn(str, delim);
-    if (*str == '\0')
-    {
-        *savep = str;
-        return NULL;
-    }
-
-    char* token = str;
-    str = strpbrk(token, delim);
-    if (str == NULL)
-    {
-        *savep = strchr(token, '\0');
-    }
-    else
-    {
-        *str = '\0';
-        *savep = str + 1;
-    }
-    return token;
-}
-
 #define OP_CODES_X                                                                                                     \
     X(PUSH)                                                                                                            \
     X(PLUS)                                                                                                            \
     X(MINUS)                                                                                                           \
     X(EQUAL)                                                                                                           \
     X(DUMP)                                                                                                            \
+    X(IF)                                                                                                              \
+    X(END)                                                                                                             \
     X(HALT)
 
 enum op_code
@@ -64,10 +38,11 @@ struct op
     enum op_code code;
     union {
         uint64_t push_op;
+        uint64_t if_op;
     } as;
 };
 
-struct op push(uint64_t x)
+static struct op push(uint64_t x)
 {
     return (struct op){
         .code = OP_PUSH,
@@ -75,35 +50,49 @@ struct op push(uint64_t x)
     };
 }
 
-struct op plus(void)
+static struct op plus(void)
 {
     return (struct op){
         .code = OP_PLUS,
     };
 }
 
-struct op minus(void)
+static struct op minus(void)
 {
     return (struct op){
         .code = OP_MINUS,
     };
 }
 
-struct op equal(void)
+static struct op equal(void)
 {
     return (struct op){
         .code = OP_EQUAL,
     };
 }
 
-struct op dump(void)
+static struct op dump(void)
 {
     return (struct op){
         .code = OP_DUMP,
     };
 }
 
-struct op halt(void)
+static struct op iff(void)
+{
+    return (struct op){
+        .code = OP_IF,
+    };
+}
+
+static struct op end(void)
+{
+    return (struct op){
+        .code = OP_END,
+    };
+}
+
+static struct op halt(void)
 {
     return (struct op){
         .code = OP_HALT,
@@ -125,7 +114,7 @@ struct token_seq_builder
     size_t capacity;
 };
 
-void lex_line(const char* file_path, size_t line_index, const char* line, struct token_seq_builder* tokens)
+static void lex_line(const char* file_path, size_t line_index, const char* line, struct token_seq_builder* tokens)
 {
     const char* cursor = line;
     while (true)
@@ -168,7 +157,7 @@ struct lexed_file
     char** lines;
 };
 
-struct lexed_file lex_file(const char* file_path, FILE* stream)
+static struct lexed_file lex_file(const char* file_path, FILE* stream)
 {
     char** lines = calloc(1, sizeof(char*));
     size_t length = 0;
@@ -246,9 +235,9 @@ struct lexed_file lex_file(const char* file_path, FILE* stream)
     };
 }
 
-struct op parse_token_as_op(struct token token)
+static struct op parse_token_as_op(struct token token)
 {
-    static_assert(OPS_COUNT == 6, "parse_token_as_op is out of sync");
+    static_assert(OPS_COUNT == 8, "parse_token_as_op is out of sync");
     if (strcmp(token.text, "+") == 0)
     {
         return plus();
@@ -264,6 +253,14 @@ struct op parse_token_as_op(struct token token)
     if (strcmp(token.text, ".") == 0)
     {
         return dump();
+    }
+    if (strcmp(token.text, "if") == 0)
+    {
+        return iff();
+    }
+    if (strcmp(token.text, "end") == 0)
+    {
+        return end();
     }
 
     char* number_end;
@@ -285,7 +282,7 @@ struct program_builder
     size_t capacity;
 };
 
-void program_push(struct program_builder* program, struct op op)
+static void program_push(struct program_builder* program, struct op op)
 {
     if (program->length + 1 > program->capacity)
     {
@@ -305,7 +302,7 @@ void program_push(struct program_builder* program, struct op op)
     program->length += 1;
 }
 
-struct op* load_program_from_file(const char* in_file_path)
+static struct op* load_program_from_file(const char* in_file_path)
 {
     FILE* in = fopen(in_file_path, "r");
     if (in == NULL)
@@ -339,7 +336,7 @@ struct stack
     size_t capacity;
 };
 
-void stack_push(struct stack* stack, uint64_t x)
+static void stack_push(struct stack* stack, uint64_t x)
 {
     if (stack->length + 1 > stack->capacity)
     {
@@ -355,7 +352,7 @@ void stack_push(struct stack* stack, uint64_t x)
     stack->length += 1;
 }
 
-uint64_t stack_pop(struct stack* stack)
+static uint64_t stack_pop(struct stack* stack)
 {
     if (stack->length == 0)
     {
@@ -367,9 +364,40 @@ uint64_t stack_pop(struct stack* stack)
     return stack->data[stack->length];
 }
 
-void simulate_program(struct op* program)
+static void cross_reference_blocks(struct op* program)
 {
-    static_assert(OPS_COUNT == 6, "simulate_program is out of sync");
+    struct stack stack = {0};
+    static_assert(OPS_COUNT == 8, "cross_reference_blocks is out of sync");
+    for (size_t ip = 0; program[ip].code != OP_HALT; ip += 1)
+    {
+        switch (program[ip].code)
+        {
+            case OP_IF:
+                stack_push(&stack, ip);
+                break;
+            case OP_END: {
+                uint64_t if_addr = stack_pop(&stack);
+                assert(program[if_addr].code == OP_IF && "'end' can only close 'if' blocks");
+                program[if_addr].as.if_op = ip;
+                break;
+            }
+            case OP_PUSH:
+            case OP_PLUS:
+            case OP_MINUS:
+            case OP_EQUAL:
+            case OP_DUMP:
+            case OP_HALT:
+            case OPS_COUNT:
+            default:
+                break;
+        }
+    }
+    free(stack.data);
+}
+
+static void simulate_program(struct op* program)
+{
+    static_assert(OPS_COUNT == 8, "simulate_program is out of sync");
     struct stack stack = {0};
     for (size_t ip = 0; program[ip].code != OP_HALT;)
     {
@@ -400,6 +428,22 @@ void simulate_program(struct op* program)
                 ip += 1;
                 break;
             }
+            case OP_IF: {
+                uint64_t x = stack_pop(&stack);
+                if (x == 0)
+                {
+                    ip = program[ip].as.if_op;
+                }
+                else
+                {
+                    ip += 1;
+                }
+                break;
+            }
+            case OP_END: {
+                ip += 1;
+                break;
+            }
             case OP_DUMP: {
                 uint64_t x = stack_pop(&stack);
                 printf("%" PRIu64 "\n", x);
@@ -417,9 +461,9 @@ void simulate_program(struct op* program)
     free(stack.data);
 }
 
-void compile_program(struct op* program, const char* out_file_path)
+static void compile_program(struct op* program, const char* out_file_path)
 {
-    static_assert(OPS_COUNT == 6, "compile_program is out of sync");
+    static_assert(OPS_COUNT == 8, "compile_program is out of sync");
     FILE* out = fopen(out_file_path, "w");
     if (out == NULL)
     {
@@ -488,6 +532,8 @@ void compile_program(struct op* program, const char* out_file_path)
                 fputs("pop rdi\n", out);
                 fputs("call dump\n", out);
                 break;
+            case OP_IF:
+            case OP_END:
             case OP_HALT:
                 assert(false && "unreachable");
             case OPS_COUNT:
@@ -502,7 +548,7 @@ void compile_program(struct op* program, const char* out_file_path)
     fclose(out);
 }
 
-void usage(const char* program_name)
+static void usage(const char* program_name)
 {
     printf("usage: %s <SUBCOMMAND> [ARGS]\n", program_name);
     puts("  SUBCOMMANDS:");
@@ -510,7 +556,7 @@ void usage(const char* program_name)
     puts("    com      Compile the program");
 }
 
-void echo_subcommand(char* const* args)
+static void echo_subcommand(char* const* args)
 {
     printf("> ");
     for (size_t i = 0; args[i] != NULL; i += 1)
@@ -522,7 +568,7 @@ void echo_subcommand(char* const* args)
 
 // note on 'args': it is not const-qualified because 'execvp' requires it to be
 // this way.
-void run_subcommand(char* const* args)
+static void run_subcommand(char* const* args)
 {
     echo_subcommand(args);
     pid_t child_pid = fork();
@@ -558,7 +604,7 @@ struct argv_iterator
     int index;
 };
 
-struct argv_iterator argv_iter(int argc, char** argv)
+static struct argv_iterator argv_iter(int argc, char** argv)
 {
     return (struct argv_iterator){
         .argc = argc,
@@ -566,7 +612,7 @@ struct argv_iterator argv_iter(int argc, char** argv)
     };
 }
 
-char* argv_current(struct argv_iterator* iter)
+static char* argv_current(struct argv_iterator* iter)
 {
     if (iter->index >= iter->argc)
     {
@@ -575,7 +621,7 @@ char* argv_current(struct argv_iterator* iter)
     return iter->argv[iter->index];
 }
 
-char* argv_next(struct argv_iterator* iter)
+static char* argv_next(struct argv_iterator* iter)
 {
     char* arg = argv_current(iter);
     iter->index += 1;
@@ -606,6 +652,7 @@ int main(int argc, char** argv)
             exit(1);
         }
         struct op* program = load_program_from_file(in_file_path);
+        cross_reference_blocks(program);
         simulate_program(program);
         free(program);
     }
