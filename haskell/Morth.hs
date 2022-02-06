@@ -1,7 +1,14 @@
 import Control.Monad (when)
 import System.Environment (getArgs, getProgName)
 import System.Exit (exitFailure)
-import System.IO (IOMode(WriteMode), hClose, hPutStrLn, openFile, stderr)
+import System.IO
+  ( IOMode(ReadMode, WriteMode)
+  , hClose
+  , hGetContents
+  , hPutStrLn
+  , openFile
+  , stderr
+  )
 
 data Op
   = OpPush Int
@@ -13,6 +20,20 @@ data Op
 pop :: [Int] -> (Int, [Int])
 pop [] = error "stack underflow"
 pop (x:rest) = (x, rest)
+
+parseTokenAsOp :: String -> Op
+parseTokenAsOp token =
+  case token of
+    "+" -> OpPlus
+    "-" -> OpMinus
+    "." -> OpDump
+    _ -> OpPush (read token :: Int)
+
+loadProgramFromFile :: String -> IO [Op]
+loadProgramFromFile inFilePath = do
+  inHandle <- openFile inFilePath ReadMode
+  contents <- hGetContents inHandle
+  return $ map parseTokenAsOp (words contents)
 
 simulateProgram :: [Op] -> IO ()
 simulateProgram program = do
@@ -92,16 +113,12 @@ compileProgram program outFilePath = do
                OpMinus ->
                  mapM_
                    (hPutStrLn out)
-                   ["pop rbx", "pop rax", "add rax, rbx", "push rax"]
+                   ["pop rbx", "pop rax", "sub rax, rbx", "push rax"]
                OpDump -> mapM_ (hPutStrLn out) ["pop rdi", "call dump"])
             loop remProgram'
    in do loop program
          mapM_ (hPutStrLn out) ["mov rax, 60", "mov rdi, 0", "syscall"]
          hClose out
-
-program :: [Op]
-program =
-  [OpPush 34, OpPush 35, OpPlus, OpDump, OpPush 500, OpPush 80, OpMinus, OpDump]
 
 usage :: IO ()
 usage = do
@@ -112,13 +129,33 @@ main :: IO ()
 main = do
   args <- getArgs
   case args of
-    [subcommand] ->
+    (subcommand:args) ->
       case subcommand of
-        "sim" -> simulateProgram program
-        "com" -> compileProgram program "output.asm"
+        "sim" ->
+          case args of
+            (inFilePath:args') -> do
+              program <- loadProgramFromFile inFilePath
+              simulateProgram program
+            [] -> do
+              usage
+              hPutStrLn stderr "ERROR: no input file provided for simulation"
+              exitFailure
+        "com" ->
+          case args of
+            (inFilePath:args') -> do
+              program <- loadProgramFromFile inFilePath
+              compileProgram program "output.asm"
+            [] -> do
+              usage
+              hPutStrLn
+                stderr
+                "ERROR: no input file is provided for compilation"
+              exitFailure
         _ -> do
           usage
+          hPutStrLn stderr ("ERROR: unknown subcommand '" ++ subcommand ++ "'")
           exitFailure
-    _ -> do
+    [] -> do
       usage
+      hPutStrLn stderr "ERROR: no subcommand provided"
       exitFailure

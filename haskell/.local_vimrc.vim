@@ -1,1 +1,1 @@
-set makeprg=stack\ run\ --\ com
+set makeprg=stack\ run\ --\ com\ test.porth
