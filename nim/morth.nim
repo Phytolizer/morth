@@ -1,3 +1,7 @@
+import std/[
+  strformat,
+]
+
 type
   OpCode = enum
     OpPush
@@ -52,5 +56,27 @@ proc simulateProgram(program: seq[Op]) =
       echo x
       ip += 1
 
+proc compileProgram(program: seq[Op], outFilePath: string) =
+  var outFile = open(outFilePath, fmWrite)
+  defer: outFile.close()
+  for op in program:
+    case op.code
+    of OpPush:
+      outFile.writeLine fmt"push {op.arg}"
+    of OpPlus:
+      outFile.writeLine "pop rbx"
+      outFile.writeLine "pop rax"
+      outFile.writeLine "add rax, rbx"
+      outFile.writeLine "push rax"
+    of OpMinus:
+      outFile.writeLine "pop rbx"
+      outFile.writeLine "pop rax"
+      outFile.writeLine "sub rax, rbx"
+      outFile.writeLine "push rax"
+    of OpDump:
+      outFile.writeLine "pop rdi"
+      outFile.writeLine "call dump"
+
 when isMainModule:
   simulateProgram(program)
+  compileProgram(program, "output.asm")
