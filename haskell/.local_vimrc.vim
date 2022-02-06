@@ -1,1 +1,1 @@
-set makeprg=stack\ run\ --\ sim
+set makeprg=stack\ run\ --\ com
