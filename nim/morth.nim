@@ -59,6 +59,37 @@ proc simulateProgram(program: seq[Op]) =
 proc compileProgram(program: seq[Op], outFilePath: string) =
   var outFile = open(outFilePath, fmWrite)
   defer: outFile.close()
+
+  outFile.writeLine "segment .text"
+  outFile.writeLine "dump:"
+  outFile.writeLine "sub     rsp, 40"
+  outFile.writeLine "lea     rsi, [rsp + 31]"
+  outFile.writeLine "mov     byte [rsp + 31], 10"
+  outFile.writeLine "mov     ecx, 1"
+  outFile.writeLine "mov     r8, -3689348814741910323"
+  outFile.writeLine ".LBB0_1:"
+  outFile.writeLine "mov     rax, rdi"
+  outFile.writeLine "mul     r8"
+  outFile.writeLine "shr     rdx, 3"
+  outFile.writeLine "lea     eax, [rdx + rdx]"
+  outFile.writeLine "lea     r9d, [rax + 4*rax]"
+  outFile.writeLine "mov     eax, edi"
+  outFile.writeLine "sub     eax, r9d"
+  outFile.writeLine "or      al, 48"
+  outFile.writeLine "mov     byte [rsi - 1], al"
+  outFile.writeLine "add     rsi, -1"
+  outFile.writeLine "add     rcx, 1"
+  outFile.writeLine "cmp     rdi, 9"
+  outFile.writeLine "mov     rdi, rdx"
+  outFile.writeLine "ja      .LBB0_1"
+  outFile.writeLine "mov     edi, 1"
+  outFile.writeLine "mov     rdx, rcx"
+  outFile.writeLine "mov     rax, 1"
+  outFile.writeLine "syscall"
+  outFile.writeLine "add     rsp, 40"
+  outFile.writeLine "ret"
+  outFile.writeLine "global _start"
+  outFile.writeLine "_start:"
   for op in program:
     case op.code
     of OpPush:
@@ -76,6 +107,9 @@ proc compileProgram(program: seq[Op], outFilePath: string) =
     of OpDump:
       outFile.writeLine "pop rdi"
       outFile.writeLine "call dump"
+  outFile.writeLine "mov rax, 60"
+  outFile.writeLine "mov rdi, 0"
+  outFile.writeLine "syscall"
 
 when isMainModule:
   simulateProgram(program)
