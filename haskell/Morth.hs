@@ -133,11 +133,11 @@ main :: IO ()
 main = do
   args <- getArgs
   case args of
-    (subcommand:args) ->
+    (subcommand:args') ->
       case subcommand of
         "sim" ->
-          case args of
-            (inFilePath:args') -> do
+          case args' of
+            (inFilePath:_) -> do
               program <- loadProgramFromFile inFilePath
               simulateProgram program
             [] -> do
@@ -146,15 +146,9 @@ main = do
               exitFailure
         "com" ->
           case args of
-            (inFilePath:args') -> do
+            (inFilePath:_) -> do
               program <- loadProgramFromFile inFilePath
               compileProgram program "output.asm"
-            [] -> do
-              usage
-              hPutStrLn
-                stderr
-                "ERROR: no input file is provided for compilation"
-              exitFailure
         _ -> do
           usage
           hPutStrLn stderr ("ERROR: unknown subcommand '" ++ subcommand ++ "'")

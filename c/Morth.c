@@ -37,35 +37,6 @@ char* nonstd_strtok_r(char* str, const char* delim, char** savep)
     return token;
 }
 
-const char** string_split_whitespace(char* str)
-{
-    const char** result = calloc(1, sizeof(char*));
-    size_t result_length = 0;
-    size_t result_capacity = 0;
-    char* save = NULL;
-    for (char* token = nonstd_strtok_r(str, " \r\n\t", &save); token != NULL;
-         token = nonstd_strtok_r(NULL, " \r\n\t", &save))
-    {
-        if (result_length + 1 > result_capacity)
-        {
-            result_capacity = result_capacity * 2 + 1;
-            const char** new_result = calloc(result_capacity + 1, sizeof(char*));
-            if (new_result == NULL)
-            {
-                perror("fatal: allocating memory");
-                exit(1);
-            }
-            memcpy(new_result, result, result_length * sizeof(char*));
-            free(result);
-            result = new_result;
-        }
-
-        result[result_length] = token;
-        result_length += 1;
-    }
-    return result;
-}
-
 #define OP_CODES_X                                                                                                     \
     X(PUSH)                                                                                                            \
     X(PLUS)                                                                                                            \
@@ -131,50 +102,192 @@ struct op halt(void)
     };
 }
 
-char* read_entire_file(FILE* stream)
+const char** string_split_whitespace(char* str)
 {
-    char* contents = calloc(1, 1);
+    const char** result = calloc(1, sizeof(char*));
+    size_t result_length = 0;
+    size_t result_capacity = 0;
+    char* save = NULL;
+    for (char* token = nonstd_strtok_r(str, " \r\n\t", &save); token != NULL;
+         token = nonstd_strtok_r(NULL, " \r\n\t", &save))
+    {
+        if (result_length + 1 > result_capacity)
+        {
+            result_capacity = result_capacity * 2 + 1;
+            const char** new_result = calloc(result_capacity + 1, sizeof(char*));
+            if (new_result == NULL)
+            {
+                perror("fatal: allocating memory");
+                exit(1);
+            }
+            memcpy(new_result, result, result_length * sizeof(char*));
+            free(result);
+            result = new_result;
+        }
+
+        result[result_length] = token;
+        result_length += 1;
+    }
+    return result;
+}
+
+struct token
+{
+    const char* file_path;
+    const char* text;
+    size_t line;
+    size_t column;
+};
+
+struct token_seq_builder
+{
+    struct token* tokens;
+    size_t length;
+    size_t capacity;
+};
+
+void lex_line(const char* file_path, size_t line_index, const char* line, struct token_seq_builder* tokens)
+{
+    const char* cursor = line;
+    while (true)
+    {
+        cursor += strspn(cursor, " \t\r");
+        char* token_end = strpbrk(cursor, " \t\r\n");
+        if (token_end == NULL)
+        {
+            break;
+        }
+
+        *token_end = '\0';
+        if (tokens->length + 1 > tokens->capacity)
+        {
+            tokens->capacity = tokens->capacity * 2 + 1;
+            struct token* new_tokens = calloc(tokens->capacity, sizeof(struct token));
+            if (new_tokens == NULL)
+            {
+                perror("calloc");
+                exit(1);
+            }
+            memcpy(new_tokens, tokens->tokens, tokens->length * sizeof(struct token));
+            free(tokens->tokens);
+            tokens->tokens = new_tokens;
+        }
+        tokens->tokens[tokens->length] = (struct token){
+            .file_path = file_path,
+            .text = cursor,
+            .line = line_index,
+            .column = cursor - line,
+        };
+        cursor = token_end + 1;
+    }
+}
+
+struct lexed_file
+{
+    struct token* tokens;
+    char** lines;
+};
+
+struct lexed_file lex_file(const char* file_path, FILE* stream)
+{
+    char** lines = calloc(1, sizeof(char*));
     size_t length = 0;
+    size_t capacity = 0;
     char buffer[1024];
     while (fgets(buffer, sizeof buffer, stream) != NULL)
     {
-        size_t line_length = strlen(buffer);
-        char* new_contents = realloc(contents, length + line_length + 1);
-        if (new_contents == NULL)
+        char* line = calloc(1, 1);
+        size_t line_length = 0;
+        size_t buffer_len = strlen(buffer);
+        while (true)
+        {
+            bool final_iteration = buffer[buffer_len - 1] == '\n';
+            char* new_line = realloc(line, line_length + buffer_len + 1);
+            if (new_line == NULL)
+            {
+                perror("realloc");
+                exit(1);
+            }
+            memcpy(new_line + line_length, buffer, buffer_len);
+            line = new_line;
+            line_length += buffer_len;
+            if (final_iteration || fgets(buffer, sizeof buffer, stream) == NULL)
+            {
+                break;
+            }
+            buffer_len = strlen(buffer);
+        }
+        if (length + 1 > capacity)
+        {
+            capacity = capacity * 2 + 1;
+            char** new_lines = realloc(lines, capacity * sizeof(char*));
+            if (new_lines == NULL)
+            {
+                perror("fatal: allocating memory");
+                exit(1);
+            }
+            lines = new_lines;
+        }
+        lines[length] = line;
+        length += 1;
+    }
+    if (length + 1 > capacity)
+    {
+        capacity = capacity * 2 + 1;
+        char** new_lines = realloc(lines, capacity * sizeof(char*));
+        if (new_lines == NULL)
         {
             perror("fatal: allocating memory");
             exit(1);
         }
-        contents = new_contents;
-        memcpy(contents + length, buffer, line_length);
-        length += line_length;
+        lines = new_lines;
     }
-    contents[length] = '\0';
-    return contents;
+    lines[length] = NULL;
+    struct token_seq_builder tokens = {0};
+    for (size_t i = 0; lines[i] != NULL; i += 1)
+    {
+        lex_line(file_path, i, lines[i], &tokens);
+    }
+    if (tokens.length + 1 > tokens.capacity)
+    {
+        tokens.capacity = tokens.capacity * 2 + 1;
+        struct token* new_tokens = realloc(tokens.tokens, tokens.capacity * sizeof(struct token));
+        if (new_tokens == NULL)
+        {
+            perror("realloc");
+            exit(1);
+        }
+        tokens.tokens = new_tokens;
+    }
+    tokens.tokens[tokens.length] = (struct token){0};
+    return (struct lexed_file){
+        .tokens = tokens.tokens,
+        .lines = lines,
+    };
 }
 
-struct op parse_token_as_op(const char* token)
+struct op parse_token_as_op(struct token token)
 {
     static_assert(OPS_COUNT == 5, "parse_token_as_op is out of sync");
-    if (strcmp(token, "+") == 0)
+    if (strcmp(token.text, "+") == 0)
     {
         return plus();
     }
-    if (strcmp(token, "-") == 0)
+    if (strcmp(token.text, "-") == 0)
     {
         return minus();
     }
-    if (strcmp(token, ".") == 0)
+    if (strcmp(token.text, ".") == 0)
     {
         return dump();
     }
 
     char* number_end;
     errno = 0;
-    unsigned long long result = strtoull(token, &number_end, 10);
+    unsigned long long result = strtoull(token.text, &number_end, 10);
     if (errno == ERANGE || (number_end != NULL && *number_end != '\0'))
     {
-        fprintf(stderr, "unknown token '%s'\n", token);
+        fprintf(stderr, "%s:%zu:%zu: unknown token '%s'\n", token.file_path, token.line, token.column, token.text);
         exit(1);
     }
     return push(result);
@@ -215,20 +328,22 @@ struct op* load_program_from_file(const char* in_file_path)
         fprintf(stderr, "fatal: could not read %s\n", in_file_path);
         exit(1);
     }
-    char* contents = read_entire_file(in);
+    struct lexed_file lexed_file = lex_file(in_file_path, in);
     fclose(in);
-
-    const char** tokens = string_split_whitespace(contents);
 
     struct program_builder program = {0};
 
-    for (size_t i = 0; tokens[i] != NULL; i += 1)
+    for (size_t i = 0; lexed_file.tokens[i].text != NULL; i += 1)
     {
-        program_push(&program, parse_token_as_op(tokens[i]));
+        program_push(&program, parse_token_as_op(lexed_file.tokens[i]));
     }
     program_push(&program, halt());
-    free(tokens);
-    free(contents);
+    free(lexed_file.tokens);
+    for (size_t i = 0; lexed_file.lines[i] != NULL; i += 1)
+    {
+        free(lexed_file.lines[i]);
+    }
+    free(lexed_file.lines);
     return program.ops;
 }
 
