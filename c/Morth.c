@@ -102,35 +102,6 @@ struct op halt(void)
     };
 }
 
-const char** string_split_whitespace(char* str)
-{
-    const char** result = calloc(1, sizeof(char*));
-    size_t result_length = 0;
-    size_t result_capacity = 0;
-    char* save = NULL;
-    for (char* token = nonstd_strtok_r(str, " \r\n\t", &save); token != NULL;
-         token = nonstd_strtok_r(NULL, " \r\n\t", &save))
-    {
-        if (result_length + 1 > result_capacity)
-        {
-            result_capacity = result_capacity * 2 + 1;
-            const char** new_result = calloc(result_capacity + 1, sizeof(char*));
-            if (new_result == NULL)
-            {
-                perror("fatal: allocating memory");
-                exit(1);
-            }
-            memcpy(new_result, result, result_length * sizeof(char*));
-            free(result);
-            result = new_result;
-        }
-
-        result[result_length] = token;
-        result_length += 1;
-    }
-    return result;
-}
-
 struct token
 {
     const char* file_path;
@@ -178,6 +149,7 @@ void lex_line(const char* file_path, size_t line_index, const char* line, struct
             .line = line_index,
             .column = cursor - line,
         };
+        tokens->length += 1;
         cursor = token_end + 1;
     }
 }
@@ -287,7 +259,8 @@ struct op parse_token_as_op(struct token token)
     unsigned long long result = strtoull(token.text, &number_end, 10);
     if (errno == ERANGE || (number_end != NULL && *number_end != '\0'))
     {
-        fprintf(stderr, "%s:%zu:%zu: unknown token '%s'\n", token.file_path, token.line, token.column, token.text);
+        fprintf(
+            stderr, "%s:%zu:%zu: unknown token '%s'\n", token.file_path, token.line + 1, token.column + 1, token.text);
         exit(1);
     }
     return push(result);
