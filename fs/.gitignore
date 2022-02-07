@@ -1,0 +1,6 @@
+.ionide/
+bin/
+obj/
+*.asm
+*.o
+output
