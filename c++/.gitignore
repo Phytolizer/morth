@@ -1,4 +1,5 @@
 /build/
+/.cache/
 *.asm
 *.o
 output
