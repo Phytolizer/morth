@@ -596,7 +596,7 @@ static void run_subcommand(char* const* args)
         perror("fatal: could not wait on subprocess");
         exit(1);
     }
-    if (child_status != 0)
+    if (!WIFEXITED(child_status) || WEXITSTATUS(child_status) != 0)
     {
         fprintf(stderr, "fatal: child process returned code %d\n", child_status);
         exit(1);
