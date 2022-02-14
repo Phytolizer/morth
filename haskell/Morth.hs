@@ -147,7 +147,7 @@ main = do
               hPutStrLn stderr "ERROR: no input file provided for simulation"
               exitFailure
         "com" ->
-          case args of
+          case args' of
             (inFilePath:_) -> do
               program <- loadProgramFromFile inFilePath
               compileProgram program "output.asm"
