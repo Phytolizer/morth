@@ -20,7 +20,7 @@ data Op
 
 pop :: [Int] -> (Int, [Int])
 pop [] = error "stack underflow"
-pop (x:rest) = (x, rest)
+pop (x:xs) = (x, xs)
 
 parseTokenAsOp :: String -> Op
 parseTokenAsOp token =
@@ -36,6 +36,12 @@ loadProgramFromFile inFilePath = do
   contents <- hGetContents inHandle
   return $ map parseTokenAsOp (words contents)
 
+stackOp :: (Int -> Int -> Int) -> [Int] -> [Int]
+stackOp op stack =
+  let (y, stack') = pop stack
+      (x, stack2) = pop stack'
+   in (op x y : stack2)
+
 simulateProgram :: [Op] -> IO ()
 simulateProgram program = do
   let loop ip stack = do
@@ -46,17 +52,13 @@ simulateProgram program = do
                   ip' = ip + 1
                in loop ip' stack'
             OpPlus -> do
-              let (y, stack') = pop stack
-                  (x, stack'') = pop stack'
-                  stack3 = (x + y : stack'')
+              let stack' = stackOp (+) stack
                   ip' = ip + 1
-               in loop ip' stack3
+               in loop ip' stack'
             OpMinus -> do
-              let (y, stack') = pop stack
-                  (x, stack'') = pop stack'
-                  stack3 = (x - y : stack'')
+              let stack' = stackOp (-) stack
                   ip' = ip + 1
-               in loop ip' stack3
+               in loop ip' stack'
             OpDump -> do
               let (x, stack') = pop stack
                   ip' = ip + 1
