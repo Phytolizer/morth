@@ -1,5 +1,7 @@
 #lang racket
 
+(require racket/cmdline)
+
 (define (stack-pop stack)
   (values (car stack) (cdr stack)))
 
@@ -122,9 +124,16 @@
                   (exit 1))
                 (void)))))))
 
+(define (usage file)
+  (map (lambda (s) (displayln s file))
+       '("Usage: morth <SUBCOMMAND> [ARGS]" "  SUBCOMMANDS:"
+                                            "    sim      Simulate the program."
+                                            "    com      Compile the program.")))
+
 (let ([args (vector->list (current-command-line-arguments))])
   (if (null? args)
       (begin
+        (usage (current-error-port))
         (displayln "ERROR: no subcommand is provided" (current-error-port))
         (exit 1))
       (let-values ([(subcommand args) (stack-pop args)])
