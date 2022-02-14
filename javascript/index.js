@@ -17,21 +17,24 @@ const simulateProgram = function (program) {
     const stack = [];
     for (let ip = 0; ip < program.length; ) {
         switch (program[ip].code) {
-            case OpCode.PUSH:
+            case OpCode.PUSH: {
                 stack.push(program[ip].arg);
                 ip += 1;
                 break;
-            case OpCode.PLUS:
+            }
+            case OpCode.PLUS: {
                 const b = stack.pop();
                 const a = stack.pop();
                 stack.push(a + b);
                 ip += 1;
                 break;
-            case OpCode.DUMP:
+            }
+            case OpCode.DUMP: {
                 const x = stack.pop();
                 console.log(x);
                 ip += 1;
                 break;
+            }
         }
     }
 };
