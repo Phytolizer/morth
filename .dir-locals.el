@@ -1,1 +1,2 @@
-((nil . ((format-all-formatters . (("C" . (clang-format)) ("Haskell" . (hindent)))))))
+((nil . ((format-all-formatters . (("C" . (clang-format))
+                                   ("Haskell" . (hindent)))))))
