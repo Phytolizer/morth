@@ -9,18 +9,17 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define OP_CODES_X                                                                                                     \
-    X(PUSH)                                                                                                            \
-    X(PLUS)                                                                                                            \
-    X(MINUS)                                                                                                           \
-    X(EQUAL)                                                                                                           \
-    X(DUMP)                                                                                                            \
-    X(IF)                                                                                                              \
-    X(END)                                                                                                             \
+#define OP_CODES_X                                                                                 \
+    X(PUSH)                                                                                        \
+    X(PLUS)                                                                                        \
+    X(MINUS)                                                                                       \
+    X(EQUAL)                                                                                       \
+    X(DUMP)                                                                                        \
+    X(IF)                                                                                          \
+    X(END)                                                                                         \
     X(HALT)
 
-enum op_code
-{
+enum op_code {
 #define X(x) OP_##x,
     OP_CODES_X
 #undef X
@@ -33,8 +32,7 @@ const char* const OP_STRINGS[] = {
 #undef X
 };
 
-struct op
-{
+struct op {
     enum op_code code;
     union {
         uint64_t push_op;
@@ -42,97 +40,83 @@ struct op
     } as;
 };
 
-static struct op push(uint64_t x)
-{
+static struct op push(uint64_t x) {
     return (struct op){
         .code = OP_PUSH,
         .as = {.push_op = x},
     };
 }
 
-static struct op plus(void)
-{
+static struct op plus(void) {
     return (struct op){
         .code = OP_PLUS,
     };
 }
 
-static struct op minus(void)
-{
+static struct op minus(void) {
     return (struct op){
         .code = OP_MINUS,
     };
 }
 
-static struct op equal(void)
-{
+static struct op equal(void) {
     return (struct op){
         .code = OP_EQUAL,
     };
 }
 
-static struct op dump(void)
-{
+static struct op dump(void) {
     return (struct op){
         .code = OP_DUMP,
     };
 }
 
-static struct op iff(void)
-{
+static struct op iff(void) {
     return (struct op){
         .code = OP_IF,
     };
 }
 
-static struct op end(void)
-{
+static struct op end(void) {
     return (struct op){
         .code = OP_END,
     };
 }
 
-static struct op halt(void)
-{
+static struct op halt(void) {
     return (struct op){
         .code = OP_HALT,
     };
 }
 
-struct token
-{
+struct token {
     const char* file_path;
     const char* text;
     size_t line;
     size_t column;
 };
 
-struct token_seq_builder
-{
+struct token_seq_builder {
     struct token* tokens;
     size_t length;
     size_t capacity;
 };
 
-static void lex_line(const char* file_path, size_t line_index, const char* line, struct token_seq_builder* tokens)
-{
+static void lex_line(const char* file_path, size_t line_index, const char* line,
+                     struct token_seq_builder* tokens) {
     const char* cursor = line;
-    while (true)
-    {
+    while (true) {
         cursor += strspn(cursor, " \t\r");
         char* token_end = strpbrk(cursor, " \t\r\n");
-        if (token_end == NULL)
-        {
+        if (token_end == NULL) {
             break;
         }
 
         *token_end = '\0';
-        if (tokens->length + 1 > tokens->capacity)
-        {
+        if (tokens->length + 1 > tokens->capacity) {
             tokens->capacity = tokens->capacity * 2 + 1;
             struct token* new_tokens = calloc(tokens->capacity, sizeof(struct token));
-            if (new_tokens == NULL)
-            {
+            if (new_tokens == NULL) {
                 perror("calloc");
                 exit(1);
             }
@@ -151,47 +135,39 @@ static void lex_line(const char* file_path, size_t line_index, const char* line,
     }
 }
 
-struct lexed_file
-{
+struct lexed_file {
     struct token* tokens;
     char** lines;
 };
 
-static struct lexed_file lex_file(const char* file_path, FILE* stream)
-{
+static struct lexed_file lex_file(const char* file_path, FILE* stream) {
     char** lines = calloc(1, sizeof(char*));
     size_t length = 0;
     size_t capacity = 0;
     char buffer[1024];
-    while (fgets(buffer, sizeof buffer, stream) != NULL)
-    {
+    while (fgets(buffer, sizeof buffer, stream) != NULL) {
         char* line = calloc(1, 1);
         size_t line_length = 0;
         size_t buffer_len = strlen(buffer);
-        while (true)
-        {
+        while (true) {
             bool final_iteration = buffer[buffer_len - 1] == '\n';
             char* new_line = realloc(line, line_length + buffer_len + 1);
-            if (new_line == NULL)
-            {
+            if (new_line == NULL) {
                 perror("realloc");
                 exit(1);
             }
             memcpy(new_line + line_length, buffer, buffer_len + 1);
             line = new_line;
             line_length += buffer_len;
-            if (final_iteration || fgets(buffer, sizeof buffer, stream) == NULL)
-            {
+            if (final_iteration || fgets(buffer, sizeof buffer, stream) == NULL) {
                 break;
             }
             buffer_len = strlen(buffer);
         }
-        if (length + 1 > capacity)
-        {
+        if (length + 1 > capacity) {
             capacity = capacity * 2 + 1;
             char** new_lines = realloc(lines, capacity * sizeof(char*));
-            if (new_lines == NULL)
-            {
+            if (new_lines == NULL) {
                 perror("fatal: allocating memory");
                 exit(1);
             }
@@ -200,12 +176,10 @@ static struct lexed_file lex_file(const char* file_path, FILE* stream)
         lines[length] = line;
         length += 1;
     }
-    if (length + 1 > capacity)
-    {
+    if (length + 1 > capacity) {
         capacity = capacity * 2 + 1;
         char** new_lines = realloc(lines, capacity * sizeof(char*));
-        if (new_lines == NULL)
-        {
+        if (new_lines == NULL) {
             perror("fatal: allocating memory");
             exit(1);
         }
@@ -213,16 +187,13 @@ static struct lexed_file lex_file(const char* file_path, FILE* stream)
     }
     lines[length] = NULL;
     struct token_seq_builder tokens = {0};
-    for (size_t i = 0; lines[i] != NULL; i += 1)
-    {
+    for (size_t i = 0; lines[i] != NULL; i += 1) {
         lex_line(file_path, i, lines[i], &tokens);
     }
-    if (tokens.length + 1 > tokens.capacity)
-    {
+    if (tokens.length + 1 > tokens.capacity) {
         tokens.capacity = tokens.capacity * 2 + 1;
         struct token* new_tokens = realloc(tokens.tokens, tokens.capacity * sizeof(struct token));
-        if (new_tokens == NULL)
-        {
+        if (new_tokens == NULL) {
             perror("realloc");
             exit(1);
         }
@@ -235,61 +206,49 @@ static struct lexed_file lex_file(const char* file_path, FILE* stream)
     };
 }
 
-static struct op parse_token_as_op(struct token token)
-{
+static struct op parse_token_as_op(struct token token) {
     static_assert(OPS_COUNT == 8, "parse_token_as_op is out of sync");
-    if (strcmp(token.text, "+") == 0)
-    {
+    if (strcmp(token.text, "+") == 0) {
         return plus();
     }
-    if (strcmp(token.text, "-") == 0)
-    {
+    if (strcmp(token.text, "-") == 0) {
         return minus();
     }
-    if (strcmp(token.text, "=") == 0)
-    {
+    if (strcmp(token.text, "=") == 0) {
         return equal();
     }
-    if (strcmp(token.text, ".") == 0)
-    {
+    if (strcmp(token.text, ".") == 0) {
         return dump();
     }
-    if (strcmp(token.text, "if") == 0)
-    {
+    if (strcmp(token.text, "if") == 0) {
         return iff();
     }
-    if (strcmp(token.text, "end") == 0)
-    {
+    if (strcmp(token.text, "end") == 0) {
         return end();
     }
 
     char* number_end;
     errno = 0;
     unsigned long long result = strtoull(token.text, &number_end, 10);
-    if (errno == ERANGE || (number_end != NULL && *number_end != '\0'))
-    {
-        fprintf(
-            stderr, "%s:%zu:%zu: unknown token '%s'\n", token.file_path, token.line + 1, token.column + 1, token.text);
+    if (errno == ERANGE || (number_end != NULL && *number_end != '\0')) {
+        fprintf(stderr, "%s:%zu:%zu: unknown token '%s'\n", token.file_path, token.line + 1,
+                token.column + 1, token.text);
         exit(1);
     }
     return push(result);
 }
 
-struct program_builder
-{
+struct program_builder {
     struct op* ops;
     size_t length;
     size_t capacity;
 };
 
-static void program_push(struct program_builder* program, struct op op)
-{
-    if (program->length + 1 > program->capacity)
-    {
+static void program_push(struct program_builder* program, struct op op) {
+    if (program->length + 1 > program->capacity) {
         program->capacity = program->capacity * 2 + 1;
         struct op* new_program = calloc(program->capacity, sizeof(struct op));
-        if (new_program == NULL)
-        {
+        if (new_program == NULL) {
             perror("fatal: allocating memory");
             exit(1);
         }
@@ -302,11 +261,9 @@ static void program_push(struct program_builder* program, struct op op)
     program->length += 1;
 }
 
-static struct op* load_program_from_file(const char* in_file_path)
-{
+static struct op* load_program_from_file(const char* in_file_path) {
     FILE* in = fopen(in_file_path, "r");
-    if (in == NULL)
-    {
+    if (in == NULL) {
         fprintf(stderr, "fatal: could not read %s\n", in_file_path);
         exit(1);
     }
@@ -315,31 +272,26 @@ static struct op* load_program_from_file(const char* in_file_path)
 
     struct program_builder program = {0};
 
-    for (size_t i = 0; lexed_file.tokens[i].text != NULL; i += 1)
-    {
+    for (size_t i = 0; lexed_file.tokens[i].text != NULL; i += 1) {
         program_push(&program, parse_token_as_op(lexed_file.tokens[i]));
     }
     program_push(&program, halt());
     free(lexed_file.tokens);
-    for (size_t i = 0; lexed_file.lines[i] != NULL; i += 1)
-    {
+    for (size_t i = 0; lexed_file.lines[i] != NULL; i += 1) {
         free(lexed_file.lines[i]);
     }
     free(lexed_file.lines);
     return program.ops;
 }
 
-struct stack
-{
+struct stack {
     uint64_t* data;
     size_t length;
     size_t capacity;
 };
 
-static void stack_push(struct stack* stack, uint64_t x)
-{
-    if (stack->length + 1 > stack->capacity)
-    {
+static void stack_push(struct stack* stack, uint64_t x) {
+    if (stack->length + 1 > stack->capacity) {
         size_t old_capacity = stack->capacity;
         stack->capacity = stack->capacity * 2 + 1;
         uint64_t* new_data = calloc(sizeof(uint64_t), stack->capacity);
@@ -352,10 +304,8 @@ static void stack_push(struct stack* stack, uint64_t x)
     stack->length += 1;
 }
 
-static uint64_t stack_pop(struct stack* stack)
-{
-    if (stack->length == 0)
-    {
+static uint64_t stack_pop(struct stack* stack) {
+    if (stack->length == 0) {
         fputs("fatal: stack underflow\n", stderr);
         exit(1);
     }
@@ -364,14 +314,11 @@ static uint64_t stack_pop(struct stack* stack)
     return stack->data[stack->length];
 }
 
-static void cross_reference_blocks(struct op* program)
-{
+static void cross_reference_blocks(struct op* program) {
     struct stack stack = {0};
     static_assert(OPS_COUNT == 8, "cross_reference_blocks is out of sync");
-    for (size_t ip = 0; program[ip].code != OP_HALT; ip += 1)
-    {
-        switch (program[ip].code)
-        {
+    for (size_t ip = 0; program[ip].code != OP_HALT; ip += 1) {
+        switch (program[ip].code) {
             case OP_IF:
                 stack_push(&stack, ip);
                 break;
@@ -395,14 +342,11 @@ static void cross_reference_blocks(struct op* program)
     free(stack.data);
 }
 
-static void simulate_program(struct op* program)
-{
+static void simulate_program(struct op* program) {
     static_assert(OPS_COUNT == 8, "simulate_program is out of sync");
     struct stack stack = {0};
-    for (size_t ip = 0; program[ip].code != OP_HALT;)
-    {
-        switch (program[ip].code)
-        {
+    for (size_t ip = 0; program[ip].code != OP_HALT;) {
+        switch (program[ip].code) {
             case OP_PUSH:
                 stack_push(&stack, program[ip].as.push_op);
                 ip += 1;
@@ -430,12 +374,9 @@ static void simulate_program(struct op* program)
             }
             case OP_IF: {
                 uint64_t x = stack_pop(&stack);
-                if (x == 0)
-                {
+                if (x == 0) {
                     ip = program[ip].as.if_op;
-                }
-                else
-                {
+                } else {
                     ip += 1;
                 }
                 break;
@@ -461,12 +402,10 @@ static void simulate_program(struct op* program)
     free(stack.data);
 }
 
-static void compile_program(struct op* program, const char* out_file_path)
-{
+static void compile_program(struct op* program, const char* out_file_path) {
     static_assert(OPS_COUNT == 8, "compile_program is out of sync");
     FILE* out = fopen(out_file_path, "w");
-    if (out == NULL)
-    {
+    if (out == NULL) {
         fputs("fatal: could not open output.asm\n", stderr);
         exit(1);
     }
@@ -500,12 +439,10 @@ static void compile_program(struct op* program, const char* out_file_path)
     fputs("ret\n", out);
     fputs("global _start\n", out);
     fputs("_start:\n", out);
-    for (size_t ip = 0; program[ip].code != OP_HALT; ip += 1)
-    {
+    for (size_t ip = 0; program[ip].code != OP_HALT; ip += 1) {
         fprintf(out, ";; -- %s --\n", OP_STRINGS[program[ip].code]);
         fprintf(out, "porth_addr_%zu:\n", ip);
-        switch (program[ip].code)
-        {
+        switch (program[ip].code) {
             case OP_PUSH:
                 fprintf(out, "push %" PRIu64 "\n", program[ip].as.push_op);
                 break;
@@ -554,19 +491,16 @@ static void compile_program(struct op* program, const char* out_file_path)
     fclose(out);
 }
 
-static void usage(const char* program_name)
-{
+static void usage(const char* program_name) {
     printf("usage: %s <SUBCOMMAND> [ARGS]\n", program_name);
     puts("  SUBCOMMANDS:");
     puts("    sim      Simulate the program");
     puts("    com      Compile the program");
 }
 
-static void echo_subcommand(char* const* args)
-{
+static void echo_subcommand(char* const* args) {
     printf("> ");
-    for (size_t i = 0; args[i] != NULL; i += 1)
-    {
+    for (size_t i = 0; args[i] != NULL; i += 1) {
         printf("%s ", args[i]);
     }
     puts("");
@@ -574,85 +508,71 @@ static void echo_subcommand(char* const* args)
 
 // note on 'args': it is not const-qualified because 'execvp' requires it to be
 // this way.
-static void run_subcommand(char* const* args)
-{
+static void run_subcommand(char* const* args) {
     echo_subcommand(args);
     pid_t child_pid = fork();
-    if (child_pid == -1)
-    {
+    if (child_pid == -1) {
         fputs("fatal: could not fork child process\n", stderr);
         exit(1);
     }
-    if (child_pid == 0)
-    {
+    if (child_pid == 0) {
         execvp(args[0], args);
         perror("fatal: could not run subcommand");
         exit(1);
     }
     int child_status;
     pid_t wait_result = waitpid(child_pid, &child_status, 0);
-    if (wait_result == -1)
-    {
+    if (wait_result == -1) {
         perror("fatal: could not wait on subprocess");
         exit(1);
     }
-    if (!WIFEXITED(child_status) || WEXITSTATUS(child_status) != 0)
-    {
+    if (!WIFEXITED(child_status) || WEXITSTATUS(child_status) != 0) {
         fprintf(stderr, "fatal: child process returned code %d\n", child_status);
         exit(1);
     }
 }
 
-struct argv_iterator
-{
+struct argv_iterator {
     int argc;
     char** argv;
     int index;
 };
 
-static struct argv_iterator argv_iter(int argc, char** argv)
-{
+static struct argv_iterator argv_iter(int argc, char** argv) {
     return (struct argv_iterator){
         .argc = argc,
         .argv = argv,
     };
 }
 
-static char* argv_current(struct argv_iterator* iter)
-{
-    if (iter->index >= iter->argc)
-    {
+static char* argv_current(struct argv_iterator* iter) {
+    if (iter->index >= iter->argc) {
         return NULL;
     }
     return iter->argv[iter->index];
 }
 
-static char* argv_next(struct argv_iterator* iter)
-{
+static char* argv_next(struct argv_iterator* iter) {
     char* arg = argv_current(iter);
     iter->index += 1;
     return arg;
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     struct argv_iterator args = argv_iter(argc, argv);
     const char* program_name = argv_next(&args);
 
     const char* subcommand = argv_next(&args);
 
-    if (subcommand == NULL)
-    {
+    if (subcommand == NULL) {
         usage(program_name);
         fputs("ERROR: no subcommand is provided\n", stderr);
         exit(1);
     }
 
-    if (strcmp(subcommand, "sim") == 0)
-    {
+    if (strcmp(subcommand, "sim") == 0) {
         char* in_file_path = argv_next(&args);
-        if (in_file_path == NULL)
-        {
+        if (in_file_path == NULL) {
             usage(program_name);
             fputs("ERROR: no input file is provided for the simulation\n", stderr);
             exit(1);
@@ -661,12 +581,9 @@ int main(int argc, char** argv)
         cross_reference_blocks(program);
         simulate_program(program);
         free(program);
-    }
-    else if (strcmp(subcommand, "com") == 0)
-    {
+    } else if (strcmp(subcommand, "com") == 0) {
         char* in_file_path = argv_next(&args);
-        if (in_file_path == NULL)
-        {
+        if (in_file_path == NULL) {
             usage(program_name);
             fputs("ERROR: no input file is provided for the compilation\n", stderr);
             exit(1);
@@ -679,9 +596,7 @@ int main(int argc, char** argv)
         run_subcommand(nasm_args);
         char* const ld_args[] = {"ld", "output.o", "-o", "output", NULL};
         run_subcommand(ld_args);
-    }
-    else
-    {
+    } else {
         usage(program_name);
         fprintf(stderr, "ERROR: unknown subcommand '%s'\n", subcommand);
         exit(1);
