@@ -1,7 +1,5 @@
 #lang racket
 
-(require racket/cmdline)
-
 (define (stack-pop stack)
   (values (car stack) (cdr stack)))
 
@@ -142,8 +140,8 @@
           [("com")
            (begin
              (call-with-output-file "output.asm"
-                                    (lambda (out) (compile-program program out))
-                                    #:mode 'text
-                                    #:exists 'replace)
+               (lambda (out) (compile-program program out))
+               #:mode 'text
+               #:exists 'replace)
              (run-command '("nasm" "-felf64" "output.asm"))
              (run-command '("ld" "-o" "output" "output.o")))]))))
