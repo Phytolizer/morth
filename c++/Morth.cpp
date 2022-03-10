@@ -4,6 +4,7 @@
 #include <magic_enum.hpp>
 #include <span>
 #include <stdexcept>
+#include <vector>
 
 struct not_implemented : std::runtime_error {
     not_implemented() : std::runtime_error("not implemented") {
@@ -39,14 +40,24 @@ struct op {
 };
 
 void simulate_program(std::span<const op> program) {
+    std::vector<std::int64_t> stack;
     for (const op& o : program) {
         switch (o.code) {
             case op_code::push:
-                throw not_implemented{};
-            case op_code::plus:
-                throw not_implemented{};
+                stack.push_back(o.x);
+                break;
+            case op_code::plus: {
+                std::int64_t b = stack.back();
+                stack.pop_back();
+                std::int64_t a = stack.back();
+                stack.pop_back();
+                stack.push_back(a + b);
+                break;
+            }
             case op_code::dump:
-                throw not_implemented{};
+                fmt::print("{}\n", stack.back());
+                stack.pop_back();
+                break;
             default:
                 throw unreachable{};
         }
