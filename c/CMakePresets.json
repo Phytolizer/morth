@@ -8,8 +8,8 @@
   "configurePresets": [
     {
       "name": "default",
-      "displayName": "C++ Default Config",
-      "description": "Default configuration for C++ using Ninja",
+      "displayName": "C Default Config",
+      "description": "Default configuration for C using Ninja",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/default",
       "cacheVariables": {
