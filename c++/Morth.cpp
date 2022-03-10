@@ -19,6 +19,7 @@ struct unreachable : std::runtime_error {
 enum struct op_code {
     push,
     plus,
+    minus,
     dump,
 };
 
@@ -32,6 +33,10 @@ struct op {
 
     static constexpr op plus() {
         return {.code = op_code::plus};
+    }
+
+    static constexpr op minus() {
+        return {.code = op_code::minus};
     }
 
     static constexpr op dump() {
@@ -54,6 +59,14 @@ void simulate_program(std::span<const op> program) {
                 stack.push_back(a + b);
                 break;
             }
+            case op_code::minus: {
+                std::int64_t b = stack.back();
+                stack.pop_back();
+                std::int64_t a = stack.back();
+                stack.pop_back();
+                stack.push_back(a - b);
+                break;
+            }
             case op_code::dump:
                 fmt::print("{}\n", stack.back());
                 stack.pop_back();
@@ -69,10 +82,8 @@ void compile_program(std::span<const op> program) {
 }
 
 constexpr std::array program = {
-    op::push(34),
-    op::push(35),
-    op::plus(),
-    op::dump(),
+    op::push(34),  op::push(35), op::plus(),  op::dump(),
+    op::push(500), op::push(80), op::minus(), op::dump(),
 };
 
 int main(int argc, char** argv) {
