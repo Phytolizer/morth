@@ -1,4 +1,4 @@
-import * as fs from "fs";
+export {};
 
 enum OpCode {
     Push,
@@ -22,7 +22,7 @@ class Op {
     }
 }
 
-const simulateProgram = function (program: Op[]) {
+function simulateProgram(program: Op[]) {
     const stack: number[] = [];
     for (let ip = 0; ip < program.length; ) {
         switch (program[ip].code) {
@@ -30,20 +30,49 @@ const simulateProgram = function (program: Op[]) {
                 stack.push(program[ip].value!);
                 ip += 1;
                 break;
-            case OpCode.Plus:
+            case OpCode.Plus: {
                 const b: number = stack.pop()!;
                 const a: number = stack.pop()!;
                 stack.push(a + b);
                 ip += 1;
                 break;
+            }
             case OpCode.Dump:
                 console.log(stack.pop()!);
                 ip += 1;
                 break;
         }
     }
-};
+}
+
+function compileProgram(program: Op[]) {}
 
 const program: Op[] = [Op.push(34), Op.push(35), Op.plus(), Op.dump()];
 
-simulateProgram(program);
+const args: string[] = process.argv.slice(2);
+
+function usage() {
+    console.log("Usage: porth <SUBCOMMAND> [ARGS]");
+    console.log("SUBCOMMANDS:");
+    console.log("  sim              Simulate the program");
+    console.log("  com              Compile the program");
+}
+
+if (args.length == 0) {
+    usage();
+    console.log("ERROR: no subcommand is provided");
+    process.exit(1);
+}
+
+switch (args[0]) {
+    case "sim":
+        simulateProgram(program);
+        break;
+    case "com":
+        compileProgram(program);
+        break;
+    default:
+        usage();
+        console.log(`ERROR: unknown subcommand ${args[0]}`);
+        process.exit(1);
+}
