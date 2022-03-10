@@ -1,0 +1,24 @@
+{
+    "name": "morth",
+    "version": "0.1.0",
+    "description": "Porth but More",
+    "main": "index.ts",
+    "scripts": {
+        "build": "tsc",
+        "morth": "node build/morth"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://gitlab.com/Phytolizer/morth.git"
+    },
+    "author": "Kyle Coffey",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://gitlab.com/Phytolizer/morth/issues"
+    },
+    "homepage": "https://gitlab.com/Phytolizer/morth#readme",
+    "dependencies": {
+        "@types/node": "^17.0.21",
+        "typescript": "^4.6.2"
+    }
+}
