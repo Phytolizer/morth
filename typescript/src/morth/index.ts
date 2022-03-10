@@ -1,4 +1,5 @@
-export {};
+import { execSync } from "child_process";
+import * as fs from "fs";
 
 enum OpCode {
     Push,
@@ -57,7 +58,30 @@ function simulateProgram(program: Op[]) {
     }
 }
 
-function compileProgram(program: Op[]) {}
+function compileProgram(program: Op[]) {
+    const output: number = fs.openSync("output.asm", "w", 0o644);
+    fs.writeFileSync(output, "segment .text\n");
+    fs.writeFileSync(output, "global _start\n");
+    fs.writeFileSync(output, "_start:\n");
+    for (const op of program) {
+        fs.writeFileSync(output, `    ;; -- ${op.code} --\n`);
+        switch (op.code) {
+            case OpCode.Push:
+                fs.writeFileSync(output, `    push ${op.value!}`);
+                break;
+            case OpCode.Plus:
+                break;
+            case OpCode.Minus:
+                break;
+            case OpCode.Dump:
+                break;
+        }
+    }
+    fs.writeFileSync(output, "    mov rax, 60\n");
+    fs.writeFileSync(output, "    mov rbx, 0\n");
+    fs.writeFileSync(output, "    syscall\n");
+    fs.closeSync(output);
+}
 
 const program: Op[] = [
     Op.push(34),
@@ -89,9 +113,12 @@ switch (args[0]) {
     case "sim":
         simulateProgram(program);
         break;
-    case "com":
+    case "com": {
         compileProgram(program);
+        execSync("nasm -f elf64 output.asm");
+        execSync("ld -o output output.o");
         break;
+    }
     default:
         usage();
         console.log(`ERROR: unknown subcommand ${args[0]}`);
