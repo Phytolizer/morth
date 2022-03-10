@@ -26,6 +26,12 @@ op_t op_plus(void) {
     };
 }
 
+op_t op_minus(void) {
+    return (op_t){
+        .code = op_code_minus,
+    };
+}
+
 op_t op_dump(void) {
     return (op_t){
         .code = op_code_dump,

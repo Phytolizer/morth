@@ -20,6 +20,12 @@ static void simulate_program(op_t* program, size_t program_size) {
                 stack_push(&stack, a + b);
                 break;
             }
+            case op_code_minus: {
+                uint64_t b = stack_pop(&stack);
+                uint64_t a = stack_pop(&stack);
+                stack_push(&stack, a - b);
+                break;
+            }
             case op_code_dump: {
                 uint64_t value = stack_pop(&stack);
                 printf("%" PRIu64 "\n", value);
@@ -35,11 +41,15 @@ static void simulate_program(op_t* program, size_t program_size) {
 }
 
 int main(void) {
-    op_t program[4];
+    op_t program[8];
     program[0] = op_push(34);
     program[1] = op_push(35);
     program[2] = op_plus();
     program[3] = op_dump();
+    program[4] = op_push(500);
+    program[5] = op_push(80);
+    program[6] = op_minus();
+    program[7] = op_dump();
 
     simulate_program(program, sizeof program / sizeof(op_t));
 
