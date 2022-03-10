@@ -8,35 +8,27 @@
 #include <string_view>
 #include <vector>
 
-struct SimulationError : std::runtime_error
-{
-    SimulationError(const std::string& message) : std::runtime_error(message)
-    {
+struct SimulationError : std::runtime_error {
+    SimulationError(const std::string& message) : std::runtime_error(message) {
     }
 };
 
-struct CompilationError : std::runtime_error
-{
-    CompilationError(const std::string& message) : std::runtime_error(message)
-    {
+struct CompilationError : std::runtime_error {
+    CompilationError(const std::string& message) : std::runtime_error(message) {
     }
 };
 
 using StackType = std::uint64_t;
 
-struct Stack
-{
+struct Stack {
     Stack() = default;
 
-    void Push(StackType value)
-    {
+    void Push(StackType value) {
         data.push(value);
     }
 
-    StackType Pop()
-    {
-        if (data.empty())
-        {
+    StackType Pop() {
+        if (data.empty()) {
             throw SimulationError{"Stack underflow"};
         }
         StackType x = data.top();
@@ -48,30 +40,27 @@ struct Stack
     std::stack<StackType> data;
 };
 
-#define MORTH_OPS_X                                                                                                    \
-    X(PUSH)                                                                                                            \
-    X(PLUS)                                                                                                            \
-    X(MINUS)                                                                                                           \
+#define MORTH_OPS_X                                                            \
+    X(PUSH)                                                                    \
+    X(PLUS)                                                                    \
+    X(MINUS)                                                                   \
     X(DUMP)
 
-enum struct OpCode
-{
+enum struct OpCode {
 #define X(x) x,
     MORTH_OPS_X
 #undef X
 };
 
-struct Op
-{
+struct Op {
     OpCode code;
     std::optional<StackType> argument;
 
-    constexpr Op(OpCode code, StackType argument) : code(code), argument(argument)
-    {
+    constexpr Op(OpCode code, StackType argument)
+        : code(code), argument(argument) {
     }
 
-    constexpr Op(OpCode code) : code(code)
-    {
+    constexpr Op(OpCode code) : code(code) {
     }
 };
 
@@ -81,15 +70,13 @@ constexpr std::array OPS = {
 #undef X
 };
 
-void SimulateProgram(const std::vector<Op>& program)
-{
+void SimulateProgram(const std::vector<Op>& program) {
     Stack stack;
-    for (std::size_t ip = 0; ip < program.size();)
-    {
-        std::cout << "Evaluating [" << ip << "], a " << OPS[static_cast<std::size_t>(program[ip].code)]
+    for (std::size_t ip = 0; ip < program.size();) {
+        std::cout << "Evaluating [" << ip << "], a "
+                  << OPS[static_cast<std::size_t>(program[ip].code)]
                   << " instruction\n";
-        switch (program[ip].code)
-        {
+        switch (program[ip].code) {
             case OpCode::PUSH:
                 stack.Push(*program[ip].argument);
                 ip += 1;
@@ -120,11 +107,10 @@ void SimulateProgram(const std::vector<Op>& program)
     }
 }
 
-void CompileProgram(const std::vector<Op>& program, const std::string& outFilePath)
-{
+void CompileProgram(const std::vector<Op>& program,
+                    const std::string& outFilePath) {
     std::ofstream out{outFilePath};
-    if (!out)
-    {
+    if (!out) {
         throw CompilationError{"Could not open output file for writing"};
     }
     out << "segment .text\n";
@@ -157,10 +143,8 @@ void CompileProgram(const std::vector<Op>& program, const std::string& outFilePa
     out << "ret\n";
     out << "global _start\n";
     out << "_start:\n";
-    for (const Op& op : program)
-    {
-        switch (op.code)
-        {
+    for (const Op& op : program) {
+        switch (op.code) {
             case OpCode::PUSH:
                 out << "push " << *op.argument << "\n";
                 break;
@@ -189,15 +173,13 @@ void CompileProgram(const std::vector<Op>& program, const std::string& outFilePa
     out << "syscall\n";
 }
 
-void Usage(std::string_view programName)
-{
+void Usage(std::string_view programName) {
     std::cout << "usage: " << programName << " <SUBCOMMAND> [ARGS]\n";
     std::cout << "  SUBCOMMANDS:\n";
     std::cout << "    sim      Simulate the program\n";
     std::cout << "    com      Compile the program\n";
 }
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     std::vector<Op> PROGRAM = {{
         {OpCode::PUSH, 34},
         {OpCode::PUSH, 35},
@@ -213,40 +195,28 @@ int main(int argc, char** argv)
     auto argsIter = args.begin();
     std::string_view programName = *argsIter;
     ++argsIter;
-    if (argsIter == args.end())
-    {
+    if (argsIter == args.end()) {
         Usage(programName);
         std::cerr << "ERROR: no subcommand is provided\n";
         return 1;
     }
     std::string_view subcommand = *argsIter;
     ++argsIter;
-    if (subcommand == "sim")
-    {
-        try
-        {
+    if (subcommand == "sim") {
+        try {
             SimulateProgram(PROGRAM);
-        }
-        catch (const SimulationError& e)
-        {
+        } catch (const SimulationError& e) {
             std::cerr << e.what() << "\n";
             return 1;
         }
-    }
-    else if (subcommand == "com")
-    {
-        try
-        {
+    } else if (subcommand == "com") {
+        try {
             CompileProgram(PROGRAM, "output.asm");
-        }
-        catch (const CompilationError& e)
-        {
+        } catch (const CompilationError& e) {
             std::cerr << e.what() << "\n";
             return 1;
         }
-    }
-    else
-    {
+    } else {
         Usage(programName);
         std::cerr << "ERROR: unknown subcommand '" << subcommand << "'\n";
         return 1;

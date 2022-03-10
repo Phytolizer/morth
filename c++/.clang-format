@@ -1,6 +1,6 @@
-BasedOnStyle: Microsoft
+BasedOnStyle: LLVM
 PointerAlignment: Left
-BinPackArguments: false
-BinPackParameters: false
-IncludeBlocks: Regroup
 IndentCaseLabels: true
+ColumnLimit: 80
+AllowShortFunctionsOnASingleLine: None
+IndentWidth: 4
