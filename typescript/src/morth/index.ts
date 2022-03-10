@@ -3,6 +3,7 @@ export {};
 enum OpCode {
     Push,
     Plus,
+    Minus,
     Dump,
 }
 
@@ -15,6 +16,10 @@ class Op {
 
     static plus() {
         return new Op(OpCode.Plus);
+    }
+
+    static minus() {
+        return new Op(OpCode.Minus);
     }
 
     static dump() {
@@ -37,6 +42,13 @@ function simulateProgram(program: Op[]) {
                 ip += 1;
                 break;
             }
+            case OpCode.Minus: {
+                const b: number = stack.pop()!;
+                const a: number = stack.pop()!;
+                stack.push(a - b);
+                ip += 1;
+                break;
+            }
             case OpCode.Dump:
                 console.log(stack.pop()!);
                 ip += 1;
@@ -47,7 +59,16 @@ function simulateProgram(program: Op[]) {
 
 function compileProgram(program: Op[]) {}
 
-const program: Op[] = [Op.push(34), Op.push(35), Op.plus(), Op.dump()];
+const program: Op[] = [
+    Op.push(34),
+    Op.push(35),
+    Op.plus(),
+    Op.dump(),
+    Op.push(500),
+    Op.push(80),
+    Op.minus(),
+    Op.dump(),
+];
 
 const args: string[] = process.argv.slice(2);
 
