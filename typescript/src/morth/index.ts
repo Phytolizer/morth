@@ -44,6 +44,6 @@ const simulateProgram = function (program: Op[]) {
     }
 };
 
-const program = [Op.push(34), Op.push(35), Op.plus(), Op.dump()];
+const program: Op[] = [Op.push(34), Op.push(35), Op.plus(), Op.dump()];
 
 simulateProgram(program);
