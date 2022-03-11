@@ -9,14 +9,14 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define OP_CODES_X                                                                                 \
-    X(PUSH)                                                                                        \
-    X(PLUS)                                                                                        \
-    X(MINUS)                                                                                       \
-    X(EQUAL)                                                                                       \
-    X(DUMP)                                                                                        \
-    X(IF)                                                                                          \
-    X(END)                                                                                         \
+#define OP_CODES_X                                                             \
+    X(PUSH)                                                                    \
+    X(PLUS)                                                                    \
+    X(MINUS)                                                                   \
+    X(EQUAL)                                                                   \
+    X(DUMP)                                                                    \
+    X(IF)                                                                      \
+    X(END)                                                                     \
     X(HALT)
 
 enum op_code {
@@ -115,12 +115,14 @@ static void lex_line(const char* file_path, size_t line_index, const char* line,
         *token_end = '\0';
         if (tokens->length + 1 > tokens->capacity) {
             tokens->capacity = tokens->capacity * 2 + 1;
-            struct token* new_tokens = calloc(tokens->capacity, sizeof(struct token));
+            struct token* new_tokens =
+                calloc(tokens->capacity, sizeof(struct token));
             if (new_tokens == NULL) {
                 perror("calloc");
                 exit(1);
             }
-            memcpy(new_tokens, tokens->tokens, tokens->length * sizeof(struct token));
+            memcpy(new_tokens, tokens->tokens,
+                   tokens->length * sizeof(struct token));
             free(tokens->tokens);
             tokens->tokens = new_tokens;
         }
@@ -159,7 +161,8 @@ static struct lexed_file lex_file(const char* file_path, FILE* stream) {
             memcpy(new_line + line_length, buffer, buffer_len + 1);
             line = new_line;
             line_length += buffer_len;
-            if (final_iteration || fgets(buffer, sizeof buffer, stream) == NULL) {
+            if (final_iteration ||
+                fgets(buffer, sizeof buffer, stream) == NULL) {
                 break;
             }
             buffer_len = strlen(buffer);
@@ -192,7 +195,8 @@ static struct lexed_file lex_file(const char* file_path, FILE* stream) {
     }
     if (tokens.length + 1 > tokens.capacity) {
         tokens.capacity = tokens.capacity * 2 + 1;
-        struct token* new_tokens = realloc(tokens.tokens, tokens.capacity * sizeof(struct token));
+        struct token* new_tokens =
+            realloc(tokens.tokens, tokens.capacity * sizeof(struct token));
         if (new_tokens == NULL) {
             perror("realloc");
             exit(1);
@@ -231,8 +235,8 @@ static struct op parse_token_as_op(struct token token) {
     errno = 0;
     unsigned long long result = strtoull(token.text, &number_end, 10);
     if (errno == ERANGE || (number_end != NULL && *number_end != '\0')) {
-        fprintf(stderr, "%s:%zu:%zu: unknown token '%s'\n", token.file_path, token.line + 1,
-                token.column + 1, token.text);
+        fprintf(stderr, "%s:%zu:%zu: unknown token '%s'\n", token.file_path,
+                token.line + 1, token.column + 1, token.text);
         exit(1);
     }
     return push(result);
@@ -324,7 +328,8 @@ static void cross_reference_blocks(struct op* program) {
                 break;
             case OP_END: {
                 uint64_t if_addr = stack_pop(&stack);
-                assert(program[if_addr].code == OP_IF && "'end' can only close 'if' blocks");
+                assert(program[if_addr].code == OP_IF &&
+                       "'end' can only close 'if' blocks");
                 program[if_addr].as.if_op = ip;
                 break;
             }
@@ -527,7 +532,8 @@ static void run_subcommand(char* const* args) {
         exit(1);
     }
     if (!WIFEXITED(child_status) || WEXITSTATUS(child_status) != 0) {
-        fprintf(stderr, "fatal: child process returned code %d\n", child_status);
+        fprintf(stderr, "fatal: child process returned code %d\n",
+                child_status);
         exit(1);
     }
 }
@@ -574,7 +580,8 @@ int main(int argc, char** argv) {
         char* in_file_path = argv_next(&args);
         if (in_file_path == NULL) {
             usage(program_name);
-            fputs("ERROR: no input file is provided for the simulation\n", stderr);
+            fputs("ERROR: no input file is provided for the simulation\n",
+                  stderr);
             exit(1);
         }
         struct op* program = load_program_from_file(in_file_path);
@@ -585,7 +592,8 @@ int main(int argc, char** argv) {
         char* in_file_path = argv_next(&args);
         if (in_file_path == NULL) {
             usage(program_name);
-            fputs("ERROR: no input file is provided for the compilation\n", stderr);
+            fputs("ERROR: no input file is provided for the compilation\n",
+                  stderr);
             exit(1);
         }
         struct op* program = load_program_from_file(in_file_path);

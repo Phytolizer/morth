@@ -1,12 +1,13 @@
 #ifndef MORTH_OP_H_
 #define MORTH_OP_H_
 
+#include <stddef.h>
 #include <stdint.h>
 
-#define OPS_X                                                                                      \
-    X(push)                                                                                        \
-    X(plus)                                                                                        \
-    X(minus)                                                                                       \
+#define OPS_X                                                                  \
+    X(push)                                                                    \
+    X(plus)                                                                    \
+    X(minus)                                                                   \
     X(dump)
 
 typedef enum {
@@ -27,5 +28,10 @@ op_t op_push(uint64_t value);
 op_t op_plus(void);
 op_t op_minus(void);
 op_t op_dump(void);
+
+typedef struct {
+    op_t* data;
+    size_t size;
+} program_t;
 
 #endif

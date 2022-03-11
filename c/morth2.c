@@ -7,12 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void simulate_program(op_t* program, size_t program_size) {
+static void simulate_program(program_t program) {
     stack_t stack = STACK_INIT;
-    for (size_t ip = 0; ip < program_size; ip += 1) {
-        switch (program[ip].code) {
+    for (size_t ip = 0; ip < program.size; ip += 1) {
+        switch (program.data[ip].code) {
             case op_code_push:
-                stack_push(&stack, program[ip].value);
+                stack_push(&stack, program.data[ip].value);
                 break;
             case op_code_plus: {
                 uint64_t b = stack_pop(&stack);
@@ -33,7 +33,8 @@ static void simulate_program(op_t* program, size_t program_size) {
             }
             case op_code_count:
             default:
-                fprintf(stderr, "Encountered illegal opcode (%d)\n", program[ip].code);
+                fprintf(stderr, "Encountered illegal opcode (%d)\n",
+                        program.data[ip].code);
                 exit(1);
         }
     }
@@ -51,7 +52,10 @@ int main(void) {
     program[6] = op_minus();
     program[7] = op_dump();
 
-    simulate_program(program, sizeof program / sizeof(op_t));
+    simulate_program((program_t){
+        .data = program,
+        .size = sizeof program / sizeof(op_t),
+    });
 
     return 0;
 }

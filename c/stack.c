@@ -6,7 +6,8 @@
 void stack_push(stack_t* stack, uint64_t value) {
     if (stack->size == stack->capacity) {
         stack->capacity = stack->capacity * 2 + 1;
-        uint64_t* new_data = realloc(stack->data, stack->capacity * sizeof(uint64_t));
+        uint64_t* new_data =
+            realloc(stack->data, stack->capacity * sizeof(uint64_t));
         if (new_data == NULL) {
             fprintf(stderr, "Allocation failure on stack reallocation\n");
             free(stack->data);
