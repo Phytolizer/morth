@@ -11,5 +11,14 @@ project(
 add_executable(Morth Morth.c)
 target_compile_features(Morth PRIVATE c_std_11)
 
-add_executable(morth2 morth2.c stack.c op.c simulate.c args.c compile.c)
+add_executable(
+    morth2
+    morth2.c
+    stack.c
+    op.c
+    simulate.c
+    args.c
+    compile.c
+    subprocess.c
+)
 target_compile_features(morth2 PRIVATE c_std_11)

@@ -2,6 +2,7 @@
 #include "./compile.h"
 #include "./op.h"
 #include "./simulate.h"
+#include "./subprocess.h"
 
 #include <stddef.h>
 #include <stdio.h>
@@ -43,7 +44,9 @@ int main(int argc, char** argv) {
     if (strcmp(subcommand, "sim") == 0) {
         simulate_program(program);
     } else if (strcmp(subcommand, "com") == 0) {
-        compile_program(program);
+        compile_program(program, "output.asm");
+        subprocess_call("nasm", "-f", "elf64", "./output.asm", NULL);
+        subprocess_call("ld", "-o", "output", "./output.o", NULL);
     } else {
         usage(program_name);
         printf("ERROR: unknown subcommand '%s'\n", subcommand);

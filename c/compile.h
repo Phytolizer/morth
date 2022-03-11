@@ -3,6 +3,6 @@
 
 #include "./op.h"
 
-void compile_program(program_t program);
+void compile_program(program_t program, const char* output_name);
 
 #endif
