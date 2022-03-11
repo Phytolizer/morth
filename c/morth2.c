@@ -2,12 +2,6 @@
 #include "./simulate.h"
 #include "./stack.h"
 
-#include <inttypes.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 int main(void) {
     op_t program[8];
     program[0] = op_push(34);
