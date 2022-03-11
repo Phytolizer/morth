@@ -46,7 +46,10 @@ int main(int argc, char** argv) {
     } else if (strcmp(subcommand, "com") == 0) {
         compile_program(program, "output.asm");
         subprocess_call("nasm", "-f", "elf64", "./output.asm", NULL);
-        subprocess_call("ld", "-o", "output", "./output.o", NULL);
+        subprocess_call("nasm", "-f", "elf64", "./assembly_sources/dump.asm",
+                        NULL);
+        subprocess_call("ld", "-o", "output", "./output.o",
+                        "./assembly_sources/dump.o", NULL);
     } else {
         usage(program_name);
         printf("ERROR: unknown subcommand '%s'\n", subcommand);
