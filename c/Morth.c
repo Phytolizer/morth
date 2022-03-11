@@ -299,6 +299,10 @@ static void stack_push(struct stack* stack, uint64_t x) {
         size_t old_capacity = stack->capacity;
         stack->capacity = stack->capacity * 2 + 1;
         uint64_t* new_data = calloc(sizeof(uint64_t), stack->capacity);
+        if (new_data == NULL) {
+            fprintf(stderr, "Memory allocation failure\n");
+            exit(1);
+        }
         memcpy(new_data, stack->data, old_capacity * sizeof(uint64_t));
         free(stack->data);
         stack->data = new_data;
