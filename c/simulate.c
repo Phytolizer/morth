@@ -1,5 +1,6 @@
 #include "./simulate.h"
 
+#include "./op.h"
 #include "./stack.h"
 
 #include <inttypes.h>

@@ -1,6 +1,5 @@
 #include "./op.h"
 #include "./simulate.h"
-#include "./stack.h"
 
 int main(void) {
     op_t program[8];
