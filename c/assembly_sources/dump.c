@@ -9,7 +9,8 @@ static inline void sys_write(int file, char* buffer, size_t size) {
             "movq %[Size], %%rdx\n\t"
             "syscall"
             :
-            : [File] "r"(file), [Buffer] "q"(buffer), [Size] "q"(size));
+            : [File] "r"(file), [Buffer] "q"(buffer), [Size] "q"(size)
+            : "rax", "edi", "rsi", "rdx");
 }
 
 void dump(uint64_t x) {
