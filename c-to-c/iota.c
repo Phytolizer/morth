@@ -336,6 +336,7 @@ void gen_iota(FILE* fp, iota_t iota) {
         fprintf(fp, "    %.*s_%.*s,\n", (int)iota.name.length, iota.name.data,
                 (int)iota.variants.data[i].length, iota.variants.data[i].data);
     }
+    fprintf(fp, "    count_%.*s,\n", (int)iota.name.length, iota.name.data);
     fprintf(fp, "} %.*s_t;\n", (int)iota.name.length, iota.name.data);
 }
 
