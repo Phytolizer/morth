@@ -1,18 +1,26 @@
 #include <errno.h>
+#include <fcntl.h>
 #include <inttypes.h>
 #include <op_code.h>
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #ifdef _WIN32
 #define STRERROR_R(error, buf, size) strerror_s(buf, size, error)
 #define FOPEN_S fopen_s
+#define CC "clang"
+#define EXE_SUFFIX ".exe"
 #else
 #define STRERROR_R strerror_r
 #define FOPEN_S(p_fp, path, mode) (*(p_fp) = fopen(path, mode))
+#define CC "gcc"
+#define EXE_SUFFIX ""
 #endif
 
 #define ERRBUF_SIZE 64
@@ -78,6 +86,7 @@ typedef TRY_T(uint64_t) try_uint64_t;
 
 #define ERR_STACK_UNDERFLOW 0x8000
 #define ERR_ILLEGAL_OPCODE 0x8001
+#define ERR_SUBCOMMAND_EXIT_CODE 0x8002
 
 static void print_error(int error) {
     switch (error) {
@@ -150,6 +159,53 @@ static int simulate_program(program_t program) {
     }
 
     free(stack.data);
+    return 0;
+}
+
+static int run_subcommand(char* program, ...) {
+    va_list args;
+    size_t argv_count = 2; // program, NULL
+    va_start(args, program);
+    printf("> %s", program);
+    for (char* arg = va_arg(args, char*); arg != NULL;
+         arg = va_arg(args, char*)) {
+        printf(" %s", arg);
+        argv_count += 1;
+    }
+    printf("\n");
+    va_end(args);
+
+    char** argv = malloc(sizeof(char*) * argv_count);
+    argv[0] = program;
+    va_start(args, program);
+    size_t i = 1;
+    for (char* arg = va_arg(args, char*); arg != NULL;
+         arg = va_arg(args, char*)) {
+        argv[i] = arg;
+        i += 1;
+    }
+    va_end(args);
+    argv[i] = NULL;
+
+    pid_t pid = fork();
+    if (pid < 0) {
+        free(argv);
+        return errno;
+    }
+    if (pid == 0) {
+        execvp(program, argv);
+        free(argv);
+        return errno;
+    }
+    free(argv);
+    int status;
+    pid_t awaited = waitpid(pid, &status, 0);
+    if (awaited != pid) {
+        return errno;
+    }
+    if (status != 0) {
+        return ERR_SUBCOMMAND_EXIT_CODE;
+    }
     return 0;
 }
 
@@ -279,6 +335,11 @@ static int compile_program(program_t program) {
     }
     fprintf(fp, "}\n");
     fclose(fp);
+    int error =
+        run_subcommand(CC, "-O2", "output.c", "-o", "output" EXE_SUFFIX, NULL);
+    if (error != 0) {
+        return error;
+    }
     return 0;
 }
 
