@@ -7,4 +7,10 @@ project(
 )
 
 add_executable(iota iota.c)
-add_executable(morth morth.c)
+add_custom_command(
+    OUTPUT op_code.h
+    DEPENDS iota
+    COMMAND "$<TARGET_FILE:iota>" "${PROJECT_SOURCE_DIR}/op_code.iota"
+            "op_code.h"
+)
+add_executable(morth morth.c "${PROJECT_BINARY_DIR}/op_code.h")
