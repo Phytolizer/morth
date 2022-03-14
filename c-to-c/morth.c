@@ -282,7 +282,14 @@ static int compile_program(program_t program) {
     return 0;
 }
 
-int main(void) {
+static void usage(FILE* fp) {
+    fprintf(fp, "Usage: porth <SUBCOMMAND> [ARGS]\n");
+    fprintf(fp, "SUBCOMMANDS:\n");
+    fprintf(fp, "  sim              Simulate the program\n");
+    fprintf(fp, "  com              Compile the program\n");
+}
+
+int main(int argc, char** argv) {
     op_t program[8];
     program[0] = push(34);
     program[1] = push(35);
@@ -293,20 +300,31 @@ int main(void) {
     program[6] = minus();
     program[7] = dump();
 
-    int error = simulate_program((program_t){
-        .data = program,
-        .length = sizeof program / sizeof(op_t),
-    });
-    if (error != 0) {
-        print_error(error);
+    if (argc < 2) {
+        usage(stderr);
+        fprintf(stderr, "ERROR: no subcommand provided\n");
         return 1;
     }
-    error = compile_program((program_t){
-        .data = program,
-        .length = sizeof program / sizeof(op_t),
-    });
-    if (error != 0) {
-        print_error(error);
-        return 1;
+    if (strcmp(argv[1], "sim") == 0) {
+        int error = simulate_program((program_t){
+            .data = program,
+            .length = sizeof program / sizeof(op_t),
+        });
+        if (error != 0) {
+            print_error(error);
+            return 1;
+        }
+    } else if (strcmp(argv[1], "com") == 0) {
+        int error = compile_program((program_t){
+            .data = program,
+            .length = sizeof program / sizeof(op_t),
+        });
+        if (error != 0) {
+            print_error(error);
+            return 1;
+        }
+    } else {
+        usage(stderr);
+        fprintf(stderr, "ERROR: unknown subcommand '%s'\n", argv[1]);
     }
 }

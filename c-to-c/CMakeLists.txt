@@ -22,4 +22,4 @@ target_include_directories(morth PRIVATE "${PROJECT_BINARY_DIR}/include")
 target_compile_features(morth PRIVATE c_std_11)
 
 enable_testing()
-add_test(morth morth)
+add_test(morth_sim morth sim)
