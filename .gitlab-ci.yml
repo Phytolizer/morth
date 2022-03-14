@@ -19,3 +19,10 @@ build-c-job:
         - cmake -B build/c -S c
         - cmake --build build/c
         - cd build/c && ctest
+
+build-c-to-c-job:
+    stage: build
+    script:
+        - cmake -B build/c-to-c -S c-to-c
+        - cmake --build build/c-to-c
+        - cd build/c-to-c && ctest
