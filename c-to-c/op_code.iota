@@ -1,5 +1,6 @@
 iota op_code = {
     push
     plus
+    minus
     dump
 };

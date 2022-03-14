@@ -33,6 +33,10 @@ static op_t plus(void) {
     return (op_t){.code = op_code_plus};
 }
 
+static op_t minus(void) {
+    return (op_t){.code = op_code_minus};
+}
+
 static op_t dump(void) {
     return (op_t){.code = op_code_dump};
 }
@@ -114,6 +118,19 @@ static int simulate_program(program_t program) {
                 }
                 simulation_stack_push(&stack, a.value + b.value);
             } break;
+            case op_code_minus: {
+                try_uint64_t b = simulation_stack_pop(&stack);
+                if (b.error != 0) {
+                    free(stack.data);
+                    return b.error;
+                }
+                try_uint64_t a = simulation_stack_pop(&stack);
+                if (a.error != 0) {
+                    free(stack.data);
+                    return a.error;
+                }
+                simulation_stack_push(&stack, a.value - b.value);
+            } break;
             case op_code_dump: {
                 try_uint64_t value = simulation_stack_pop(&stack);
                 if (value.error != 0) {
@@ -134,11 +151,15 @@ static int simulate_program(program_t program) {
 }
 
 int main(void) {
-    op_t program[4];
+    op_t program[8];
     program[0] = push(34);
     program[1] = push(35);
     program[2] = plus();
     program[3] = dump();
+    program[4] = push(500);
+    program[5] = push(80);
+    program[6] = minus();
+    program[7] = dump();
 
     int error = simulate_program((program_t){
         .data = program,
