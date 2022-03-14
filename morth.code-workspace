@@ -8,6 +8,9 @@
         },
         {
             "path": "python"
+        },
+        {
+            "path": "c-to-c"
         }
     ],
     "settings": {}

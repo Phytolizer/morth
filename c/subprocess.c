@@ -14,9 +14,13 @@ void subprocess_call(char* program, ...) {
 
     va_list args;
     va_start(args, program);
-    while (va_arg(args, char*) != NULL) {
+    printf("> %s ", program);
+    for (char* arg = va_arg(args, char*); arg != NULL;
+         arg = va_arg(args, char*)) {
+        printf("%s ", arg);
         argv_count += 1;
     }
+    printf("\n");
     va_end(args);
 
     char** argv = calloc(argv_count + 1, sizeof(char*));
