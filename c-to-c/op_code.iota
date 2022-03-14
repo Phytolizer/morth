@@ -1,0 +1,5 @@
+iota op_code = {
+    push
+    plus
+    dump
+};

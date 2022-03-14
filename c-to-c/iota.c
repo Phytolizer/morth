@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,7 +81,8 @@ iota_token_t lex_token(string_view_t source, size_t* p_offset) {
         default:
             if (isalpha(source.data[*p_offset])) {
                 while (*p_offset < source.length &&
-                       isalnum(source.data[*p_offset])) {
+                       (isalnum(source.data[*p_offset]) ||
+                        source.data[*p_offset] == '_')) {
                     *p_offset += 1;
                 }
                 if (*p_offset - start == 4 &&
@@ -155,7 +157,8 @@ typedef TRY_T(iota_t) try_iota_t;
 #define IOTA_PARSE_NO_SEMICOLON 0x8006
 #define IOTA_PARSE_TRAILING 0x8007
 
-try_iota_t parse_iota(int fd) {
+try_iota_t parse_iota(const char* input_path) {
+    int fd = open(input_path, O_RDONLY);
     struct stat statbuf;
     if (fstat(fd, &statbuf) == -1) {
         close(fd);
@@ -194,6 +197,7 @@ try_iota_t parse_iota(int fd) {
         .name = tokens.data[index].text,
         .source =
             (string_view_t){.data = source_buf, .length = statbuf.st_size},
+        .variants = {0},
     };
     index += 1;
     if (index == tokens.length ||
@@ -255,18 +259,41 @@ try_iota_t parse_iota(int fd) {
     return (try_iota_t){.value = result};
 }
 
+void gen_include_guard(FILE* fp, string_view_t output_path) {
+    bool begun = false;
+    for (size_t i = 0; i < output_path.length; i += 1) {
+        if (!begun && !isalpha(output_path.data[i])) {
+            continue;
+        }
+        if (isalpha(output_path.data[i])) {
+            fputc(toupper(output_path.data[i]), fp);
+            begun = true;
+        } else {
+            fputc('_', fp);
+        }
+    }
+    fputc('_', fp);
+}
+
+void gen_iota(FILE* fp, iota_t iota) {
+    fprintf(fp, "typedef enum {\n");
+    for (size_t i = 0; i < iota.variants.length; i += 1) {
+        fprintf(fp, "    %.*s_%.*s,\n", (int)iota.name.length, iota.name.data,
+                (int)iota.variants.data[i].length, iota.variants.data[i].data);
+    }
+    fprintf(fp, "} %.*s_t;\n", (int)iota.name.length, iota.name.data);
+}
+
 int main(int argc, char** argv) {
     if (argc < 3) {
         fprintf(stderr, "usage: iota <input> <output>");
         return 1;
     }
 
-    const char* input_path = argv[1];
-    const char* output_path = argv[2];
+    char* input_path = argv[1];
+    char* output_path = argv[2];
 
-    int infp = open(input_path, O_RDONLY);
-
-    try_iota_t try_iota = parse_iota(infp);
+    try_iota_t try_iota = parse_iota(input_path);
     if (try_iota.error != 0) {
         switch (try_iota.error) {
             case IOTA_PARSE_NO_KW:
@@ -302,7 +329,17 @@ int main(int argc, char** argv) {
 
     iota_t iota = try_iota.value;
 
-    // TODO(kyle): generate the thing
+    FILE* outfp = fopen(output_path, "w");
+    fprintf(outfp, "#ifndef ");
+    gen_include_guard(outfp, (string_view_t){.data = output_path,
+                                             .length = strlen(output_path)});
+    fprintf(outfp, "\n#define ");
+    gen_include_guard(outfp, (string_view_t){.data = output_path,
+                                             .length = strlen(output_path)});
+    fprintf(outfp, "\n\n");
+    gen_iota(outfp, iota);
+    fprintf(outfp, "\n#endif\n");
+    fclose(outfp);
 
     free(iota.source.data);
     free(iota.variants.data);
