@@ -7,7 +7,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#else
 #include <unistd.h>
+#endif
+
+#ifdef _WIN32
+#define STRERROR_R(error, buffer, size) strerror_s(buffer, size, error)
+#else
+#define STRERROR_R strerror_r
+#endif
 
 #define ERRBUF_SIZE 64
 
@@ -157,23 +169,67 @@ typedef TRY_T(iota_t) try_iota_t;
 #define IOTA_PARSE_NO_SEMICOLON 0x8006
 #define IOTA_PARSE_TRAILING 0x8007
 
+#define WIN32_ERROR 0x9000
+
 try_iota_t parse_iota(const char* input_path) {
-    int fd = open(input_path, O_RDONLY);
+    size_t file_size;
+#ifdef _WIN32
+    HANDLE fd = CreateFile(input_path, GENERIC_READ, FILE_SHARE_READ, NULL,
+                           OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (fd == INVALID_HANDLE_VALUE) {
+        DWORD err = GetLastError();
+        char* errbuf;
+        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                          FORMAT_MESSAGE_FROM_SYSTEM,
+                      NULL, err, 0, (LPSTR)&errbuf, 0, NULL);
+        fprintf(stderr, "opening %s: %s\n", input_path, errbuf);
+        LocalFree(errbuf);
+        return (try_iota_t){.error = WIN32_ERROR};
+    }
+    LARGE_INTEGER file_size_large;
+    if (!GetFileSizeEx(fd, &file_size_large)) {
+        DWORD err = GetLastError();
+        char* errbuf;
+        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                          FORMAT_MESSAGE_FROM_SYSTEM,
+                      NULL, err, 0, (LPSTR)&errbuf, 0, NULL);
+        fprintf(stderr, "sizing %s: %s\n", input_path, errbuf);
+        LocalFree(errbuf);
+        return (try_iota_t){.error = WIN32_ERROR};
+    }
+    file_size = file_size_large.QuadPart;
+#else
     struct stat statbuf;
+    int fd = open(input_path, O_RDONLY);
     if (fstat(fd, &statbuf) == -1) {
         close(fd);
         return (try_iota_t){.error = errno};
     }
-    char* source_buf = malloc(statbuf.st_size + 1);
-    if (read(fd, source_buf, statbuf.st_size) == -1) {
+    file_size = statbuf.st_size;
+#endif
+    char* source_buf = malloc(file_size + 1);
+#ifdef _WIN32
+    if (!ReadFile(fd, source_buf, file_size, NULL, NULL)) {
+        DWORD err = GetLastError();
+        char* errbuf;
+        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                          FORMAT_MESSAGE_FROM_SYSTEM,
+                      NULL, err, 0, (LPSTR)&errbuf, 0, NULL);
+        fprintf(stderr, "reading %s: %s\n", input_path, errbuf);
+        LocalFree(errbuf);
+        return (try_iota_t){.error = WIN32_ERROR};
+    }
+#else
+    if (read(fd, source_buf, file_size) == -1) {
         free(source_buf);
         close(fd);
         return (try_iota_t){.error = errno};
     }
     close(fd);
-    source_buf[statbuf.st_size] = '\0';
-    try_iota_tokens_t try_tokens = lex_iota(
-        (string_view_t){.data = source_buf, .length = statbuf.st_size});
+#endif
+    source_buf[file_size] = '\0';
+    try_iota_tokens_t try_tokens =
+        lex_iota((string_view_t){.data = source_buf, .length = file_size});
     if (try_tokens.error != 0) {
         free(source_buf);
         return (try_iota_t){.error = try_tokens.error};
@@ -195,8 +251,7 @@ try_iota_t parse_iota(const char* input_path) {
     }
     iota_t result = {
         .name = tokens.data[index].text,
-        .source =
-            (string_view_t){.data = source_buf, .length = statbuf.st_size},
+        .source = (string_view_t){.data = source_buf, .length = file_size},
         .variants = {0},
     };
     index += 1;
@@ -296,6 +351,9 @@ int main(int argc, char** argv) {
     try_iota_t try_iota = parse_iota(input_path);
     if (try_iota.error != 0) {
         switch (try_iota.error) {
+            case WIN32_ERROR:
+                fprintf(stderr, "win32 error\n");
+                break;
             case IOTA_PARSE_NO_KW:
                 fprintf(stderr, "missing 'iota' at beginning\n");
                 break;
@@ -319,7 +377,7 @@ int main(int argc, char** argv) {
                 break;
             default: {
                 char errbuf[ERRBUF_SIZE];
-                strerror_r(try_iota.error, errbuf, sizeof errbuf);
+                STRERROR_R(try_iota.error, errbuf, sizeof errbuf);
                 fprintf(stderr, "%s\n", errbuf);
                 break;
             }
@@ -329,7 +387,12 @@ int main(int argc, char** argv) {
 
     iota_t iota = try_iota.value;
 
+#ifdef _WIN32
+    FILE* outfp;
+    fopen_s(&outfp, output_path, "w");
+#else
     FILE* outfp = fopen(output_path, "w");
+#endif
     fprintf(outfp, "#ifndef ");
     gen_include_guard(outfp, (string_view_t){.data = output_path,
                                              .length = strlen(output_path)});

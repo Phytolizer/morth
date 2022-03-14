@@ -7,6 +7,7 @@ project(
 )
 
 add_executable(iota iota.c)
+target_compile_features(iota PRIVATE c_std_11)
 add_custom_command(
     OUTPUT op_code.h
     DEPENDS iota
