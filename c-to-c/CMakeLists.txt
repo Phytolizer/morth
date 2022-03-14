@@ -20,3 +20,6 @@ gen_iota("${PROJECT_SOURCE_DIR}/op_code.iota" "op_code.h")
 add_executable(morth morth.c "${PROJECT_BINARY_DIR}/include/op_code.h")
 target_include_directories(morth PRIVATE "${PROJECT_BINARY_DIR}/include")
 target_compile_features(morth PRIVATE c_std_11)
+
+enable_testing()
+add_test(morth morth)
