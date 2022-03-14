@@ -1,3 +1,4 @@
+#include <config.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -14,12 +15,10 @@
 #ifdef _WIN32
 #define STRERROR_R(error, buf, size) strerror_s(buf, size, error)
 #define FOPEN_S fopen_s
-#define CC "clang"
 #define EXE_SUFFIX ".exe"
 #else
 #define STRERROR_R strerror_r
 #define FOPEN_S(p_fp, path, mode) (*(p_fp) = fopen(path, mode))
-#define CC "gcc"
 #define EXE_SUFFIX ""
 #endif
 
