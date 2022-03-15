@@ -211,12 +211,13 @@ static int run_subcommand(char* program, ...) {
 static int compile_program(program_t program) {
     FILE* fp;
     FOPEN_S(&fp, "output.c", "w");
+    fprintf(fp, "#include <errno.h>\n");
     fprintf(fp, "#include <inttypes.h>\n");
     fprintf(fp, "#include <stddef.h>\n");
     fprintf(fp, "#include <stdint.h>\n");
     fprintf(fp, "#include <stdio.h>\n");
+    fprintf(fp, "#include <stdlib.h>\n");
     fprintf(fp, "#include <string.h>\n");
-    fprintf(fp, "#define STACK_CAPACITY 64\n");
     fprintf(fp, "#define ERRBUF_SIZE 64\n");
     fprintf(fp, "#ifdef _WIN32\n");
     fprintf(fp, "#define STRERROR_R(error, buffer, size) strerror_s(buffer, "
@@ -225,15 +226,15 @@ static int compile_program(program_t program) {
     fprintf(fp, "#define STRERROR_R(error, buffer, size) strerror_r(error, "
                 "buffer, size)\n");
     fprintf(fp, "#endif\n");
-    fprintf(fp, "static uint64_t stack[STACK_CAPACITY];\n");
-    fprintf(fp, "static size_t stack_size = 0;\n");
-    fprintf(fp, "#define ERR_STACK_OVERFLOW 0x8000\n");
-    fprintf(fp, "#define ERR_STACK_UNDERFLOW 0x8001\n");
+    fprintf(fp, "typedef struct {\n");
+    fprintf(fp, "    uint64_t* data;\n");
+    fprintf(fp, "    size_t length;\n");
+    fprintf(fp, "    size_t capacity;\n");
+    fprintf(fp, "} stack_t;\n");
+    fprintf(fp, "static stack_t stack;\n");
+    fprintf(fp, "#define ERR_STACK_UNDERFLOW 0x8000\n");
     fprintf(fp, "static void print_error(int error) {\n");
     fprintf(fp, "    switch (error) {\n");
-    fprintf(fp, "        case ERR_STACK_OVERFLOW:\n");
-    fprintf(fp, "            fprintf(stderr, \"stack overflow\\n\");\n");
-    fprintf(fp, "            break;\n");
     fprintf(fp, "        case ERR_STACK_UNDERFLOW:\n");
     fprintf(fp, "            fprintf(stderr, \"stack underflow\\n\");\n");
     fprintf(fp, "            break;\n");
@@ -245,22 +246,33 @@ static int compile_program(program_t program) {
     fprintf(fp, "    }\n");
     fprintf(fp, "}\n");
     fprintf(fp, "static int stack_push(uint64_t value) {\n");
-    fprintf(fp, "    if (stack_size == STACK_CAPACITY) {\n");
-    fprintf(fp, "        return ERR_STACK_OVERFLOW;\n");
+    fprintf(fp, "    if (stack.length == stack.capacity) {\n");
+    fprintf(fp, "        stack.capacity = stack.capacity * 2 + 1;\n");
+    fprintf(fp, "        uint64_t* new_stack = realloc(stack.data, "
+                "sizeof(uint64_t) * stack.capacity);\n");
+    fprintf(fp, "        if (new_stack == NULL) {\n");
+    fprintf(fp, "            free(stack.data);\n");
+    fprintf(fp, "            stack.data = NULL;\n");
+    fprintf(fp, "            stack.length = 0;\n");
+    fprintf(fp, "            stack.capacity = 0;\n");
+    fprintf(fp, "            return ENOMEM;\n");
+    fprintf(fp, "        }\n");
+    fprintf(fp, "        stack.data = new_stack;\n");
     fprintf(fp, "    }\n");
-    fprintf(fp, "    stack[stack_size] = value;\n");
-    fprintf(fp, "    stack_size += 1;\n");
+    fprintf(fp, "    stack.data[stack.length] = value;\n");
+    fprintf(fp, "    stack.length += 1;\n");
     fprintf(fp, "    return 0;\n");
     fprintf(fp, "}\n");
     fprintf(fp,
             "typedef struct { int error; uint64_t value; } try_uint64_t;\n");
     fprintf(fp, "static try_uint64_t stack_pop(void) {\n");
-    fprintf(fp, "    if (stack_size == 0) {\n");
+    fprintf(fp, "    if (stack.length == 0) {\n");
     fprintf(fp,
             "        return (try_uint64_t){.error = ERR_STACK_UNDERFLOW};\n");
     fprintf(fp, "    }\n");
-    fprintf(fp, "    stack_size -= 1;\n");
-    fprintf(fp, "    return (try_uint64_t){.value = stack[stack_size]};\n");
+    fprintf(fp, "    stack.length -= 1;\n");
+    fprintf(fp,
+            "    return (try_uint64_t){.value = stack.data[stack.length]};\n");
     fprintf(fp, "}\n");
     fprintf(fp, "int main(void) {\n");
     for (size_t i = 0; i < program.length; i += 1) {
@@ -345,7 +357,7 @@ static int compile_program(program_t program) {
 typedef TRY_T(program_t) try_program_t;
 
 static try_program_t parse_program(const char* input_file_path) {
-
+    return (try_program_t){.value = (program_t){0}};
 }
 
 static void usage(FILE* fp, const char* program_name) {
