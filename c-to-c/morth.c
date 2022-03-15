@@ -342,49 +342,84 @@ static int compile_program(program_t program) {
     return 0;
 }
 
-static void usage(FILE* fp) {
-    fprintf(fp, "Usage: porth <SUBCOMMAND> [ARGS]\n");
+typedef TRY_T(program_t) try_program_t;
+
+static try_program_t parse_program(const char* input_file_path) {
+
+}
+
+static void usage(FILE* fp, const char* program_name) {
+    fprintf(fp, "Usage: %s <SUBCOMMAND> [ARGS]\n", program_name);
     fprintf(fp, "SUBCOMMANDS:\n");
-    fprintf(fp, "  sim              Simulate the program\n");
-    fprintf(fp, "  com              Compile the program\n");
+    fprintf(fp, "  sim <file>       Simulate the program\n");
+    fprintf(fp, "  com <file>       Compile the program\n");
+}
+
+typedef struct {
+    int argc;
+    char** argv;
+    int pos;
+} args_t;
+
+char* args_next(args_t* args) {
+    if (args->pos == args->argc) {
+        return NULL;
+    }
+    char* arg = args->argv[args->pos];
+    args->pos += 1;
+    return arg;
 }
 
 int main(int argc, char** argv) {
-    op_t program[8];
-    program[0] = push(34);
-    program[1] = push(35);
-    program[2] = plus();
-    program[3] = dump();
-    program[4] = push(500);
-    program[5] = push(80);
-    program[6] = minus();
-    program[7] = dump();
+    args_t args = {
+        .argc = argc,
+        .argv = argv,
+        .pos = 0,
+    };
+    char* program_name = args_next(&args);
+    char* subcommand = args_next(&args);
 
-    if (argc < 2) {
-        usage(stderr);
+    if (subcommand == NULL) {
+        usage(stderr, program_name);
         fprintf(stderr, "ERROR: no subcommand provided\n");
         return 1;
     }
     if (strcmp(argv[1], "sim") == 0) {
-        int error = simulate_program((program_t){
-            .data = program,
-            .length = sizeof program / sizeof(op_t),
-        });
+        char* input_file_path = args_next(&args);
+        if (input_file_path == NULL) {
+            usage(stderr, program_name);
+            fprintf(stderr, "ERROR: no input file provided for `sim`\n");
+            return 1;
+        }
+        try_program_t program = parse_program(input_file_path);
+        if (program.error != 0) {
+            print_error(program.error);
+            return 1;
+        }
+        int error = simulate_program(program.value);
         if (error != 0) {
             print_error(error);
             return 1;
         }
     } else if (strcmp(argv[1], "com") == 0) {
-        int error = compile_program((program_t){
-            .data = program,
-            .length = sizeof program / sizeof(op_t),
-        });
+        char* input_file_path = args_next(&args);
+        if (input_file_path == NULL) {
+            usage(stderr, program_name);
+            fprintf(stderr, "ERROR: no input file provided for `sim`\n");
+            return 1;
+        }
+        try_program_t program = parse_program(input_file_path);
+        if (program.error != 0) {
+            print_error(program.error);
+            return 1;
+        }
+        int error = compile_program(program.value);
         if (error != 0) {
             print_error(error);
             return 1;
         }
     } else {
-        usage(stderr);
+        usage(stderr, program_name);
         fprintf(stderr, "ERROR: unknown subcommand '%s'\n", argv[1]);
     }
 }
