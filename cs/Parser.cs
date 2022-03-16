@@ -16,6 +16,10 @@ public static class Parser
         {
             return Op.Dump();
         }
+        if (token.Text == "=")
+        {
+            return Op.Equal();
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {

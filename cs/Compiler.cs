@@ -41,7 +41,7 @@ public static class Compiler
         return File.ReadAllText(Path.Join(temp, "build", "compiler.txt")).Trim();
     }
 
-    private static void GenerateBinaryStackOperation(CEmitter fp, char op)
+    private static void GenerateBinaryStackOperation(CEmitter fp, string op)
     {
         fp.Emit("{");
         fp.AddIndent();
@@ -172,10 +172,13 @@ public static class Compiler
                         em.Emit("}");
                         break;
                     case OpCode.Plus:
-                        GenerateBinaryStackOperation(em, '+');
+                        GenerateBinaryStackOperation(em, "+");
                         break;
                     case OpCode.Minus:
-                        GenerateBinaryStackOperation(em, '-');
+                        GenerateBinaryStackOperation(em, "-");
+                        break;
+                    case OpCode.Equal:
+                        GenerateBinaryStackOperation(em, "==");
                         break;
                     case OpCode.Dump:
                         em.Emit("{");

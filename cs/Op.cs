@@ -31,6 +31,11 @@ public class Op
         return new Op(OpCode.Minus);
     }
 
+    public static Op Equal()
+    {
+        return new Op(OpCode.Equal);
+    }
+
     public static Op Dump()
     {
         return new Op(OpCode.Dump);

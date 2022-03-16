@@ -27,6 +27,13 @@ public static class Simulator
                         stack.Push(a - b);
                     }
                     break;
+                case OpCode.Equal:
+                    {
+                        var b = stack.Pop();
+                        var a = stack.Pop();
+                        stack.Push((ulong)(a == b ? 1 : 0));
+                    }
+                    break;
                 case OpCode.Dump:
                     {
                         var value = stack.Pop();
