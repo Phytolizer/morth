@@ -26,5 +26,5 @@ target_compile_features(morth PRIVATE c_std_11)
 
 enable_testing()
 configure_file("test.morth" "test.morth" COPYONLY)
-add_test(morth_sim morth sim test.morth)
-add_test(morth_com morth com test.morth)
+add_test(NAME morth_sim COMMAND morth sim test.morth)
+add_test(NAME morth_com COMMAND morth com test.morth)
