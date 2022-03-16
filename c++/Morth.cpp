@@ -246,6 +246,7 @@ int main(int argc, char** argv) {
             compile_program(program);
         } else {
             fmt::print("ERROR: unknown subcommand `{}`\n", args[1]);
+            return 1;
         }
     } catch (const std::runtime_error& e) {
         fmt::print(stderr, "unhandled exception: {}\n", e.what());
