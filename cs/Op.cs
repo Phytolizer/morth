@@ -51,6 +51,16 @@ public class Op
         return new Op(OpCode.End);
     }
 
+    public static Op Dup()
+    {
+        return new Op(OpCode.Dup);
+    }
+
+    public static Op Greater()
+    {
+        return new Op(OpCode.Greater);
+    }
+
     public static Op Dump()
     {
         return new Op(OpCode.Dump);

@@ -32,6 +32,14 @@ public static class Parser
         {
             return Op.End();
         }
+        if (token.Text == "dup")
+        {
+            return Op.Dup();
+        }
+        if (token.Text == ">")
+        {
+            return Op.Greater();
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {

@@ -9,5 +9,7 @@ public enum OpCode
     If,
     Else,
     End,
+    Dup,
+    Greater,
     Dump,
 }

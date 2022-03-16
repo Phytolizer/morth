@@ -59,6 +59,22 @@ public static class Simulator
                 case OpCode.End:
                     i++;
                     break;
+                case OpCode.Dup:
+                    {
+                        var a = stack.Pop();
+                        stack.Push(a);
+                        stack.Push(a);
+                        i++;
+                    }
+                    break;
+                case OpCode.Greater:
+                    {
+                        var b = stack.Pop();
+                        var a = stack.Pop();
+                        stack.Push((ulong)(a > b ? 1 : 0));
+                        i++;
+                    }
+                    break;
                 case OpCode.Dump:
                     {
                         var value = stack.Pop();

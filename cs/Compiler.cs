@@ -204,6 +204,33 @@ public static class Compiler
                         em.RemoveIndent();
                         em.Emit("}");
                         break;
+                    case OpCode.Dup:
+                        em.Emit("{");
+                        em.AddIndent();
+                        em.Emit("try_uint64_t value = stack_pop();");
+                        em.Emit("if (value.error != 0) {");
+                        em.AddIndent();
+                        em.Emit("print_error(value.error);");
+                        em.Emit("return 1;");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        em.Emit($"int err = stack_push(value.value);");
+                        em.Emit("if (err != 0) {");
+                        em.AddIndent();
+                        em.Emit("print_error(err);");
+                        em.Emit("return 1;");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        em.Emit($"err = stack_push(value.value);");
+                        em.Emit("if (err != 0) {");
+                        em.AddIndent();
+                        em.Emit("print_error(err);");
+                        em.Emit("return 1;");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        break;
                     case OpCode.Dump:
                         em.Emit("{");
                         em.AddIndent();

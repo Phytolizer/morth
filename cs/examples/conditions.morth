@@ -3,3 +3,7 @@
 else
     420 .
 end
+
+34 35 + 68 > if
+    35 dup + .
+end
