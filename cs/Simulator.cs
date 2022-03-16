@@ -2,7 +2,7 @@ namespace Morth;
 
 public static class Simulator
 {
-    public static void SimulateProgram(Span<Op> program)
+    public static void SimulateProgram(IEnumerable<Op> program)
     {
         var stack = new Stack<ulong>();
 

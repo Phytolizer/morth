@@ -5,16 +5,6 @@ namespace Morth;
 
 public static class Compiler
 {
-    private static string ExeSuffix()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return ".exe";
-        }
-
-        return "";
-    }
-
     private static string FindCCompiler()
     {
         var temp = Path.Join(Path.GetTempPath(), "morth-cmake-temp");
@@ -169,6 +159,6 @@ public static class Compiler
             fp.WriteLine("}");
         }
 
-        Subcommand.Run(FindCCompiler(), "-O2", "output.c", "-o", $"output{ExeSuffix()}");
+        Subcommand.Run(FindCCompiler(), "-O2", "output.c", "-o", $"output{MyEnvironment.ExeSuffix()}");
     }
 }
