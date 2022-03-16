@@ -191,7 +191,7 @@ static int simulate_program(program_t program) {
 static int run_subcommand(char* program, ...) {
 #ifdef _WIN32
     va_list args;
-    size_t argv_len = strlen(program) + 1; // "program "
+    size_t argv_len = strlen(program) + 3; // '"program" '
     va_start(args, program);
     printf("> %s", program);
     for (char* arg = va_arg(args, char*); arg != NULL;
@@ -202,16 +202,15 @@ static int run_subcommand(char* program, ...) {
     printf("\n");
     va_end(args);
 
-    char* command_line = malloc(argv_len);
-    sprintf(command_line, "%s ", program);
+    char* command_line = malloc(argv_len + 1);
+    sprintf(command_line, "\"%s\" ", program);
     va_start(args, program);
     for (char* arg = va_arg(args, char*); arg != NULL;
          arg = va_arg(args, char*)) {
-        strcat_s(command_line, argv_len, arg);
-        strcat_s(command_line, argv_len, " ");
+        strcat_s(command_line, argv_len + 1, arg);
+        strcat_s(command_line, argv_len + 1, " ");
     }
     va_end(args);
-    command_line[argv_len - 1] = '\0';
 
     STARTUPINFO startup_info = {
         .cb = sizeof(STARTUPINFO),
