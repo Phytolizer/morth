@@ -6,6 +6,7 @@
 #include <fmt/format.h>
 #include <fstream>
 #include <magic_enum.hpp>
+#include <ostream>
 #include <reproc++/run.hpp>
 #include <span>
 #include <stdexcept>
@@ -88,6 +89,35 @@ void simulate_program(std::span<const op> program) {
     }
 }
 
+void run_subcommand(const std::vector<std::string>& args) {
+    fmt::print("> ");
+    for (const std::string& arg : args) {
+        fmt::print("\"{}\" ", arg);
+    }
+    fmt::print("\n");
+    reproc::run(args, reproc::options{.redirect = {.parent = true}});
+}
+
+void generate_binary_stack_op(std::ostream& fp, char op) {
+    fp << "    {\n";
+    fp << "        try_uint64_t b = stack_pop();\n";
+    fp << "        if (b.error != 0) {\n";
+    fp << "            print_error(b.error);\n";
+    fp << "            return 1;\n";
+    fp << "        }\n";
+    fp << "        try_uint64_t a = stack_pop();\n";
+    fp << "        if (a.error != 0) {\n";
+    fp << "            print_error(a.error);\n";
+    fp << "            return 1;\n";
+    fp << "        }\n";
+    fp << "        int err = stack_push(a.value " << op << " b.value);\n";
+    fp << "        if (err != 0) {\n";
+    fp << "            print_error(err);\n";
+    fp << "            return 1;\n";
+    fp << "        }\n";
+    fp << "    }\n";
+}
+
 void compile_program(std::span<const op> program) {
     {
         std::ofstream fp{"output.c"};
@@ -164,42 +194,10 @@ void compile_program(std::span<const op> program) {
                     fp << "    }\n";
                     break;
                 case op_code::plus:
-                    fp << "    {\n";
-                    fp << "        try_uint64_t b = stack_pop();\n";
-                    fp << "        if (b.error != 0) {\n";
-                    fp << "            print_error(b.error);\n";
-                    fp << "            return 1;\n";
-                    fp << "        }\n";
-                    fp << "        try_uint64_t a = stack_pop();\n";
-                    fp << "        if (a.error != 0) {\n";
-                    fp << "            print_error(a.error);\n";
-                    fp << "            return 1;\n";
-                    fp << "        }\n";
-                    fp << "        int err = stack_push(a.value + b.value);\n";
-                    fp << "        if (err != 0) {\n";
-                    fp << "            print_error(err);\n";
-                    fp << "            return 1;\n";
-                    fp << "        }\n";
-                    fp << "    }\n";
+                    generate_binary_stack_op(fp, '+');
                     break;
                 case op_code::minus:
-                    fp << "    {\n";
-                    fp << "        try_uint64_t b = stack_pop();\n";
-                    fp << "        if (b.error != 0) {\n";
-                    fp << "            print_error(b.error);\n";
-                    fp << "            return 1;\n";
-                    fp << "        }\n";
-                    fp << "        try_uint64_t a = stack_pop();\n";
-                    fp << "        if (a.error != 0) {\n";
-                    fp << "            print_error(a.error);\n";
-                    fp << "            return 1;\n";
-                    fp << "        }\n";
-                    fp << "        int err = stack_push(a.value - b.value);\n";
-                    fp << "        if (err != 0) {\n";
-                    fp << "            print_error(err);\n";
-                    fp << "            return 1;\n";
-                    fp << "        }\n";
-                    fp << "    }\n";
+                    generate_binary_stack_op(fp, '-');
                     break;
                 case op_code::dump:
                     fp << "    {\n";
@@ -217,9 +215,8 @@ void compile_program(std::span<const op> program) {
         fp << "    free(stack.data);\n";
         fp << "}\n";
     }
-    std::vector<std::string> args{std::string{CC}, "-O2", "output.c", "-o",
-                                  std::string{"output" EXE_SUFFIX}};
-    reproc::run(args, reproc::options{.redirect = {.parent = true}});
+    run_subcommand({std::string{CC}, "-O2", "output.c", "-o",
+                    std::string{"output" EXE_SUFFIX}});
 }
 
 constexpr std::array program = {
