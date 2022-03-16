@@ -11,6 +11,8 @@ project(
 set(CMAKE_CXX_STANDARD 20)
 include(FetchContent)
 
+find_package(Boost REQUIRED)
+
 find_package(fmt)
 if(NOT fmt_FOUND)
     FetchContent_Declare(
@@ -42,4 +44,7 @@ configure_file("config.hpp.cin" "include/config.hpp")
 add_executable(Morth Morth.cpp)
 target_compile_features(Morth PRIVATE cxx_std_20)
 target_link_libraries(Morth PRIVATE fmt::fmt magic_enum::magic_enum reproc++)
-target_include_directories(Morth PRIVATE "${PROJECT_BINARY_DIR}/include")
+target_include_directories(
+    Morth SYSTEM PRIVATE "${PROJECT_BINARY_DIR}/include"
+                         "${Boost_INCLUDE_DIRS}"
+)
