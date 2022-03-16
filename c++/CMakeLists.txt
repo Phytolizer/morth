@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12...3.23)
 
 project(
     Morth
-    LANGUAGES CXX
+    LANGUAGES CXX C
     VERSION 0.1.0
     DESCRIPTION "Porth but More"
     HOMEPAGE_URL "https://gitlab.com/Phytolizer/Morth"
@@ -28,6 +28,18 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(magic_enum)
 
+set(REPROC++ ON)
+
+FetchContent_Declare(
+    reproc
+    GIT_REPOSITORY "https://github.com/DaanDeMeyer/reproc.git"
+    GIT_TAG "v14.2.4"
+)
+FetchContent_MakeAvailable(reproc)
+
+configure_file("config.hpp.cin" "include/config.hpp")
+
 add_executable(Morth Morth.cpp)
 target_compile_features(Morth PRIVATE cxx_std_20)
-target_link_libraries(Morth PRIVATE fmt::fmt magic_enum::magic_enum)
+target_link_libraries(Morth PRIVATE fmt::fmt magic_enum::magic_enum reproc++)
+target_include_directories(Morth PRIVATE "${PROJECT_BINARY_DIR}/include")
