@@ -31,7 +31,7 @@ internal static class Program
 
     private static void Main(string[] args)
     {
-        CommandLine.Parser.Default.ParseArguments<CompileOptions, SimulationOptions>(args[1..])
+        CommandLine.Parser.Default.ParseArguments<CompileOptions, SimulationOptions>(args)
         .WithParsed<SimulationOptions>(o =>
         {
             var program = Lexer
