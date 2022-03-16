@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace Morth;
 
-public static class MyEnvironment
+public static class Environment
 {
     public static string ExeSuffix()
     {

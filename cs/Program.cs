@@ -49,7 +49,7 @@ internal static class Program
             Compiler.CompileProgram(program);
             if (o.Run)
             {
-                Subcommand.Run($"./output{MyEnvironment.ExeSuffix()}");
+                Subcommand.Run(Path.Join(System.Environment.CurrentDirectory, $"output{Environment.ExeSuffix()}"));
             }
         });
     }

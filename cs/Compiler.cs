@@ -159,6 +159,6 @@ public static class Compiler
             fp.WriteLine("}");
         }
 
-        Subcommand.Run(FindCCompiler(), "-O2", "output.c", "-o", $"output{MyEnvironment.ExeSuffix()}");
+        Subcommand.Run(FindCCompiler(), "-O2", "output.c", "-o", $"output{Environment.ExeSuffix()}");
     }
 }
