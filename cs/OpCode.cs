@@ -6,5 +6,8 @@ public enum OpCode
     Plus,
     Minus,
     Equal,
+    If,
+    Else,
+    End,
     Dump,
 }

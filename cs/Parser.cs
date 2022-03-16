@@ -20,6 +20,18 @@ public static class Parser
         {
             return Op.Equal();
         }
+        if (token.Text == "if")
+        {
+            return Op.If();
+        }
+        if (token.Text == "else")
+        {
+            return Op.Else();
+        }
+        if (token.Text == "end")
+        {
+            return Op.End();
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {

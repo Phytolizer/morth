@@ -180,6 +180,30 @@ public static class Compiler
                     case OpCode.Equal:
                         GenerateBinaryStackOperation(em, "==");
                         break;
+                    case OpCode.If:
+                        em.Emit("{");
+                        em.AddIndent();
+                        em.Emit("try_uint64_t value = stack_pop();");
+                        em.Emit("if (value.error != 0) {");
+                        em.AddIndent();
+                        em.Emit("print_error(value.error);");
+                        em.Emit("return 1;");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        em.Emit("if (value.value) {");
+                        em.AddIndent();
+                        break;
+                    case OpCode.Else:
+                        em.RemoveIndent();
+                        em.Emit("} else {");
+                        em.AddIndent();
+                        break;
+                    case OpCode.End:
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        break;
                     case OpCode.Dump:
                         em.Emit("{");
                         em.AddIndent();

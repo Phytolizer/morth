@@ -32,25 +32,27 @@ internal static class Program
     private static void Main(string[] args)
     {
         CommandLine.Parser.Default.ParseArguments<CompileOptions, SimulationOptions>(args)
-        .WithParsed<SimulationOptions>(o =>
-        {
-            var program = Lexer
-                .LexFile(o.InputPath)
-                .Select(tok => Parser.ParseTokenAsOp(tok))
-                .ToArray();
-            Simulator.SimulateProgram(program);
-        })
-        .WithParsed<CompileOptions>(o =>
-        {
-            var program = Lexer
-                .LexFile(o.InputPath)
-                .Select(tok => Parser.ParseTokenAsOp(tok))
-                .ToArray();
-            Compiler.CompileProgram(program);
-            if (o.Run)
+            .WithParsed<SimulationOptions>(o =>
             {
-                Subcommand.Run(Path.Join(System.Environment.CurrentDirectory, $"output{Environment.ExeSuffix()}"));
-            }
-        });
+                var program = Lexer
+                    .LexFile(o.InputPath)
+                    .Select(tok => Parser.ParseTokenAsOp(tok))
+                    .ToArray();
+                SemanticAnalyzer.CrossReferenceBlocks(program);
+                Simulator.SimulateProgram(program);
+            })
+            .WithParsed<CompileOptions>(o =>
+            {
+                var program = Lexer
+                    .LexFile(o.InputPath)
+                    .Select(tok => Parser.ParseTokenAsOp(tok))
+                    .ToArray();
+                SemanticAnalyzer.CrossReferenceBlocks(program);
+                Compiler.CompileProgram(program);
+                if (o.Run)
+                {
+                    Subcommand.Run(Path.Join(System.Environment.CurrentDirectory, $"output{Environment.ExeSuffix()}"));
+                }
+            });
     }
 }

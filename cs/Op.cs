@@ -3,7 +3,7 @@ namespace Morth;
 public class Op
 {
     public OpCode Code { get; }
-    public ulong Value { get; } = 0;
+    public ulong Value { get; set; } = 0;
 
     private Op(OpCode code)
     {
@@ -34,6 +34,21 @@ public class Op
     public static Op Equal()
     {
         return new Op(OpCode.Equal);
+    }
+
+    public static Op If()
+    {
+        return new Op(OpCode.If);
+    }
+
+    public static Op Else()
+    {
+        return new Op(OpCode.Else);
+    }
+
+    public static Op End()
+    {
+        return new Op(OpCode.End);
     }
 
     public static Op Dump()
