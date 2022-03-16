@@ -1,9 +1,12 @@
+#include "string_view.h"
+#include <asm-generic/errno-base.h>
 #include <config.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
 #include <op_code.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -86,11 +89,21 @@ typedef TRY_T(uint64_t) try_uint64_t;
 #define ERR_STACK_UNDERFLOW 0x8000
 #define ERR_ILLEGAL_OPCODE 0x8001
 #define ERR_SUBCOMMAND_EXIT_CODE 0x8002
+#define ERR_UNKNOWN_TOKEN 0x8003
 
 static void print_error(int error) {
     switch (error) {
         case ERR_STACK_UNDERFLOW:
             fprintf(stderr, "stack underflow\n");
+            break;
+        case ERR_ILLEGAL_OPCODE:
+            fprintf(stderr, "illegal opcode\n");
+            break;
+        case ERR_SUBCOMMAND_EXIT_CODE:
+            fprintf(stderr, "subcommand reported failure\n");
+            break;
+        case ERR_UNKNOWN_TOKEN:
+            fprintf(stderr, "unknown token\n");
             break;
         default: {
             char errbuf[ERRBUF_SIZE];
@@ -344,6 +357,7 @@ static int compile_program(program_t program) {
                 return ERR_ILLEGAL_OPCODE;
         }
     }
+    fprintf(fp, "    free(stack.data);\n");
     fprintf(fp, "}\n");
     fclose(fp);
     int error =
@@ -354,10 +368,217 @@ static int compile_program(program_t program) {
     return 0;
 }
 
+typedef struct {
+    string_view_t file_path;
+    size_t line;
+    size_t column;
+    string_view_t text;
+} token_t;
+
+typedef struct {
+    token_t* data;
+    size_t length;
+} tokens_t;
+
+typedef struct {
+    tokens_t value;
+    size_t capacity;
+} tokens_builder_t;
+
+static int lex_line(string_view_t file_path, size_t line_index,
+                    string_view_t line, tokens_builder_t* tokens) {
+    string_view_t cursor = line;
+    while (true) {
+        cursor = string_view_advance(
+            cursor, string_view_span(cursor, STRING_VIEW_C(" \t\r")));
+        size_t token_end =
+            string_view_compl_span(cursor, STRING_VIEW_C(" \t\r\n"));
+
+        if (tokens->value.length == tokens->capacity) {
+            tokens->capacity = tokens->capacity * 2 + 1;
+            token_t* new_tokens =
+                realloc(tokens->value.data, sizeof(token_t) * tokens->capacity);
+            if (new_tokens == NULL) {
+                free(tokens->value.data);
+                tokens->value.data = NULL;
+                tokens->value.length = 0;
+                tokens->capacity = 0;
+                return ENOMEM;
+            }
+            tokens->value.data = new_tokens;
+        }
+        tokens->value.data[tokens->value.length] = (token_t){
+            .file_path = file_path,
+            .line = line_index + 1,
+            .column = cursor.data - line.data + 1,
+            .text = string_view_new(cursor.data, token_end),
+        };
+        tokens->value.length += 1;
+
+        if (token_end == cursor.length || cursor.data[token_end] == '\n') {
+            break;
+        }
+
+        cursor = string_view_advance(cursor, token_end);
+    }
+
+    return 0;
+}
+
+typedef struct {
+    string_view_t* data;
+    size_t length;
+} raw_lines_t;
+
+typedef struct {
+    raw_lines_t value;
+    size_t capacity;
+} raw_lines_builder_t;
+
+typedef struct {
+    tokens_t tokens;
+    raw_lines_t lines;
+} lexed_file_t;
+
+typedef TRY_T(lexed_file_t) try_lexed_file_t;
+
+static try_lexed_file_t lex_file(char* file_path) {
+    raw_lines_builder_t lines = {0};
+    tokens_builder_t tokens_builder = {0};
+    char line_buffer[1024];
+    char* line = NULL;
+    size_t line_len = 0;
+    FILE* fp = fopen(file_path, "r");
+    if (fp == NULL) {
+        return (try_lexed_file_t){.error = ENOENT};
+    }
+    while (fgets(line_buffer, sizeof line_buffer, fp) != NULL) {
+        size_t buffer_len = strlen(line_buffer);
+        while (true) {
+            if (buffer_len == 0) {
+                break;
+            }
+            bool final_iteration = line_buffer[buffer_len - 1] == '\n';
+            char* new_line = realloc(line, line_len + buffer_len);
+            if (new_line == NULL) {
+                fclose(fp);
+                free(line);
+                free(lines.value.data);
+                return (try_lexed_file_t){.error = ENOMEM};
+            }
+            line = new_line;
+            memcpy(line + line_len, line_buffer, buffer_len);
+            line_len += buffer_len;
+            if (final_iteration ||
+                fgets(line_buffer, sizeof line_buffer, fp) == NULL) {
+                break;
+            }
+            buffer_len = strlen(line_buffer);
+        }
+        if (lines.value.length == lines.capacity) {
+            lines.capacity = lines.capacity * 2 + 1;
+            string_view_t* new_lines = realloc(
+                lines.value.data, sizeof(string_view_t) * lines.capacity);
+            if (new_lines == NULL) {
+                free(line);
+                fclose(fp);
+                for (size_t i = 0; i < lines.value.length; i += 1) {
+                    free(lines.value.data[i].data);
+                }
+                free(lines.value.data);
+                return (try_lexed_file_t){.error = ENOMEM};
+            }
+            lines.value.data = new_lines;
+        }
+        lines.value.data[lines.value.length] = string_view_new(line, line_len);
+        lines.value.length += 1;
+        line = NULL;
+        line_len = 0;
+    }
+    fclose(fp);
+
+    size_t file_path_len = strlen(file_path);
+    string_view_t file_path_view = string_view_new(file_path, file_path_len);
+    for (size_t i = 0; i < lines.value.length; i += 1) {
+        int error =
+            lex_line(file_path_view, i, lines.value.data[i], &tokens_builder);
+        if (error != 0) {
+            free(tokens_builder.value.data);
+            for (size_t i = 0; i < lines.value.length; i += 1) {
+                free(lines.value.data[i].data);
+            }
+            free(lines.value.data);
+            return (try_lexed_file_t){.error = error};
+        }
+    }
+    return (try_lexed_file_t){
+        .value = {.tokens = tokens_builder.value, .lines = lines.value},
+    };
+}
+
+typedef TRY_T(op_t) try_op_t;
+
+static try_op_t parse_token_as_op(token_t token) {
+    if (string_view_equal(token.text, STRING_VIEW_C("+"))) {
+        return (try_op_t){.value = plus()};
+    }
+    if (string_view_equal(token.text, STRING_VIEW_C("-"))) {
+        return (try_op_t){.value = minus()};
+    }
+    if (string_view_equal(token.text, STRING_VIEW_C("."))) {
+        return (try_op_t){.value = dump()};
+    }
+
+    char* temp_token_text = malloc(token.text.length + 1);
+    memcpy(temp_token_text, token.text.data, token.text.length);
+    temp_token_text[token.text.length] = '\0';
+    errno = 0;
+    uint64_t value;
+    char c;
+    int nscanned = sscanf(temp_token_text, "%" SCNu64 "%c", &value, &c);
+    free(temp_token_text);
+    if (nscanned != 1) {
+        return (try_op_t){.error = ERR_UNKNOWN_TOKEN};
+    }
+    if (errno != 0) {
+        return (try_op_t){.error = errno};
+    }
+    return (try_op_t){.value = push(value)};
+}
+
 typedef TRY_T(program_t) try_program_t;
 
-static try_program_t parse_program(const char* input_file_path) {
-    return (try_program_t){.value = (program_t){0}};
+static try_program_t parse_program(char* input_file_path) {
+    try_lexed_file_t try_lexed_file = lex_file(input_file_path);
+    if (try_lexed_file.error != 0) {
+        return (try_program_t){.error = try_lexed_file.error};
+    }
+
+    lexed_file_t lexed_file = try_lexed_file.value;
+    program_t program = {
+        .data = lexed_file.tokens.length == 0
+                    ? NULL
+                    : malloc(sizeof(op_t) * lexed_file.tokens.length),
+        .length = lexed_file.tokens.length,
+    };
+
+    for (size_t i = 0; i < lexed_file.tokens.length; i += 1) {
+        try_op_t try_op = parse_token_as_op(lexed_file.tokens.data[i]);
+        if (try_op.error != 0) {
+            free(program.data);
+            free(lexed_file.lines.data);
+            free(lexed_file.tokens.data);
+            return (try_program_t){.error = try_op.error};
+        }
+        program.data[i] = try_op.value;
+    }
+
+    for (size_t i = 0; i < lexed_file.lines.length; i += 1) {
+        free(lexed_file.lines.data[i].data);
+    }
+    free(lexed_file.lines.data);
+    free(lexed_file.tokens.data);
+    return (try_program_t){.value = program};
 }
 
 static void usage(FILE* fp, const char* program_name) {
@@ -409,6 +630,7 @@ int main(int argc, char** argv) {
             return 1;
         }
         int error = simulate_program(program.value);
+        free(program.value.data);
         if (error != 0) {
             print_error(error);
             return 1;
@@ -426,6 +648,7 @@ int main(int argc, char** argv) {
             return 1;
         }
         int error = compile_program(program.value);
+        free(program.value.data);
         if (error != 0) {
             print_error(error);
             return 1;

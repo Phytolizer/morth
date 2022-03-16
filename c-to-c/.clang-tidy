@@ -2,7 +2,9 @@ Checks: |
     -*,
     readability-identifier-naming,
     clang-analyzer-*,
+    -clang-analyzer-security.insecureAPI.*,
     bugprone-*,
+    -bugprone-not-null-terminated-result,
     google-*,
 CheckOptions:
     - key: readability-identifier-naming.ClassCase

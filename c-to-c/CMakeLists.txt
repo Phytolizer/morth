@@ -18,9 +18,13 @@ function(gen_iota INPUT OUTPUT)
 endfunction()
 gen_iota("${PROJECT_SOURCE_DIR}/op_code.iota" "op_code.h")
 configure_file("cmake/config.h.cin" "include/config.h")
-add_executable(morth morth.c "${PROJECT_BINARY_DIR}/include/op_code.h")
+add_executable(
+    morth morth.c string_view.c "${PROJECT_BINARY_DIR}/include/op_code.h"
+)
 target_include_directories(morth PRIVATE "${PROJECT_BINARY_DIR}/include")
 target_compile_features(morth PRIVATE c_std_11)
 
 enable_testing()
-add_test(morth_sim morth sim temp.morth)
+configure_file("test.morth" "test.morth" COPYONLY)
+add_test(morth_sim morth sim test.morth)
+add_test(morth_com morth com test.morth)
