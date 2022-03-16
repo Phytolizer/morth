@@ -6,6 +6,8 @@ public static class Subcommand
 {
     public static void Run(params string[] args)
     {
+        Console.WriteLine($"> {string.Join(' ', args)}");
+
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo
         {

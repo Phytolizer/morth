@@ -48,7 +48,7 @@ public static class Compiler
             }
         }
 
-        return File.ReadAllText(Path.Join(temp, "build", "compiler.txt"));
+        return File.ReadAllText(Path.Join(temp, "build", "compiler.txt")).Trim();
     }
 
     private static void GenerateBinaryStackOperation(TextWriter fp, char op)
