@@ -27,11 +27,15 @@
             "generator": "Unix Makefiles"
         },
         {
-            "name": "dev-msys",
-            "description": "Develop with MSYS",
-            "binaryDir": "build/dev-msys",
+            "name": "dev-win",
+            "description": "Develop with Windows",
+            "binaryDir": "build/dev-win",
             "inherits": "dev-base",
-            "generator": "MinGW Makefiles"
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_FLAGS": "-Wall -Wextra -Wpedantic",
+                "CMAKE_EXE_LINKER_FLAGS": ""
+            }
         },
         {
             "name": "dist-base",

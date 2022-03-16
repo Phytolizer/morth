@@ -1,5 +1,4 @@
 #include "string_view.h"
-#include <asm-generic/errno-base.h>
 #include <config.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -12,17 +11,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/wait.h>
-#include <unistd.h>
 
 #ifdef _WIN32
 #define STRERROR_R(error, buf, size) strerror_s(buf, size, error)
 #define FOPEN_S fopen_s
+#define SSCANF_S sscanf_s
 #define EXE_SUFFIX ".exe"
+#include <windows.h>
 #else
 #define STRERROR_R strerror_r
 #define FOPEN_S(p_fp, path, mode) (*(p_fp) = fopen(path, mode))
+#define SSCANF_S sscanf
 #define EXE_SUFFIX ""
+#include <sys/wait.h>
+#include <unistd.h>
 #endif
 
 #define ERRBUF_SIZE 64
@@ -90,6 +92,9 @@ typedef TRY_T(uint64_t) try_uint64_t;
 #define ERR_ILLEGAL_OPCODE 0x8001
 #define ERR_SUBCOMMAND_EXIT_CODE 0x8002
 #define ERR_UNKNOWN_TOKEN 0x8003
+#define ERR_WIN32_SPAWN 0x8004
+#define ERR_WIN32_WAIT 0x8005
+#define ERR_WIN32_GET_EXIT_CODE 0x8006
 
 static void print_error(int error) {
     switch (error) {
@@ -104,6 +109,15 @@ static void print_error(int error) {
             break;
         case ERR_UNKNOWN_TOKEN:
             fprintf(stderr, "unknown token\n");
+            break;
+        case ERR_WIN32_SPAWN:
+            fprintf(stderr, "spawning process failed\n");
+            break;
+        case ERR_WIN32_WAIT:
+            fprintf(stderr, "waiting for process failed\n");
+            break;
+        case ERR_WIN32_GET_EXIT_CODE:
+            fprintf(stderr, "getting process exit code failed\n");
             break;
         default: {
             char errbuf[ERRBUF_SIZE];
@@ -175,6 +189,59 @@ static int simulate_program(program_t program) {
 }
 
 static int run_subcommand(char* program, ...) {
+#ifdef _WIN32
+    va_list args;
+    size_t argv_len = strlen(program) + 1; // "program "
+    va_start(args, program);
+    printf("> %s", program);
+    for (char* arg = va_arg(args, char*); arg != NULL;
+         arg = va_arg(args, char*)) {
+        printf(" %s", arg);
+        argv_len += strlen(arg) + 1;
+    }
+    printf("\n");
+    va_end(args);
+
+    char* command_line = malloc(argv_len);
+    sprintf(command_line, "%s ", program);
+    va_start(args, program);
+    for (char* arg = va_arg(args, char*); arg != NULL;
+         arg = va_arg(args, char*)) {
+        strcat_s(command_line, argv_len, arg);
+        strcat_s(command_line, argv_len, " ");
+    }
+    va_end(args);
+    command_line[argv_len - 1] = '\0';
+
+    STARTUPINFO startup_info = {
+        .cb = sizeof(STARTUPINFO),
+        .hStdError = GetStdHandle(STD_ERROR_HANDLE),
+        .hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE),
+        .hStdInput = GetStdHandle(STD_INPUT_HANDLE),
+        .dwFlags = STARTF_USESTDHANDLES,
+    };
+
+    PROCESS_INFORMATION process_info = {0};
+
+    if (!CreateProcess(program, command_line, NULL, NULL, false, 0, NULL, NULL,
+                       &startup_info, &process_info)) {
+        free(command_line);
+        return ERR_WIN32_SPAWN;
+    }
+    free(command_line);
+    CloseHandle(process_info.hThread);
+    DWORD result = WaitForSingleObject(process_info.hProcess, INFINITE);
+    if (result == WAIT_FAILED) {
+        return ERR_WIN32_WAIT;
+    }
+    DWORD exit_status;
+    if (!GetExitCodeProcess(process_info.hProcess, &exit_status)) {
+        return ERR_WIN32_GET_EXIT_CODE;
+    }
+    if (exit_status != 0) {
+        return ERR_SUBCOMMAND_EXIT_CODE;
+    }
+#else
     va_list args;
     size_t argv_count = 2; // program, NULL
     va_start(args, program);
@@ -218,6 +285,7 @@ static int run_subcommand(char* program, ...) {
     if (status != 0) {
         return ERR_SUBCOMMAND_EXIT_CODE;
     }
+#endif
     return 0;
 }
 
@@ -448,7 +516,8 @@ static try_lexed_file_t lex_file(char* file_path) {
     char line_buffer[1024];
     char* line = NULL;
     size_t line_len = 0;
-    FILE* fp = fopen(file_path, "r");
+    FILE* fp;
+    FOPEN_S(&fp, file_path, "r");
     if (fp == NULL) {
         return (try_lexed_file_t){.error = ENOENT};
     }
@@ -535,7 +604,7 @@ static try_op_t parse_token_as_op(token_t token) {
     errno = 0;
     uint64_t value;
     char c;
-    int nscanned = sscanf(temp_token_text, "%" SCNu64 "%c", &value, &c);
+    int nscanned = SSCANF_S(temp_token_text, "%" SCNu64 "%c", &value, &c);
     free(temp_token_text);
     if (nscanned != 1) {
         return (try_op_t){.error = ERR_UNKNOWN_TOKEN};
