@@ -235,11 +235,18 @@ int main(int argc, char** argv) {
         fmt::print("SUBCOMMANDS:\n");
         fmt::print("  sim           Simulate the program\n");
         fmt::print("  com           Compile the program\n");
+        fmt::print("ERROR: no subcommand provided\n");
         return 1;
     }
 
     try {
-        compile_program(program);
+        if (args[1] == std::string_view{"sim"}) {
+            simulate_program(program);
+        } else if (args[1] == std::string_view{"com"}) {
+            compile_program(program);
+        } else {
+            fmt::print("ERROR: unknown subcommand `{}`\n", args[1]);
+        }
     } catch (const std::runtime_error& e) {
         fmt::print(stderr, "unhandled exception: {}\n", e.what());
         return -1;
