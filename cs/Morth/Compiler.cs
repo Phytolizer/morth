@@ -389,6 +389,17 @@ public static class Compiler
                     case OpCode.BitwiseAnd:
                         GenerateBinaryStackOperation(em, "&");
                         break;
+                    case OpCode.Over:
+                        em.Emit("{");
+                        em.AddIndent();
+                        GeneratePop(em, "b");
+                        GeneratePop(em, "a");
+                        GeneratePush(em, "a.value");
+                        GeneratePush(em, "b.value");
+                        GeneratePush(em, "a.value");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        break;
                     case OpCode.Dump:
                         em.Emit("{");
                         em.AddIndent();

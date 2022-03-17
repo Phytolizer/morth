@@ -25,5 +25,6 @@ public enum OpCode
     ShiftLeft,
     BitwiseOr,
     BitwiseAnd,
+    Over,
     Dump,
 }

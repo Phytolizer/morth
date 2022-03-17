@@ -96,6 +96,10 @@ public static class Parser
         {
             return Op.BitwiseAnd(token.Location);
         }
+        if (token.Text == "over")
+        {
+            return Op.Over(token.Location);
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {

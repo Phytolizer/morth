@@ -134,6 +134,11 @@ public class Op
         return new Op(OpCode.BitwiseAnd, location);
     }
 
+    public static Op Over(SourceLocation location)
+    {
+        return new Op(OpCode.Over, location);
+    }
+
     public static Op Dump(SourceLocation location)
     {
         return new Op(OpCode.Dump, location);
