@@ -1,5 +1,5 @@
 using Morth;
-using System;
+using MorthUtils;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +11,7 @@ public class TestRunner
 {
     private static IEnumerable<object[]> GetTestRunnerData()
     {
-        foreach (var file in Directory.EnumerateFiles(Path.Join(ProjectSourcePath.Value, "tests")))
+        foreach (var file in Directory.EnumerateFiles(Path.Join(ProjectSourcePath.Value, "..", "tests"), "*.morth"))
         {
             yield return new object[] { file };
         }
@@ -21,7 +21,8 @@ public class TestRunner
     [MemberData(nameof(GetTestRunnerData))]
     public void CheckFileOutput(string path)
     {
-        Console.WriteLine(path);
+        var outputTxtPath = Path.ChangeExtension(path, "output");
+        var expectedOutput = File.ReadAllText(outputTxtPath);
         var program = Lexer
             .LexFile(path)
             .Select(tok => Parser.ParseTokenAsOp(tok))
@@ -29,9 +30,12 @@ public class TestRunner
         SemanticAnalyzer.CrossReferenceBlocks(program);
         var simulationOutput = new StringWriter();
         Simulator.SimulateProgram(program, simulationOutput);
+
+        Assert.Equal(simulationOutput.ToString(), expectedOutput);
+
         var exePath = Compiler.CompileProgram(program, path, "temp/");
         var compilationOutput = Subcommand.RunCaptured(exePath);
 
-        Assert.Equal(simulationOutput.ToString().ReplaceLineEndings(), compilationOutput);
+        Assert.Equal(compilationOutput, expectedOutput);
     }
 }

@@ -2,9 +2,9 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace MorthTest;
+namespace MorthUtils;
 
-internal static class ProjectSourcePath
+public static class ProjectSourcePath
 {
     private const string _relativePath = $"{nameof(ProjectSourcePath)}.cs";
     private static string? _lazyValue;
