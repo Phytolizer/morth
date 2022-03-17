@@ -21,5 +21,9 @@ public enum OpCode
     Less,
     Swap,
     Drop,
+    ShiftRight,
+    ShiftLeft,
+    BitwiseOr,
+    BitwiseAnd,
     Dump,
 }

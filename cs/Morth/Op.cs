@@ -114,6 +114,26 @@ public class Op
         return new Op(OpCode.Drop, location);
     }
 
+    public static Op ShiftRight(SourceLocation location)
+    {
+        return new Op(OpCode.ShiftRight, location);
+    }
+
+    public static Op ShiftLeft(SourceLocation location)
+    {
+        return new Op(OpCode.ShiftLeft, location);
+    }
+
+    public static Op BitwiseOr(SourceLocation location)
+    {
+        return new Op(OpCode.BitwiseOr, location);
+    }
+
+    public static Op BitwiseAnd(SourceLocation location)
+    {
+        return new Op(OpCode.BitwiseAnd, location);
+    }
+
     public static Op Dump(SourceLocation location)
     {
         return new Op(OpCode.Dump, location);

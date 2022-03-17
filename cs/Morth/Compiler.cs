@@ -377,6 +377,18 @@ public static class Compiler
                         em.RemoveIndent();
                         em.Emit("}");
                         break;
+                    case OpCode.ShiftRight:
+                        GenerateBinaryStackOperation(em, ">>");
+                        break;
+                    case OpCode.ShiftLeft:
+                        GenerateBinaryStackOperation(em, "<<");
+                        break;
+                    case OpCode.BitwiseOr:
+                        GenerateBinaryStackOperation(em, "|");
+                        break;
+                    case OpCode.BitwiseAnd:
+                        GenerateBinaryStackOperation(em, "&");
+                        break;
                     case OpCode.Dump:
                         em.Emit("{");
                         em.AddIndent();

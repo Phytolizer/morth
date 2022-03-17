@@ -80,6 +80,22 @@ public static class Parser
         {
             return Op.Drop(token.Location);
         }
+        if (token.Text == "shr")
+        {
+            return Op.ShiftRight(token.Location);
+        }
+        if (token.Text == "shl")
+        {
+            return Op.ShiftLeft(token.Location);
+        }
+        if (token.Text == "bor")
+        {
+            return Op.BitwiseOr(token.Location);
+        }
+        if (token.Text == "band")
+        {
+            return Op.BitwiseAnd(token.Location);
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {

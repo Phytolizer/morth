@@ -180,6 +180,38 @@ public static class Simulator
                     stack.Pop();
                     ip++;
                     break;
+                case OpCode.ShiftRight:
+                    {
+                        var b = stack.Pop();
+                        var a = stack.Pop();
+                        stack.Push(a >> (int)b);
+                        ip++;
+                    }
+                    break;
+                case OpCode.ShiftLeft:
+                    {
+                        var b = stack.Pop();
+                        var a = stack.Pop();
+                        stack.Push(a << (int)b);
+                        ip++;
+                    }
+                    break;
+                case OpCode.BitwiseOr:
+                    {
+                        var b = stack.Pop();
+                        var a = stack.Pop();
+                        stack.Push(a | b);
+                        ip++;
+                    }
+                    break;
+                case OpCode.BitwiseAnd:
+                    {
+                        var b = stack.Pop();
+                        var a = stack.Pop();
+                        stack.Push(a & b);
+                        ip++;
+                    }
+                    break;
                 case OpCode.Dump:
                     {
                         var value = stack.Pop();
