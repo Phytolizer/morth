@@ -20,4 +20,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Morth\Morth.csproj" />
+  </ItemGroup>
+
 </Project>

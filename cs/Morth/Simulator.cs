@@ -2,7 +2,7 @@ namespace Morth;
 
 public static class Simulator
 {
-    public static void SimulateProgram(IEnumerable<Op> programEnumerable)
+    public static void SimulateProgram(IEnumerable<Op> programEnumerable, TextWriter output)
     {
         var stack = new Stack<ulong>();
         var program = programEnumerable.ToArray();
@@ -94,7 +94,7 @@ public static class Simulator
                 case OpCode.Dump:
                     {
                         var value = stack.Pop();
-                        Console.WriteLine(value);
+                        output.WriteLine(value);
                     }
                     ip++;
                     break;

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Morth", "Morth\Morth.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MorthTest", "MorthTest\MorthTest.csproj", "{D9D4BFE6-876C-4315-95AE-C8225F0EB33E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MorthCompiler", "MorthCompiler\MorthCompiler.csproj", "{023F7467-AA25-4597-A04D-5F13DC66477E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{D9D4BFE6-876C-4315-95AE-C8225F0EB33E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9D4BFE6-876C-4315-95AE-C8225F0EB33E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9D4BFE6-876C-4315-95AE-C8225F0EB33E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{023F7467-AA25-4597-A04D-5F13DC66477E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{023F7467-AA25-4597-A04D-5F13DC66477E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{023F7467-AA25-4597-A04D-5F13DC66477E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{023F7467-AA25-4597-A04D-5F13DC66477E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

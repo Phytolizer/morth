@@ -1,6 +1,5 @@
 ﻿using CommandLine;
-
-namespace Morth;
+using Morth;
 
 internal static class Program
 {
@@ -32,16 +31,16 @@ internal static class Program
                 {
                     var program = Lexer
                         .LexFile(o.InputPath)
-                        .Select(tok => Parser.ParseTokenAsOp(tok))
+                        .Select(tok => Morth.Parser.ParseTokenAsOp(tok))
                         .ToArray();
                     SemanticAnalyzer.CrossReferenceBlocks(program);
-                    Simulator.SimulateProgram(program);
+                    Simulator.SimulateProgram(program, Console.Out);
                 })
                 .WithParsed<CompileOptions>(o =>
                 {
                     var program = Lexer
                         .LexFile(o.InputPath)
-                        .Select(tok => Parser.ParseTokenAsOp(tok))
+                        .Select(tok => Morth.Parser.ParseTokenAsOp(tok))
                         .ToArray();
                     SemanticAnalyzer.CrossReferenceBlocks(program);
                     var exePath = Compiler.CompileProgram(program, o.InputPath, o.OutputPath);

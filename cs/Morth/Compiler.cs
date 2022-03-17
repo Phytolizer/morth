@@ -299,7 +299,7 @@ public static class Compiler
             em.Emit("}");
         }
 
-        Subcommand.Run(FindCCompiler(), "-O2", "output.c", "-o", exePath);
+        Subcommand.Run(FindCCompiler(), "-O2", cPath, "-o", exePath);
 
         return exePath;
     }

@@ -4,11 +4,6 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <WarningLevel>5</WarningLevel>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.8.0" />
-  </ItemGroup>
 
 </Project>
