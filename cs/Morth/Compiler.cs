@@ -342,6 +342,21 @@ public static class Compiler
                         em.RemoveIndent();
                         em.Emit("}");
                         break;
+                    case OpCode.Dup2:
+                        em.Emit("{");
+                        em.AddIndent();
+                        GeneratePop(em, "b");
+                        GeneratePop(em, "a");
+                        GeneratePush(em, "a.value");
+                        GeneratePush(em, "b.value");
+                        GeneratePush(em, "a.value");
+                        GeneratePush(em, "b.value");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        break;
+                    case OpCode.Less:
+                        GenerateBinaryStackOperation(em, "<");
+                        break;
                     case OpCode.Dump:
                         em.Emit("{");
                         em.AddIndent();

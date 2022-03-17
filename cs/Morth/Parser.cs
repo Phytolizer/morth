@@ -64,6 +64,14 @@ public static class Parser
         {
             return Op.Syscall3(token.Location);
         }
+        if (token.Text == "2dup")
+        {
+            return Op.Dup2(token.Location);
+        }
+        if (token.Text == "<")
+        {
+            return Op.Less(token.Location);
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {

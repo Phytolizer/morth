@@ -17,5 +17,7 @@ public enum OpCode
     Load,
     Store,
     Syscall3,
+    Dup2,
+    Less,
     Dump,
 }
