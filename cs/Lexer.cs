@@ -36,7 +36,7 @@ public static class Lexer
         for (int i = 0; i < lines.Length; i++)
         {
             string line = lines[i];
-            foreach (var token in LexLine(path, i, line))
+            foreach (var token in LexLine(path, i, line.Split("//")[0]))
             {
                 yield return token;
             }

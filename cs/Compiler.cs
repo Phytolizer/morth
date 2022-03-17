@@ -82,7 +82,7 @@ public static class Compiler
         else
         {
             var outputDir = Path.GetDirectoryName(outputPath);
-            if (outputDir != null)
+            if (!string.IsNullOrEmpty(outputDir))
             {
                 Directory.CreateDirectory(outputDir);
             }
