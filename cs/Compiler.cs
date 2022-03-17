@@ -81,6 +81,11 @@ public static class Compiler
         }
         else
         {
+            var outputDir = Path.GetDirectoryName(outputPath);
+            if (outputDir != null)
+            {
+                Directory.CreateDirectory(outputDir);
+            }
             cPath = Path.ChangeExtension(outputPath, "c");
             exePath = Path.ChangeExtension(outputPath, Environment.ExeSuffix());
         }
