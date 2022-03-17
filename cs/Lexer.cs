@@ -21,9 +21,11 @@ public static class Lexer
 
             yield return new Token(
                 line[columnIndex..(columnIndex + tokenLength)],
-                filePath,
-                lineIndex + 1,
-                columnIndex + 1
+                new SourceLocation(
+                    filePath,
+                    lineIndex + 1,
+                    columnIndex + 1
+                )
             );
             columnIndex += tokenLength;
         }

@@ -3,25 +3,16 @@ namespace Morth;
 public class Token
 {
     public string Text { get; }
-    public string FilePath { get; }
-    public int Line { get; }
-    public int Column { get; }
+    public SourceLocation Location { get; }
 
-    public Token(string text, string filePath, int line, int column)
+    public Token(string text, SourceLocation location)
     {
         Text = text;
-        FilePath = filePath;
-        Line = line;
-        Column = column;
-    }
-
-    public string Location()
-    {
-        return $"{FilePath}:{Line}:{Column}";
+        Location = location;
     }
 
     public override string ToString()
     {
-        return $"{Location()}: '{Text}'";
+        return $"{Location}: '{Text}'";
     }
 }
