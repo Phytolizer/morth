@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using System.Text;
+
 namespace Morth;
 
 public static class Simulator
@@ -109,6 +112,39 @@ public static class Simulator
                         var b = stack.Pop();
                         var a = stack.Pop();
                         mem[(int)a] = (byte)(b & 0xFF);
+                        ip++;
+                    }
+                    break;
+                case OpCode.Syscall3:
+                    {
+                        var syscallNumber = stack.Pop();
+                        var arg1 = stack.Pop();
+                        var arg2 = stack.Pop();
+                        var arg3 = stack.Pop();
+                        if (syscallNumber == 1)
+                        {
+                            var fd = arg1;
+                            var buf = arg2;
+                            var count = arg3;
+                            var s = mem[(int)buf..(int)(buf + count)];
+                            var str = Encoding.Default.GetString(s);
+                            switch (fd)
+                            {
+                                case 1:
+                                    Console.Write(str);
+                                    break;
+                                case 2:
+                                    Console.Error.Write(str);
+                                    break;
+                                default:
+                                    Debug.Fail($"unknown fd {fd}");
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            Debug.Fail($"unknown syscall {syscallNumber}");
+                        }
                         ip++;
                     }
                     break;

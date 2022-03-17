@@ -16,5 +16,6 @@ public enum OpCode
     Mem,
     Load,
     Store,
+    Syscall3,
     Dump,
 }

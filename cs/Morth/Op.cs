@@ -89,6 +89,11 @@ public class Op
         return new Op(OpCode.Store, location);
     }
 
+    public static Op Syscall3(SourceLocation location)
+    {
+        return new Op(OpCode.Syscall3, location);
+    }
+
     public static Op Dump(SourceLocation location)
     {
         return new Op(OpCode.Dump, location);

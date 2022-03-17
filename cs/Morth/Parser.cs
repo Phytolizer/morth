@@ -60,6 +60,10 @@ public static class Parser
         {
             return Op.Load(token.Location);
         }
+        if (token.Text == "syscall3")
+        {
+            return Op.Syscall3(token.Location);
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {
