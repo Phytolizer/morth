@@ -1,7 +1,11 @@
 image: gcc
 before_script:
+    - wget https://packages.microsoft.com/config/ubuntu/21.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+    - dpkg -i packages-microsoft-prod.deb
+    - rm packages-microsoft-prod.deb
     - apt-get update --yes
-    - apt-get install --yes cmake libboost-dev
+    - apt-get install --yes cmake libboost-dev apt-transport-https
+    - apt-get install --yes dotnet-sdk-6.0
 
 stages:
     - build
@@ -26,3 +30,8 @@ build-c-to-c-job:
         - cmake -B build/c-to-c -S c-to-c
         - cmake --build build/c-to-c
         - cd build/c-to-c && ctest
+
+build-cs-job:
+    stage: build
+    script:
+        - dotnet test cs/morth.sln
