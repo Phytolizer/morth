@@ -40,31 +40,39 @@ public static class Compiler
         return File.ReadAllText(Path.Join(temp, "build", "compiler.txt")).Trim();
     }
 
-    private static void GenerateBinaryStackOperation(CEmitter em, string op)
+    private static void GeneratePop(CEmitter em, string name)
+    {
+        em.Emit($"try_uint64_t {name} = stack_pop();");
+        em.Emit($"if ({name}.error != 0) {{");
+        em.AddIndent();
+        em.Emit($"print_error({name}.error);");
+        em.Emit("return 1;");
+        em.RemoveIndent();
+        em.Emit("}");
+    }
+
+    private static void GeneratePush(CEmitter em, string expression)
     {
         em.Emit("{");
         em.AddIndent();
-        em.Emit("try_uint64_t b = stack_pop();");
-        em.Emit("if (b.error != 0) {");
-        em.AddIndent();
-        em.Emit("print_error(b.error);");
-        em.Emit("return 1;");
-        em.RemoveIndent();
-        em.Emit("}");
-        em.Emit("try_uint64_t a = stack_pop();");
-        em.Emit("if (a.error != 0) {");
-        em.AddIndent();
-        em.Emit("print_error(a.error);");
-        em.Emit("return 1;");
-        em.RemoveIndent();
-        em.Emit("}");
-        em.Emit($"int err = stack_push(a.value {op} b.value);");
+        em.Emit($"int err = stack_push({expression});");
         em.Emit("if (err != 0) {");
         em.AddIndent();
         em.Emit("print_error(err);");
         em.Emit("return 1;");
         em.RemoveIndent();
         em.Emit("}");
+        em.RemoveIndent();
+        em.Emit("}");
+    }
+
+    private static void GenerateBinaryStackOperation(CEmitter em, string op)
+    {
+        em.Emit("{");
+        em.AddIndent();
+        GeneratePop(em, "b");
+        GeneratePop(em, "a");
+        GeneratePush(em, $"a.value {op} b.value");
         em.RemoveIndent();
         em.Emit("}");
     }
@@ -235,13 +243,7 @@ public static class Compiler
                     case OpCode.Push:
                         em.Emit("{");
                         em.AddIndent();
-                        em.Emit($"int err = stack_push({op.Value});");
-                        em.Emit("if (err != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(err);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
+                        GeneratePush(em, op.Value.ToString());
                         em.RemoveIndent();
                         em.Emit("}");
                         break;
@@ -257,13 +259,7 @@ public static class Compiler
                     case OpCode.If:
                         em.Emit("{");
                         em.AddIndent();
-                        em.Emit("try_uint64_t value = stack_pop();");
-                        em.Emit("if (value.error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(value.error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
+                        GeneratePop(em, "value");
                         em.Emit("if (value.value == 0) {");
                         em.AddIndent();
                         em.Emit($"goto porth_addr_{op.Value};");
@@ -281,27 +277,9 @@ public static class Compiler
                     case OpCode.Dup:
                         em.Emit("{");
                         em.AddIndent();
-                        em.Emit("try_uint64_t value = stack_pop();");
-                        em.Emit("if (value.error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(value.error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
-                        em.Emit($"int err = stack_push(value.value);");
-                        em.Emit("if (err != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(err);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
-                        em.Emit($"err = stack_push(value.value);");
-                        em.Emit("if (err != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(err);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
+                        GeneratePop(em, "value");
+                        GeneratePush(em, "value.value");
+                        GeneratePush(em, "value.value");
                         em.RemoveIndent();
                         em.Emit("}");
                         break;
@@ -314,13 +292,7 @@ public static class Compiler
                     case OpCode.Do:
                         em.Emit("{");
                         em.AddIndent();
-                        em.Emit("try_uint64_t value = stack_pop();");
-                        em.Emit("if (value.error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(value.error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
+                        GeneratePop(em, "value");
                         em.Emit("if (value.value == 0) {");
                         em.AddIndent();
                         em.Emit($"goto porth_addr_{op.Value};");
@@ -332,53 +304,23 @@ public static class Compiler
                     case OpCode.Mem:
                         em.Emit("{");
                         em.AddIndent();
-                        em.Emit("int error = stack_push(0);");
-                        em.Emit("if (error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
+                        GeneratePush(em, "0");
                         em.RemoveIndent();
                         em.Emit("}");
                         break;
                     case OpCode.Load:
                         em.Emit("{");
                         em.AddIndent();
-                        em.Emit("try_uint64_t value = stack_pop();");
-                        em.Emit("if (value.error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(value.error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
-                        em.Emit("int error = stack_push(mem[value.value]);");
-                        em.Emit("if (error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
+                        GeneratePop(em, "value");
+                        GeneratePush(em, "mem[value.value]");
                         em.RemoveIndent();
                         em.Emit("}");
                         break;
                     case OpCode.Store:
                         em.Emit("{");
                         em.AddIndent();
-                        em.Emit("try_uint64_t b = stack_pop();");
-                        em.Emit("if (b.error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(b.error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
-                        em.Emit("try_uint64_t a = stack_pop();");
-                        em.Emit("if (a.error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(a.error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
+                        GeneratePop(em, "b");
+                        GeneratePop(em, "a");
                         em.Emit("mem[a.value] = (uint8_t)b.value;");
                         em.RemoveIndent();
                         em.Emit("}");
@@ -386,34 +328,10 @@ public static class Compiler
                     case OpCode.Syscall3:
                         em.Emit("{");
                         em.AddIndent();
-                        em.Emit("try_uint64_t syscall_number = stack_pop();");
-                        em.Emit("if (syscall_number.error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(syscall_number.error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
-                        em.Emit("try_uint64_t arg1 = stack_pop();");
-                        em.Emit("if (arg1.error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(arg1.error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
-                        em.Emit("try_uint64_t arg2 = stack_pop();");
-                        em.Emit("if (arg2.error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(arg2.error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
-                        em.Emit("try_uint64_t arg3 = stack_pop();");
-                        em.Emit("if (arg3.error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(arg3.error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
+                        GeneratePop(em, "syscall_number");
+                        GeneratePop(em, "arg1");
+                        GeneratePop(em, "arg2");
+                        GeneratePop(em, "arg3");
                         em.Emit("int error = syscall3(syscall_number.value, arg1.value, arg2.value, arg3.value);");
                         em.Emit("if (error != 0) {");
                         em.AddIndent();
@@ -427,13 +345,7 @@ public static class Compiler
                     case OpCode.Dump:
                         em.Emit("{");
                         em.AddIndent();
-                        em.Emit("try_uint64_t value = stack_pop();");
-                        em.Emit("if (value.error != 0) {");
-                        em.AddIndent();
-                        em.Emit("print_error(value.error);");
-                        em.Emit("return 1;");
-                        em.RemoveIndent();
-                        em.Emit("}");
+                        GeneratePop(em, "value");
                         em.Emit("printf(\"%\" PRIu64 \"\\n\", value.value);");
                         em.RemoveIndent();
                         em.Emit("}");
