@@ -27,5 +27,7 @@ public enum OpCode
     BitwiseAnd,
     Over,
     Modulo,
+    GreaterEqual,
+    LessEqual,
     Dump,
 }

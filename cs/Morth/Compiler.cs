@@ -403,6 +403,12 @@ public static class Compiler
                     case OpCode.Modulo:
                         GenerateBinaryStackOperation(em, "%");
                         break;
+                    case OpCode.GreaterEqual:
+                        GenerateBinaryStackOperation(em, ">=");
+                        break;
+                    case OpCode.LessEqual:
+                        GenerateBinaryStackOperation(em, "<=");
+                        break;
                     case OpCode.Dump:
                         em.Emit("{");
                         em.AddIndent();

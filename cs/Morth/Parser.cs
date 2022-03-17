@@ -104,6 +104,14 @@ public static class Parser
         {
             return Op.Modulo(token.Location);
         }
+        if (token.Text == ">=")
+        {
+            return Op.GreaterEqual(token.Location);
+        }
+        if (token.Text == "<=")
+        {
+            return Op.LessEqual(token.Location);
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {

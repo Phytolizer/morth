@@ -230,6 +230,22 @@ public static class Simulator
                         ip++;
                     }
                     break;
+                case OpCode.GreaterEqual:
+                    {
+                        var b = stack.Pop();
+                        var a = stack.Pop();
+                        stack.Push((ulong)(a >= b ? 1 : 0));
+                        ip++;
+                    }
+                    break;
+                case OpCode.LessEqual:
+                    {
+                        var b = stack.Pop();
+                        var a = stack.Pop();
+                        stack.Push((ulong)(a <= b ? 1 : 0));
+                        ip++;
+                    }
+                    break;
                 case OpCode.Dump:
                     {
                         var value = stack.Pop();

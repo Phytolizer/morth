@@ -144,6 +144,16 @@ public class Op
         return new Op(OpCode.Modulo, location);
     }
 
+    public static Op GreaterEqual(SourceLocation location)
+    {
+        return new Op(OpCode.GreaterEqual, location);
+    }
+
+    public static Op LessEqual(SourceLocation location)
+    {
+        return new Op(OpCode.LessEqual, location);
+    }
+
     public static Op Dump(SourceLocation location)
     {
         return new Op(OpCode.Dump, location);
