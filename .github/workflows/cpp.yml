@@ -21,6 +21,7 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Install Boost
+      if: matrix.folder == 'c++'
       run: |
         sudo apt-get update --yes
         sudo apt-get install --yes libboost-dev
