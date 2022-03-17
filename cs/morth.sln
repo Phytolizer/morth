@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Morth", "Morth\Morth.csproj", "{EE257373-35A0-4B63-B77F-D4B67FD783A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MorthTest", "MorthTest\MorthTest.csproj", "{D9D4BFE6-876C-4315-95AE-C8225F0EB33E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EE257373-35A0-4B63-B77F-D4B67FD783A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE257373-35A0-4B63-B77F-D4B67FD783A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE257373-35A0-4B63-B77F-D4B67FD783A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE257373-35A0-4B63-B77F-D4B67FD783A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9D4BFE6-876C-4315-95AE-C8225F0EB33E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9D4BFE6-876C-4315-95AE-C8225F0EB33E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9D4BFE6-876C-4315-95AE-C8225F0EB33E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9D4BFE6-876C-4315-95AE-C8225F0EB33E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
