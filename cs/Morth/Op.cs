@@ -74,6 +74,11 @@ public class Op
         return new Op(OpCode.Do, location);
     }
 
+    public static Op Mem(SourceLocation location)
+    {
+        return new Op(OpCode.Mem, location);
+    }
+
     public static Op Dump(SourceLocation location)
     {
         return new Op(OpCode.Dump, location);

@@ -13,5 +13,6 @@ public enum OpCode
     Greater,
     While,
     Do,
+    Mem,
     Dump,
 }

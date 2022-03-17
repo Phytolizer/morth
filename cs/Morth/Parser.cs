@@ -48,6 +48,10 @@ public static class Parser
         {
             return Op.Do(token.Location);
         }
+        if (token.Text == "mem")
+        {
+            return Op.Mem(token.Location);
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {

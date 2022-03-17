@@ -101,6 +101,7 @@ public static class Compiler
             em.Emit("#include <stdlib.h>");
             em.Emit("#include <string.h>");
             em.Emit("#define ERRBUF_SIZE 64");
+            em.Emit($"#define MEM_CAPACITY {Limits.MemCapacity}");
             em.Emit("#ifdef _WIN32");
             em.Emit("#define STRERROR_R(error, buffer, size) strerror_s(buffer, size, error)");
             em.Emit("#else");
@@ -114,6 +115,7 @@ public static class Compiler
             em.RemoveIndent();
             em.Emit("} stack_t;");
             em.Emit("static stack_t stack;");
+            em.Emit("static uint8_t mem[MEM_CAPACITY];");
             em.Emit("#define ERR_STACK_UNDERFLOW 0x8000");
             em.Emit("static void print_error(int error) {");
             em.AddIndent();
@@ -272,6 +274,19 @@ public static class Compiler
                         em.Emit("if (value.value == 0) {");
                         em.AddIndent();
                         em.Emit($"goto porth_addr_{op.Value};");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        break;
+                    case OpCode.Mem:
+                        em.Emit("{");
+                        em.AddIndent();
+                        em.Emit("int error = stack_push((uint64_t)mem);");
+                        em.Emit("if (error != 0) {");
+                        em.AddIndent();
+                        em.Emit("print_error(error);");
+                        em.Emit("return 1;");
                         em.RemoveIndent();
                         em.Emit("}");
                         em.RemoveIndent();

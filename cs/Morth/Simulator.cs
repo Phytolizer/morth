@@ -91,6 +91,8 @@ public static class Simulator
                         ip++;
                     }
                     break;
+                case OpCode.Mem:
+                    throw new NotImplemented();
                 case OpCode.Dump:
                     {
                         var value = stack.Pop();
