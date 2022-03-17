@@ -29,7 +29,7 @@ public class TestRunner
             .ToArray();
         SemanticAnalyzer.CrossReferenceBlocks(program);
         var simulationOutput = new StringWriter();
-        Simulator.SimulateProgram(program, simulationOutput);
+        Simulator.SimulateProgram(program, simulationOutput, false);
 
         Assert.Equal(simulationOutput.ToString(), expectedOutput);
 

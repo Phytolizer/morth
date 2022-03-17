@@ -16,7 +16,7 @@ internal static class Program
                 .ToArray();
             SemanticAnalyzer.CrossReferenceBlocks(program);
             var simulationOutput = new StringWriter();
-            Simulator.SimulateProgram(program, simulationOutput);
+            Simulator.SimulateProgram(program, simulationOutput, false);
             var outputPath = Path.ChangeExtension(path, "output");
             File.WriteAllText(outputPath, simulationOutput.ToString());
         }

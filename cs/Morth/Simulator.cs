@@ -5,7 +5,7 @@ namespace Morth;
 
 public static class Simulator
 {
-    public static void SimulateProgram(IEnumerable<Op> programEnumerable, TextWriter output)
+    public static void SimulateProgram(IEnumerable<Op> programEnumerable, TextWriter output, bool debug)
     {
         var stack = new Stack<ulong>();
         var program = programEnumerable.ToArray();
@@ -188,6 +188,12 @@ public static class Simulator
                     ip++;
                     break;
             }
+        }
+
+        if (debug)
+        {
+            Console.Error.WriteLine("[INFO] Memory dump");
+            Console.Error.WriteLine(Encoding.Default.GetString(mem[0..20]));
         }
     }
 }

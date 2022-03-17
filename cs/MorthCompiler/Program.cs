@@ -3,6 +3,12 @@ using Morth;
 
 internal static class Program
 {
+    public class Options
+    {
+        [Option("debug", Required = false, HelpText = "Enable debug mode.")]
+        public bool Debug { get; set; }
+    }
+
     [Verb("sim", HelpText = "Simulate the program.")]
     public class SimulationOptions
     {
@@ -24,9 +30,18 @@ internal static class Program
 
     private static void Main(string[] args)
     {
+        var debug = false;
         try
         {
-            CommandLine.Parser.Default.ParseArguments<CompileOptions, SimulationOptions>(args)
+            CommandLine.Parser.Default.ParseArguments<Options, CompileOptions, SimulationOptions>(args)
+                .WithParsed<Options>(o =>
+                {
+                    debug = o.Debug;
+                    if (debug)
+                    {
+                        Console.Error.WriteLine("[INFO] Debug mode is enabled");
+                    }
+                })
                 .WithParsed<SimulationOptions>(o =>
                 {
                     var program = Lexer
@@ -34,7 +49,7 @@ internal static class Program
                         .Select(tok => Morth.Parser.ParseTokenAsOp(tok))
                         .ToArray();
                     SemanticAnalyzer.CrossReferenceBlocks(program);
-                    Simulator.SimulateProgram(program, Console.Out);
+                    Simulator.SimulateProgram(program, Console.Out, debug);
                 })
                 .WithParsed<CompileOptions>(o =>
                 {
