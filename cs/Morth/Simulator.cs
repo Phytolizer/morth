@@ -222,6 +222,14 @@ public static class Simulator
                         ip++;
                     }
                     break;
+                case OpCode.Modulo:
+                    {
+                        var b = stack.Pop();
+                        var a = stack.Pop();
+                        stack.Push(a % b);
+                        ip++;
+                    }
+                    break;
                 case OpCode.Dump:
                     {
                         var value = stack.Pop();

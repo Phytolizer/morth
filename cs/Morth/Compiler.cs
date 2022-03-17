@@ -400,6 +400,9 @@ public static class Compiler
                         em.RemoveIndent();
                         em.Emit("}");
                         break;
+                    case OpCode.Modulo:
+                        GenerateBinaryStackOperation(em, "%");
+                        break;
                     case OpCode.Dump:
                         em.Emit("{");
                         em.AddIndent();

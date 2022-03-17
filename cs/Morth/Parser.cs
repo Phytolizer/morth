@@ -100,6 +100,10 @@ public static class Parser
         {
             return Op.Over(token.Location);
         }
+        if (token.Text == "mod")
+        {
+            return Op.Modulo(token.Location);
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {
