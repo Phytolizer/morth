@@ -14,5 +14,7 @@ public enum OpCode
     While,
     Do,
     Mem,
+    Load,
+    Store,
     Dump,
 }

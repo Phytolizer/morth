@@ -52,6 +52,14 @@ public static class Parser
         {
             return Op.Mem(token.Location);
         }
+        if (token.Text == ".")
+        {
+            return Op.Load(token.Location);
+        }
+        if (token.Text == ",")
+        {
+            return Op.Store(token.Location);
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {
