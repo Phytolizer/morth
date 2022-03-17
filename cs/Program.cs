@@ -19,6 +19,8 @@ internal static class Program
 
         [Option('r', "run", Required = false, HelpText = "Run the compiled program immediately.")]
         public bool Run { get; set; }
+        [Option('o', "output", Required = false, HelpText = "Set the output file path")]
+        public string OutputPath { get; set; } = "output";
     }
 
     private static List<Op> TestProgram { get; } = new List<Op>
@@ -48,10 +50,10 @@ internal static class Program
                     .Select(tok => Parser.ParseTokenAsOp(tok))
                     .ToArray();
                 SemanticAnalyzer.CrossReferenceBlocks(program);
-                Compiler.CompileProgram(program);
+                var exePath = Compiler.CompileProgram(program, o.InputPath, o.OutputPath);
                 if (o.Run)
                 {
-                    Subcommand.Run(Path.Join(System.Environment.CurrentDirectory, $"output{Environment.ExeSuffix()}"));
+                    Subcommand.Run(Path.Join(System.Environment.CurrentDirectory, exePath));
                 }
             });
     }

@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace Morth;
 
@@ -70,10 +69,23 @@ public static class Compiler
         em.Emit("}");
     }
 
-    public static void CompileProgram(IEnumerable<Op> programEnumerable)
+    public static string CompileProgram(IEnumerable<Op> programEnumerable, string inputPath, string outputPath)
     {
+        string cPath = "";
+        string exePath = "";
+        if (Path.EndsInDirectorySeparator(outputPath))
+        {
+            Directory.CreateDirectory(outputPath);
+            cPath = Path.Join(outputPath, Path.ChangeExtension(Path.GetFileName(inputPath), "c"));
+            exePath = Path.Join(outputPath, Path.ChangeExtension(Path.GetFileName(inputPath), Environment.ExeSuffix()));
+        }
+        else
+        {
+            cPath = Path.ChangeExtension(outputPath, "c");
+            exePath = Path.ChangeExtension(outputPath, Environment.ExeSuffix());
+        }
         var program = programEnumerable.ToArray();
-        using (var fp = File.CreateText("output.c"))
+        using (var fp = File.CreateText(cPath))
         {
             var em = new CEmitter(fp);
             em.Emit("#include <errno.h>");
@@ -282,6 +294,8 @@ public static class Compiler
             em.Emit("}");
         }
 
-        Subcommand.Run(FindCCompiler(), "-O2", "output.c", "-o", $"output{Environment.ExeSuffix()}");
+        Subcommand.Run(FindCCompiler(), "-O2", "output.c", "-o", exePath);
+
+        return exePath;
     }
 }
