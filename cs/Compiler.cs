@@ -200,6 +200,8 @@ public static class Compiler
                         em.Emit($"goto porth_addr_{op.Value};");
                         em.RemoveIndent();
                         em.Emit("}");
+                        em.RemoveIndent();
+                        em.Emit("}");
                         break;
                     case OpCode.Else:
                         em.Emit($"goto porth_addr_{op.Value};");
