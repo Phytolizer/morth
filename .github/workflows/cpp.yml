@@ -1,0 +1,36 @@
+name: CMake
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        folder: ['c++', 'c', 'c-to-c']
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Install Boost
+      run: |
+        sudo apt-get update --yes
+        sudo apt-get install --yes libboost-dev
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build/${{matrix.folder}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -S ${{matrix.folder}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build/${{matrix.folder}} --config ${{env.BUILD_TYPE}}
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build/${{matrix.folder}}
+      run: ctest -C ${{env.BUILD_TYPE}}
