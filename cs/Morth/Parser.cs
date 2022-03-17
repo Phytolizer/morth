@@ -112,6 +112,10 @@ public static class Parser
         {
             return Op.LessEqual(token.Location);
         }
+        if (token.Text == "!=")
+        {
+            return Op.NotEqual(token.Location);
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {

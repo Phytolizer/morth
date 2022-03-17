@@ -29,5 +29,6 @@ public enum OpCode
     Modulo,
     GreaterEqual,
     LessEqual,
+    NotEqual,
     Dump,
 }

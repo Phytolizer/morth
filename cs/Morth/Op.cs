@@ -154,6 +154,11 @@ public class Op
         return new Op(OpCode.LessEqual, location);
     }
 
+    public static Op NotEqual(SourceLocation location)
+    {
+        return new Op(OpCode.NotEqual, location);
+    }
+
     public static Op Dump(SourceLocation location)
     {
         return new Op(OpCode.Dump, location);

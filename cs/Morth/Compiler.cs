@@ -409,6 +409,9 @@ public static class Compiler
                     case OpCode.LessEqual:
                         GenerateBinaryStackOperation(em, "<=");
                         break;
+                    case OpCode.NotEqual:
+                        GenerateBinaryStackOperation(em, "!=");
+                        break;
                     case OpCode.Dump:
                         em.Emit("{");
                         em.AddIndent();
