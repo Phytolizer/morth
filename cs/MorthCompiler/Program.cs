@@ -46,7 +46,14 @@ internal static class Program
                     var exePath = Compiler.CompileProgram(program, o.InputPath, o.OutputPath);
                     if (o.Run)
                     {
-                        Subcommand.Run(Path.Join(System.Environment.CurrentDirectory, exePath));
+                        try
+                        {
+                            Subcommand.Run(Path.Join(System.Environment.CurrentDirectory, exePath));
+                        }
+                        catch (SubcommandException e)
+                        {
+                            System.Environment.ExitCode = e.ExitCode;
+                        }
                     }
                 });
         }
