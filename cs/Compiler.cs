@@ -41,37 +41,38 @@ public static class Compiler
         return File.ReadAllText(Path.Join(temp, "build", "compiler.txt")).Trim();
     }
 
-    private static void GenerateBinaryStackOperation(CEmitter fp, string op)
+    private static void GenerateBinaryStackOperation(CEmitter em, string op)
     {
-        fp.Emit("{");
-        fp.AddIndent();
-        fp.Emit("try_uint64_t b = stack_pop();");
-        fp.Emit("if (b.error != 0) {");
-        fp.AddIndent();
-        fp.Emit("print_error(b.error);");
-        fp.Emit("return 1;");
-        fp.RemoveIndent();
-        fp.Emit("}");
-        fp.Emit("try_uint64_t a = stack_pop();");
-        fp.Emit("if (a.error != 0) {");
-        fp.AddIndent();
-        fp.Emit("print_error(a.error);");
-        fp.Emit("return 1;");
-        fp.RemoveIndent();
-        fp.Emit("}");
-        fp.Emit($"int err = stack_push(a.value {op} b.value);");
-        fp.Emit("if (err != 0) {");
-        fp.AddIndent();
-        fp.Emit("print_error(err);");
-        fp.Emit("return 1;");
-        fp.RemoveIndent();
-        fp.Emit("}");
-        fp.RemoveIndent();
-        fp.Emit("}");
+        em.Emit("{");
+        em.AddIndent();
+        em.Emit("try_uint64_t b = stack_pop();");
+        em.Emit("if (b.error != 0) {");
+        em.AddIndent();
+        em.Emit("print_error(b.error);");
+        em.Emit("return 1;");
+        em.RemoveIndent();
+        em.Emit("}");
+        em.Emit("try_uint64_t a = stack_pop();");
+        em.Emit("if (a.error != 0) {");
+        em.AddIndent();
+        em.Emit("print_error(a.error);");
+        em.Emit("return 1;");
+        em.RemoveIndent();
+        em.Emit("}");
+        em.Emit($"int err = stack_push(a.value {op} b.value);");
+        em.Emit("if (err != 0) {");
+        em.AddIndent();
+        em.Emit("print_error(err);");
+        em.Emit("return 1;");
+        em.RemoveIndent();
+        em.Emit("}");
+        em.RemoveIndent();
+        em.Emit("}");
     }
 
-    public static void CompileProgram(IEnumerable<Op> program)
+    public static void CompileProgram(IEnumerable<Op> programEnumerable)
     {
+        var program = programEnumerable.ToArray();
         using (var fp = File.CreateText("output.c"))
         {
             var em = new CEmitter(fp);
@@ -154,8 +155,12 @@ public static class Compiler
             em.Emit("}");
             em.Emit("int main(void) {");
             em.AddIndent();
-            foreach (var op in program)
+            var ip = 0;
+            for (; ip < program.Length; ip++)
             {
+                Op op = program[ip];
+                em.EmitNoIndent($"porth_addr_{ip}:");
+                em.Emit($"// {op.Code}");
                 switch (op.Code)
                 {
                     case OpCode.Push:
@@ -190,19 +195,17 @@ public static class Compiler
                         em.Emit("return 1;");
                         em.RemoveIndent();
                         em.Emit("}");
-                        em.Emit("if (value.value) {");
+                        em.Emit("if (value.value == 0) {");
                         em.AddIndent();
+                        em.Emit($"goto porth_addr_{op.Value};");
+                        em.RemoveIndent();
+                        em.Emit("}");
                         break;
                     case OpCode.Else:
-                        em.RemoveIndent();
-                        em.Emit("} else {");
-                        em.AddIndent();
+                        em.Emit($"goto porth_addr_{op.Value};");
                         break;
                     case OpCode.End:
-                        em.RemoveIndent();
-                        em.Emit("}");
-                        em.RemoveIndent();
-                        em.Emit("}");
+                        em.Emit($"goto porth_addr_{op.Value};");
                         break;
                     case OpCode.Dup:
                         em.Emit("{");
@@ -231,6 +234,30 @@ public static class Compiler
                         em.RemoveIndent();
                         em.Emit("}");
                         break;
+                    case OpCode.Greater:
+                        GenerateBinaryStackOperation(em, ">");
+                        break;
+                    case OpCode.While:
+                        em.Emit(";");
+                        break;
+                    case OpCode.Do:
+                        em.Emit("{");
+                        em.AddIndent();
+                        em.Emit("try_uint64_t value = stack_pop();");
+                        em.Emit("if (value.error != 0) {");
+                        em.AddIndent();
+                        em.Emit("print_error(value.error);");
+                        em.Emit("return 1;");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        em.Emit("if (value.value == 0) {");
+                        em.AddIndent();
+                        em.Emit($"goto porth_addr_{op.Value};");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        break;
                     case OpCode.Dump:
                         em.Emit("{");
                         em.AddIndent();
@@ -247,6 +274,7 @@ public static class Compiler
                         break;
                 }
             }
+            em.EmitNoIndent($"porth_addr_{ip}:");
             em.Emit("free(stack.data);");
             em.RemoveIndent();
             em.Emit("}");

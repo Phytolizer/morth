@@ -28,4 +28,9 @@ public class CEmitter
         }
         _fp.WriteLine(text);
     }
+
+    public void EmitNoIndent(string text)
+    {
+        _fp.WriteLine(text);
+    }
 }

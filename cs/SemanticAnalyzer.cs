@@ -25,12 +25,28 @@ public static class SemanticAnalyzer
                         stack.Push(i);
                     }
                     break;
+                case OpCode.While:
+                    stack.Push(i);
+                    break;
+                case OpCode.Do:
+                    {
+                        var whileIp = stack.Pop();
+                        program[i].Value = (ulong)whileIp;
+                        stack.Push(i);
+                    }
+                    break;
                 case OpCode.End:
                     {
                         var blockIp = stack.Pop();
                         if (program[blockIp].Code == OpCode.If || program[blockIp].Code == OpCode.Else)
                         {
                             program[blockIp].Value = (ulong)i;
+                            program[i].Value = (ulong)(i + 1);
+                        }
+                        else if (program[blockIp].Code == OpCode.Do)
+                        {
+                            program[i].Value = program[blockIp].Value;
+                            program[blockIp].Value = (ulong)(i + 1);
                         }
                         else
                         {

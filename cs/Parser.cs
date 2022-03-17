@@ -40,6 +40,14 @@ public static class Parser
         {
             return Op.Greater();
         }
+        if (token.Text == "while")
+        {
+            return Op.While();
+        }
+        if (token.Text == "do")
+        {
+            return Op.Do();
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {

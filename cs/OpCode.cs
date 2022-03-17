@@ -11,5 +11,7 @@ public enum OpCode
     End,
     Dup,
     Greater,
+    While,
+    Do,
     Dump,
 }

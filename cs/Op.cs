@@ -61,6 +61,16 @@ public class Op
         return new Op(OpCode.Greater);
     }
 
+    public static Op While()
+    {
+        return new Op(OpCode.While);
+    }
+
+    public static Op Do()
+    {
+        return new Op(OpCode.Do);
+    }
+
     public static Op Dump()
     {
         return new Op(OpCode.Dump);
