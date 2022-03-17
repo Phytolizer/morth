@@ -23,14 +23,6 @@ internal static class Program
         public string OutputPath { get; set; } = "output";
     }
 
-    private static List<Op> TestProgram { get; } = new List<Op>
-    {
-        Op.Push(34),
-        Op.Push(35),
-        Op.Plus(),
-        Op.Dump(),
-    };
-
     private static void Main(string[] args)
     {
         CommandLine.Parser.Default.ParseArguments<CompileOptions, SimulationOptions>(args)

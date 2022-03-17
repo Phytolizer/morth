@@ -20,7 +20,10 @@ public static class SemanticAnalyzer
                 case OpCode.Else:
                     {
                         var ifIp = stack.Pop();
-                        Debug.Assert(program[ifIp].Code == OpCode.If, "'else' can only be used in 'if' blocks");
+                        if (program[ifIp].Code != OpCode.If)
+                        {
+                            throw new CompileError(op.Location, "'else' can only be used in 'if' blocks");
+                        }
                         program[ifIp].Value = (ulong)(i + 1);
                         stack.Push(i);
                     }
@@ -50,11 +53,16 @@ public static class SemanticAnalyzer
                         }
                         else
                         {
-                            Debug.Fail("'end' can only close 'if'/'else' blocks");
+                            throw new CompileError(op.Location, "'end' can only close 'if'/'else' or 'do'-blocks");
                         }
                     }
                     break;
             }
+        }
+
+        if (stack.Count > 0)
+        {
+            throw new CompileError(program[stack.Pop()].Location, "unclosed block");
         }
     }
 }

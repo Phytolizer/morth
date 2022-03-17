@@ -6,47 +6,47 @@ public static class Parser
     {
         if (token.Text == "+")
         {
-            return Op.Plus();
+            return Op.Plus(token.Location);
         }
         if (token.Text == "-")
         {
-            return Op.Minus();
+            return Op.Minus(token.Location);
         }
         if (token.Text == ".")
         {
-            return Op.Dump();
+            return Op.Dump(token.Location);
         }
         if (token.Text == "=")
         {
-            return Op.Equal();
+            return Op.Equal(token.Location);
         }
         if (token.Text == "if")
         {
-            return Op.If();
+            return Op.If(token.Location);
         }
         if (token.Text == "else")
         {
-            return Op.Else();
+            return Op.Else(token.Location);
         }
         if (token.Text == "end")
         {
-            return Op.End();
+            return Op.End(token.Location);
         }
         if (token.Text == "dup")
         {
-            return Op.Dup();
+            return Op.Dup(token.Location);
         }
         if (token.Text == ">")
         {
-            return Op.Greater();
+            return Op.Greater(token.Location);
         }
         if (token.Text == "while")
         {
-            return Op.While();
+            return Op.While(token.Location);
         }
         if (token.Text == "do")
         {
-            return Op.Do();
+            return Op.Do(token.Location);
         }
 
         if (!ulong.TryParse(token.Text, out var value))
@@ -54,6 +54,6 @@ public static class Parser
             throw new ParseException(token, "Unknown token.");
         }
 
-        return Op.Push(value);
+        return Op.Push(value, token.Location);
     }
 }
