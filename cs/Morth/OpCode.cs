@@ -19,5 +19,6 @@ public enum OpCode
     Syscall3,
     Dup2,
     Less,
+    Swap,
     Dump,
 }

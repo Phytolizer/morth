@@ -85,7 +85,13 @@ public static class Compiler
         {
             Directory.CreateDirectory(outputPath);
             cPath = Path.Join(outputPath, Path.ChangeExtension(Path.GetFileName(inputPath), "c"));
-            exePath = Path.Join(outputPath, Path.ChangeExtension(Path.GetFileName(inputPath), Environment.ExeSuffix()));
+            var exeSuffix = Environment.ExeSuffix();
+            var baseName = Path.ChangeExtension(Path.GetFileName(inputPath), exeSuffix);
+            if (exeSuffix == "")
+            {
+                baseName = baseName[..(baseName.Length - 1)];
+            }
+            exePath = Path.Join(outputPath, baseName);
         }
         else
         {
@@ -95,7 +101,12 @@ public static class Compiler
                 Directory.CreateDirectory(outputDir);
             }
             cPath = Path.ChangeExtension(outputPath, "c");
+            var exeSuffix = Environment.ExeSuffix();
             exePath = Path.ChangeExtension(outputPath, Environment.ExeSuffix());
+            if (exeSuffix == "")
+            {
+                exePath = exePath[..(exePath.Length - 1)];
+            }
         }
         var program = programEnumerable.ToArray();
         using (var fp = File.CreateText(cPath))
@@ -241,11 +252,7 @@ public static class Compiler
                 switch (op.Code)
                 {
                     case OpCode.Push:
-                        em.Emit("{");
-                        em.AddIndent();
                         GeneratePush(em, op.Value.ToString());
-                        em.RemoveIndent();
-                        em.Emit("}");
                         break;
                     case OpCode.Plus:
                         GenerateBinaryStackOperation(em, "+");
@@ -302,11 +309,7 @@ public static class Compiler
                         em.Emit("}");
                         break;
                     case OpCode.Mem:
-                        em.Emit("{");
-                        em.AddIndent();
                         GeneratePush(em, "0");
-                        em.RemoveIndent();
-                        em.Emit("}");
                         break;
                     case OpCode.Load:
                         em.Emit("{");
@@ -356,6 +359,16 @@ public static class Compiler
                         break;
                     case OpCode.Less:
                         GenerateBinaryStackOperation(em, "<");
+                        break;
+                    case OpCode.Swap:
+                        em.Emit("{");
+                        em.AddIndent();
+                        GeneratePop(em, "b");
+                        GeneratePop(em, "a");
+                        GeneratePush(em, "b.value");
+                        GeneratePush(em, "a.value");
+                        em.RemoveIndent();
+                        em.Emit("}");
                         break;
                     case OpCode.Dump:
                         em.Emit("{");

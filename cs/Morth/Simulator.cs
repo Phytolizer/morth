@@ -167,6 +167,15 @@ public static class Simulator
                         ip++;
                     }
                     break;
+                case OpCode.Swap:
+                    {
+                        var b = stack.Pop();
+                        var a = stack.Pop();
+                        stack.Push(b);
+                        stack.Push(a);
+                        ip++;
+                    }
+                    break;
                 case OpCode.Dump:
                     {
                         var value = stack.Pop();

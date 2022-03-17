@@ -104,6 +104,11 @@ public class Op
         return new Op(OpCode.Less, location);
     }
 
+    public static Op Swap(SourceLocation location)
+    {
+        return new Op(OpCode.Swap, location);
+    }
+
     public static Op Dump(SourceLocation location)
     {
         return new Op(OpCode.Dump, location);
