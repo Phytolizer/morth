@@ -370,6 +370,13 @@ public static class Compiler
                         em.RemoveIndent();
                         em.Emit("}");
                         break;
+                    case OpCode.Drop:
+                        em.Emit("{");
+                        em.AddIndent();
+                        GeneratePop(em, "value");
+                        em.RemoveIndent();
+                        em.Emit("}");
+                        break;
                     case OpCode.Dump:
                         em.Emit("{");
                         em.AddIndent();

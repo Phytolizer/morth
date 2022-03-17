@@ -76,6 +76,10 @@ public static class Parser
         {
             return Op.Swap(token.Location);
         }
+        if (token.Text == "drop")
+        {
+            return Op.Drop(token.Location);
+        }
 
         if (!ulong.TryParse(token.Text, out var value))
         {

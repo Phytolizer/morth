@@ -20,5 +20,6 @@ public enum OpCode
     Dup2,
     Less,
     Swap,
+    Drop,
     Dump,
 }
