@@ -6,6 +6,7 @@ public static class Simulator
     {
         var stack = new Stack<ulong>();
         var program = programEnumerable.ToArray();
+        var mem = new byte[Limits.MemCapacity];
 
         for (int ip = 0; ip < program.Length;)
         {
@@ -92,7 +93,25 @@ public static class Simulator
                     }
                     break;
                 case OpCode.Mem:
-                    throw new NotImplemented();
+                    stack.Push(0);
+                    ip++;
+                    break;
+                case OpCode.Load:
+                    {
+                        var addr = stack.Pop();
+                        var b = mem[(int)addr];
+                        stack.Push((ulong)b);
+                        ip++;
+                    }
+                    break;
+                case OpCode.Store:
+                    {
+                        var b = stack.Pop();
+                        var a = stack.Pop();
+                        mem[(int)a] = (byte)(b & 0xFF);
+                        ip++;
+                    }
+                    break;
                 case OpCode.Dump:
                     {
                         var value = stack.Pop();
