@@ -131,7 +131,7 @@ public static class Simulator
                             switch (fd)
                             {
                                 case 1:
-                                    Console.Write(str);
+                                    output.Write(str);
                                     break;
                                 case 2:
                                     Console.Error.Write(str);

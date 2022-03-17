@@ -32,6 +32,6 @@ public class TestRunner
         var exePath = Compiler.CompileProgram(program, path, "temp/");
         var compilationOutput = Subcommand.RunCaptured(exePath);
 
-        Assert.Equal(simulationOutput.ToString(), compilationOutput);
+        Assert.Equal(simulationOutput.ToString().ReplaceLineEndings(), compilationOutput);
     }
 }
