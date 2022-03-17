@@ -22,6 +22,8 @@ jobs:
       with:
         version: latest
         platform: x64
+    - name: Get CMake
+      uses: symbitic/install-cmake@master
     - name: Restore dependencies
       working-directory: cs
       run: dotnet restore
