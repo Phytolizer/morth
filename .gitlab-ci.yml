@@ -6,7 +6,7 @@ before_script:
     - dpkg -i packages-microsoft-prod.deb
     - rm packages-microsoft-prod.deb
     - apt-get update --yes
-    - apt-get install --yes g++ cmake libboost-dev apt-transport-https ninja-build
+    - apt-get install --yes git g++ cmake libboost-dev apt-transport-https ninja-build
     - apt-get install --yes dotnet-sdk-6.0
 
 stages:
