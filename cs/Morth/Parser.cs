@@ -12,7 +12,7 @@ public static class Parser
         {
             return Op.Minus(token.Location);
         }
-        if (token.Text == ".")
+        if (token.Text == "dump")
         {
             return Op.Dump(token.Location);
         }
