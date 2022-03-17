@@ -226,8 +226,8 @@ public static class Simulator
                     {
                         var value = stack.Pop();
                         output.WriteLine(value);
+                        ip++;
                     }
-                    ip++;
                     break;
             }
         }
