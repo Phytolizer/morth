@@ -3,7 +3,7 @@ namespace Morth;
 public class CEmitter
 {
     private int _indentLevel = 0;
-    private TextWriter _fp;
+    private readonly TextWriter _fp;
 
     public CEmitter(TextWriter fp)
     {

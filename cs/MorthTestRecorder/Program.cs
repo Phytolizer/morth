@@ -1,12 +1,11 @@
-﻿using System.Text;
-using Morth;
+﻿using Morth;
 using MorthUtils;
 
 namespace MorthTestRecorder;
 
 internal static class Program
 {
-    private static void Main(string[] args)
+    private static void Main()
     {
         foreach (var path in Directory.EnumerateFiles(Path.Join(ProjectSourcePath.Value, "..", "tests"), "*.morth"))
         {

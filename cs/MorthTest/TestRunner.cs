@@ -10,7 +10,7 @@ namespace MorthTest;
 
 public class TestRunner
 {
-    ITestOutputHelper _output;
+    private readonly ITestOutputHelper _output;
 
     public TestRunner(ITestOutputHelper output)
     {

@@ -14,7 +14,7 @@ public static class ProjectSourcePath
     {
         var pathName = GetSourceFilePathName();
         Debug.Assert(pathName.EndsWith(_relativePath, StringComparison.Ordinal));
-        return pathName.Substring(0, pathName.Length - _relativePath.Length);
+        return pathName[..(pathName.Length - _relativePath.Length)];
     }
 
     public static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null) => callerFilePath ?? "";

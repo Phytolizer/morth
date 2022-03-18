@@ -79,8 +79,8 @@ public static class Compiler
 
     public static string CompileProgram(IEnumerable<Op> programEnumerable, string inputPath, string outputPath)
     {
-        string cPath = "";
-        string exePath = "";
+        string cPath;
+        string exePath;
         if (Path.EndsInDirectorySeparator(outputPath))
         {
             Directory.CreateDirectory(outputPath);
