@@ -140,6 +140,7 @@ public static class Simulator
                                     Debug.Fail($"unknown fd {fd}");
                                     break;
                             }
+                            stack.Push(count);
                         }
                         else
                         {

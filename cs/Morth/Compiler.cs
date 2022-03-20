@@ -230,6 +230,7 @@ public static class Compiler
             em.RemoveIndent();
             em.RemoveIndent();
             em.Emit("}");
+            GeneratePush(em, "count");
             em.RemoveIndent();
             em.Emit("} break;");
             em.Emit("default:");
