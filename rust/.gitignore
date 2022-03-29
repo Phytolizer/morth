@@ -1,4 +1,1 @@
-/target/
-*.asm
-*.o
-output
+target/

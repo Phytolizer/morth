@@ -79,8 +79,8 @@ public static class Compiler
 
     public static string CompileProgram(IEnumerable<Op> programEnumerable, string inputPath, string outputPath)
     {
-        string cPath = "";
-        string exePath = "";
+        string cPath;
+        string exePath;
         if (Path.EndsInDirectorySeparator(outputPath))
         {
             Directory.CreateDirectory(outputPath);
@@ -230,6 +230,7 @@ public static class Compiler
             em.RemoveIndent();
             em.RemoveIndent();
             em.Emit("}");
+            GeneratePush(em, "count");
             em.RemoveIndent();
             em.Emit("} break;");
             em.Emit("default:");
