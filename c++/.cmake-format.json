@@ -16,6 +16,13 @@
                     "SOURCES": "*",
                     "DEPENDS": "*"
                 }
+            },
+            "CPMAddPackage": {
+                "kwargs": {
+                    "NAME": 1,
+                    "GITHUB_REPOSITORY": 1,
+                    "GIT_TAG": 1
+                }
             }
         },
         "_help_override_spec": [

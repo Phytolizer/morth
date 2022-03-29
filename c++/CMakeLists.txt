@@ -13,31 +13,27 @@ include(FetchContent)
 
 find_package(Boost REQUIRED)
 
-find_package(fmt)
-if(NOT fmt_FOUND)
-    FetchContent_Declare(
-        fmt
-        GIT_REPOSITORY "https://github.com/fmtlib/fmt.git"
-        GIT_TAG "8.1.1"
-    )
-    FetchContent_MakeAvailable(fmt)
-endif()
+include("cmake/CPM.cmake")
 
-FetchContent_Declare(
-    magic_enum
-    GIT_REPOSITORY "https://github.com/Neargye/magic_enum.git"
+CPMAddPackage(
+    NAME fmt
+    GITHUB_REPOSITORY "fmtlib/fmt"
+    GIT_TAG "8.1.1"
+)
+
+CPMAddPackage(
+    NAME magic_enum
+    GITHUB_REPOSITORY "Neargye/magic_enum"
     GIT_TAG "v0.7.3"
 )
-FetchContent_MakeAvailable(magic_enum)
 
 set(REPROC++ ON)
 
-FetchContent_Declare(
-    reproc
-    GIT_REPOSITORY "https://github.com/DaanDeMeyer/reproc.git"
+CPMAddPackage(
+    NAME reproc
+    GITHUB_REPOSITORY "DaanDeMeyer/reproc"
     GIT_TAG "v14.2.4"
 )
-FetchContent_MakeAvailable(reproc)
 
 configure_file("config.hpp.cin" "include/config.hpp")
 
