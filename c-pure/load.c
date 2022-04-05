@@ -26,6 +26,9 @@ program_t load_program_from_file(const char* input_file_path) {
         char* pword = line;
         size_t col = 1;
         while (word != NULL) {
+            if (strncmp(word, "//", 2) == 0) {
+                break;
+            }
             col += word - pword;
             BUFFER_EXPAND(&program);
             program.data[program.length] =
