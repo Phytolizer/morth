@@ -38,6 +38,18 @@ void simulate_program(program_t program) {
                 printf("%" PRId64 "\n", value);
                 ip++;
             } break;
+            case op_code_dup: {
+                int64_t value = stack_pop(&stack);
+                stack_push(&stack, value);
+                stack_push(&stack, value);
+                ip++;
+            } break;
+            case op_code_gt: {
+                int64_t b = stack_pop(&stack);
+                int64_t a = stack_pop(&stack);
+                stack_push(&stack, a > b);
+                ip++;
+            } break;
             case op_code_if: {
                 int64_t condition = stack_pop(&stack);
                 if (condition) {
@@ -49,8 +61,19 @@ void simulate_program(program_t program) {
             case op_code_else:
                 ip = op.operand;
                 break;
-            case op_code_end:
+            case op_code_while:
                 ip++;
+                break;
+            case op_code_do: {
+                int64_t condition = stack_pop(&stack);
+                if (condition) {
+                    ip++;
+                } else {
+                    ip = op.operand;
+                }
+            } break;
+            case op_code_end:
+                ip = op.operand;
                 break;
             default:
                 assert(false && "unhandled opcode");
