@@ -58,10 +58,12 @@ void compile_program(program_t program, const char* out_file_path) {
     EMIT("global _start");
     LABL("_start");
 
-    for (op_t* op = program.begin; op != program.end; op++) {
-        switch (op->code) {
+    for (size_t i = 0; i < program.length; i++) {
+        op_t op = program.begin[i];
+        LABL("addr_%zu", i);
+        switch (op.code) {
             case op_code_push:
-                EMIT("push %" PRId64, op->operand);
+                EMIT("push %" PRId64, op.operand);
                 break;
             case op_code_plus:
                 EMIT("pop rdx");
@@ -82,6 +84,13 @@ void compile_program(program_t program, const char* out_file_path) {
                 EMIT("sete al");
                 EMIT("movzx rax, al");
                 EMIT("push rax");
+                break;
+            case op_code_if:
+                EMIT("pop rax");
+                EMIT("cmp rax, 0");
+                EMIT("je addr_%zu", op.operand);
+                break;
+            case op_code_end:
                 break;
             case op_code_dump:
                 EMIT("pop rdi");

@@ -3,6 +3,7 @@
 #include "buffer.h"
 
 #include <assert.h>
+#include <stdio.h>
 
 typedef BUFFER_TYPE(size_t) size_stack_t;
 
@@ -28,12 +29,24 @@ void cross_reference_blocks(program_t program) {
                 size_stack_push(&stack, i);
                 break;
             case op_code_end: {
+                if (stack.length == 0) {
+                    fprintf(stderr, "%s:%zu:%zu: error: unbalanced '%s'\n", op.tok.loc.file_path,
+                            op.tok.loc.row, op.tok.loc.col, op.tok.text);
+                    exit(EXIT_FAILURE);
+                }
                 size_t if_ip = size_stack_pop(&stack);
                 program.begin[if_ip].operand = i;
             } break;
             default:
                 assert(false && "unhandled opcode");
         }
+    }
+    if (stack.length > 0) {
+        size_t ip = size_stack_pop(&stack);
+        op_t op = program.begin[ip];
+        fprintf(stderr, "%s:%zu:%zu: error: unbalanced '%s'\n", op.tok.loc.file_path,
+                op.tok.loc.row, op.tok.loc.col, op.tok.text);
+        exit(EXIT_FAILURE);
     }
 
     BUFFER_FREE(stack);

@@ -1,5 +1,9 @@
 #pragma once
 
+#include "source_location.h"
+#include "token.h"
+
+#include <stddef.h>
 #include <stdint.h>
 
 #define OP_CODES_X \
@@ -20,12 +24,13 @@ typedef enum {
 typedef struct {
     op_code_t code;
     int64_t operand;
+    token_t tok;
 } op_t;
 
-op_t push(int64_t operand);
-op_t plus(void);
-op_t dump(void);
-op_t minus(void);
-op_t eq(void);
-op_t iff(void);
-op_t end(void);
+op_t push(int64_t operand, token_t tok);
+op_t plus(token_t tok);
+op_t dump(token_t tok);
+op_t minus(token_t tok);
+op_t eq(token_t tok);
+op_t iff(token_t tok);
+op_t end(token_t tok);

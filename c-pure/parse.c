@@ -7,32 +7,32 @@
 
 op_t parse_token_as_op(token_t token) {
     if (strcmp(token.text, "+") == 0) {
-        return plus();
+        return plus(token_dup(token));
     }
     if (strcmp(token.text, "-") == 0) {
-        return minus();
+        return minus(token_dup(token));
     }
     if (strcmp(token.text, ".") == 0) {
-        return dump();
+        return dump(token_dup(token));
     }
     if (strcmp(token.text, "=") == 0) {
-        return eq();
+        return eq(token_dup(token));
     }
     if (strcmp(token.text, "if") == 0) {
-        return iff();
+        return iff(token_dup(token));
     }
     if (strcmp(token.text, "end") == 0) {
-        return end();
+        return end(token_dup(token));
     }
 
     char* endp;
     errno = 0;
     long long operand = strtoll(token.text, &endp, 10);
     if (errno != 0 || *endp != '\0' || operand < INT64_MIN || operand > INT64_MAX) {
-        fprintf(stderr, "%s:%zu:%zu: Invalid token '%s'\n", token.file_path, token.row, token.col,
-                token.text);
+        fprintf(stderr, "%s:%zu:%zu: Invalid token '%s'\n", token.loc.file_path, token.loc.row,
+                token.loc.col, token.text);
         exit(EXIT_FAILURE);
     }
 
-    return push((int64_t)operand);
+    return push((int64_t)operand, token_dup(token));
 }

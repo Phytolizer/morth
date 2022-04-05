@@ -29,7 +29,7 @@ program_t load_program_from_file(const char* input_file_path) {
             col += word - pword;
             BUFFER_EXPAND(&program);
             program.data[program.length] =
-                    parse_token_as_op((token_t){input_file_path, word, row, col});
+                    parse_token_as_op((token_t){word, {input_file_path, row, col}});
             program.length++;
             pword = word;
             word = strtok_r(NULL, " \t\r\n", &save);

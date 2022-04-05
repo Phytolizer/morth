@@ -12,6 +12,7 @@ const char* const morth_sources[] = {
         "run_command",
         "simulate",
         "stack",
+        "token",
 };
 #define MORTH_CFLAGS "-Wall", "-Wextra", "-Wpedantic", "-std=gnu99"
 
