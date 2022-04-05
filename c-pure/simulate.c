@@ -46,6 +46,9 @@ void simulate_program(program_t program) {
                     ip = op.operand;
                 }
             } break;
+            case op_code_else:
+                ip = op.operand;
+                break;
             case op_code_end:
                 ip++;
                 break;

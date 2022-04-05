@@ -43,6 +43,13 @@ op_t iff(token_t tok) {
     return result;
 }
 
+op_t elze(token_t tok) {
+    op_t result;
+    result.code = op_code_else;
+    result.tok = tok;
+    return result;
+}
+
 op_t end(token_t tok) {
     op_t result;
     result.code = op_code_end;

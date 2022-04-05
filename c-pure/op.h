@@ -12,6 +12,7 @@
     X(minus) \
     X(eq) \
     X(if) \
+    X(else) \
     X(end) \
     X(dump)
 
@@ -33,4 +34,5 @@ op_t dump(token_t tok);
 op_t minus(token_t tok);
 op_t eq(token_t tok);
 op_t iff(token_t tok);
+op_t elze(token_t tok);
 op_t end(token_t tok);

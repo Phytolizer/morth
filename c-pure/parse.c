@@ -24,6 +24,9 @@ op_t parse_token_as_op(token_t token) {
     if (strcmp(token.text, "end") == 0) {
         return end(token_dup(token));
     }
+    if (strcmp(token.text, "else") == 0) {
+        return elze(token_dup(token));
+    }
 
     char* endp;
     errno = 0;

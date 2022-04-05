@@ -90,6 +90,9 @@ void compile_program(program_t program, const char* out_file_path) {
                 EMIT("cmp rax, 0");
                 EMIT("je addr_%zu", op.operand);
                 break;
+            case op_code_else:
+                EMIT("jmp addr_%zu", op.operand);
+                break;
             case op_code_end:
                 break;
             case op_code_dump:
