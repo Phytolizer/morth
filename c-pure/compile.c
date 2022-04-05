@@ -120,6 +120,14 @@ void compile_program(program_t program, const char* out_file_path) {
                 EMIT("movzx rax, al");
                 EMIT("push rax");
                 break;
+            case op_code_lt:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("cmp rax, rdx");
+                EMIT("setl al");
+                EMIT("movzx rax, al");
+                EMIT("push rax");
+                break;
             default:
                 assert(false && "unhandled opcode");
         }

@@ -28,6 +28,8 @@ void cross_reference_blocks(program_t program) {
                 break;
             case op_code_gt:
                 break;
+            case op_code_lt:
+                break;
             case op_code_dup:
                 break;
             case op_code_if:

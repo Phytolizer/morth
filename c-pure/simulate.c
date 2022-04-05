@@ -50,6 +50,12 @@ void simulate_program(program_t program) {
                 stack_push(&stack, a > b);
                 ip++;
             } break;
+            case op_code_lt: {
+                int64_t b = stack_pop(&stack);
+                int64_t a = stack_pop(&stack);
+                stack_push(&stack, a < b);
+                ip++;
+            } break;
             case op_code_if: {
                 int64_t condition = stack_pop(&stack);
                 if (condition) {

@@ -84,3 +84,10 @@ op_t gt(token_t tok) {
     result.tok = tok;
     return result;
 }
+
+op_t lt(token_t tok) {
+    op_t result;
+    result.code = op_code_lt;
+    result.tok = tok;
+    return result;
+}
