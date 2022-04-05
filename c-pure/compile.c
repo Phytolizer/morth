@@ -75,6 +75,14 @@ void compile_program(program_t program, const char* out_file_path) {
                 EMIT("sub rax, rdx");
                 EMIT("push rax");
                 break;
+            case op_code_eq:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("cmp rax, rdx");
+                EMIT("sete al");
+                EMIT("movzx rax, al");
+                EMIT("push rax");
+                break;
             case op_code_dump:
                 EMIT("pop rdi");
                 EMIT("call dump");

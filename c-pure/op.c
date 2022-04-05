@@ -24,3 +24,9 @@ op_t minus(void) {
     result.code = op_code_minus;
     return result;
 }
+
+op_t eq(void) {
+    op_t result;
+    result.code = op_code_eq;
+    return result;
+}

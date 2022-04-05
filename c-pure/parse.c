@@ -15,6 +15,9 @@ op_t parse_token_as_op(token_t token) {
     if (strcmp(token.text, ".") == 0) {
         return dump();
     }
+    if (strcmp(token.text, "=") == 0) {
+        return eq();
+    }
 
     char* endp;
     errno = 0;

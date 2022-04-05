@@ -24,6 +24,11 @@ void simulate_program(program_t program) {
                 int64_t a = stack_pop(&stack);
                 stack_push(&stack, a - b);
             } break;
+            case op_code_eq: {
+                int64_t b = stack_pop(&stack);
+                int64_t a = stack_pop(&stack);
+                stack_push(&stack, a == b);
+            } break;
             case op_code_dump: {
                 int64_t value = stack_pop(&stack);
                 printf("%" PRId64 "\n", value);
