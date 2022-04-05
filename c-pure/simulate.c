@@ -87,6 +87,17 @@ void simulate_program(program_t program) {
                 stack_push(&stack, 0);
                 ip++;
                 break;
+            case op_code_load: {
+                int64_t address = stack_pop(&stack);
+                stack_push(&stack, mem[address]);
+                ip++;
+            } break;
+            case op_code_store: {
+                int64_t value = stack_pop(&stack);
+                int64_t address = stack_pop(&stack);
+                mem[address] = value;
+                ip++;
+            } break;
             default:
                 assert(false && "unhandled opcode");
         }
