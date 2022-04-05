@@ -42,4 +42,4 @@ build-c-pure-job:
     stage: build
     script:
         - cd c-pure && cc -o coolbuild coolbuild.c
-        - cd c-pure && ./coolbuild
+        - ./coolbuild
