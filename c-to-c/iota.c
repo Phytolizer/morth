@@ -28,19 +28,19 @@ typedef struct {
     size_t length;
 } string_view_t;
 
-#define TRY_T(T)                                                               \
-    struct {                                                                   \
-        T value;                                                               \
-        int error;                                                             \
+#define TRY_T(T) \
+    struct { \
+        T value; \
+        int error; \
     }
 
-#define IOTA_TOKENS_X                                                          \
-    X(invalid)                                                                 \
-    X(iota_kw)                                                                 \
-    X(identifier)                                                              \
-    X(equals)                                                                  \
-    X(left_brace)                                                              \
-    X(right_brace)                                                             \
+#define IOTA_TOKENS_X \
+    X(invalid) \
+    X(iota_kw) \
+    X(identifier) \
+    X(equals) \
+    X(left_brace) \
+    X(right_brace) \
     X(semicolon)
 
 typedef enum {
@@ -93,12 +93,10 @@ iota_token_t lex_token(string_view_t source, size_t* p_offset) {
         default:
             if (isalpha(source.data[*p_offset])) {
                 while (*p_offset < source.length &&
-                       (isalnum(source.data[*p_offset]) ||
-                        source.data[*p_offset] == '_')) {
+                        (isalnum(source.data[*p_offset]) || source.data[*p_offset] == '_')) {
                     *p_offset += 1;
                 }
-                if (*p_offset - start == 4 &&
-                    strncmp(&source.data[start], "iota", 4) == 0) {
+                if (*p_offset - start == 4 && strncmp(&source.data[start], "iota", 4) == 0) {
                     type = iota_token_iota_kw;
                 } else {
                     type = iota_token_identifier;
@@ -110,13 +108,13 @@ iota_token_t lex_token(string_view_t source, size_t* p_offset) {
     }
 
     return (iota_token_t){
-        .type = type,
-        .text =
-            (string_view_t){
-                .data = &source.data[start],
-                .length = *p_offset - start,
-            },
-        .begin_offset = start,
+            .type = type,
+            .text =
+                    (string_view_t){
+                            .data = &source.data[start],
+                            .length = *p_offset - start,
+                    },
+            .begin_offset = start,
     };
 }
 
@@ -132,8 +130,7 @@ try_iota_tokens_t lex_iota(string_view_t source) {
 
         if (tokens.length == capacity) {
             capacity = capacity * 2 + 1;
-            iota_token_t* new_data =
-                realloc(tokens.data, sizeof(iota_token_t) * capacity);
+            iota_token_t* new_data = realloc(tokens.data, sizeof(iota_token_t) * capacity);
             if (new_data == NULL) {
                 free(tokens.data);
                 return (try_iota_tokens_t){.error = ENOMEM};
@@ -174,14 +171,13 @@ typedef TRY_T(iota_t) try_iota_t;
 try_iota_t parse_iota(const char* input_path) {
     size_t file_size;
 #ifdef _WIN32
-    HANDLE fd = CreateFile(input_path, GENERIC_READ, FILE_SHARE_READ, NULL,
-                           OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE fd = CreateFile(input_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL, NULL);
     if (fd == INVALID_HANDLE_VALUE) {
         DWORD err = GetLastError();
         char* errbuf;
-        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                          FORMAT_MESSAGE_FROM_SYSTEM,
-                      NULL, err, 0, (LPSTR)&errbuf, 0, NULL);
+        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, err, 0,
+                (LPSTR)&errbuf, 0, NULL);
         fprintf(stderr, "opening %s: %s\n", input_path, errbuf);
         LocalFree(errbuf);
         return (try_iota_t){.error = WIN32_ERROR};
@@ -190,9 +186,8 @@ try_iota_t parse_iota(const char* input_path) {
     if (!GetFileSizeEx(fd, &file_size_large)) {
         DWORD err = GetLastError();
         char* errbuf;
-        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                          FORMAT_MESSAGE_FROM_SYSTEM,
-                      NULL, err, 0, (LPSTR)&errbuf, 0, NULL);
+        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, err, 0,
+                (LPSTR)&errbuf, 0, NULL);
         fprintf(stderr, "sizing %s: %s\n", input_path, errbuf);
         LocalFree(errbuf);
         return (try_iota_t){.error = WIN32_ERROR};
@@ -212,9 +207,8 @@ try_iota_t parse_iota(const char* input_path) {
     if (!ReadFile(fd, source_buf, file_size, NULL, NULL)) {
         DWORD err = GetLastError();
         char* errbuf;
-        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                          FORMAT_MESSAGE_FROM_SYSTEM,
-                      NULL, err, 0, (LPSTR)&errbuf, 0, NULL);
+        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, err, 0,
+                (LPSTR)&errbuf, 0, NULL);
         fprintf(stderr, "reading %s: %s\n", input_path, errbuf);
         LocalFree(errbuf);
         return (try_iota_t){.error = WIN32_ERROR};
@@ -229,53 +223,48 @@ try_iota_t parse_iota(const char* input_path) {
 #endif
     source_buf[file_size] = '\0';
     try_iota_tokens_t try_tokens =
-        lex_iota((string_view_t){.data = source_buf, .length = file_size});
+            lex_iota((string_view_t){.data = source_buf, .length = file_size});
     if (try_tokens.error != 0) {
         free(source_buf);
         return (try_iota_t){.error = try_tokens.error};
     }
     iota_tokens_t tokens = try_tokens.value;
     size_t index = 0;
-    if (index == tokens.length ||
-        tokens.data[index].type != iota_token_iota_kw) {
+    if (index == tokens.length || tokens.data[index].type != iota_token_iota_kw) {
         free(source_buf);
         free(tokens.data);
         return (try_iota_t){.error = IOTA_PARSE_NO_KW};
     }
     index += 1;
-    if (index == tokens.length ||
-        tokens.data[index].type != iota_token_identifier) {
+    if (index == tokens.length || tokens.data[index].type != iota_token_identifier) {
         free(source_buf);
         free(tokens.data);
         return (try_iota_t){.error = IOTA_PARSE_NO_NAME};
     }
     iota_t result = {
-        .name = tokens.data[index].text,
-        .source = (string_view_t){.data = source_buf, .length = file_size},
-        .variants = {0},
+            .name = tokens.data[index].text,
+            .source = (string_view_t){.data = source_buf, .length = file_size},
+            .variants = {0},
     };
     index += 1;
-    if (index == tokens.length ||
-        tokens.data[index].type != iota_token_equals) {
+    if (index == tokens.length || tokens.data[index].type != iota_token_equals) {
         free(source_buf);
         free(tokens.data);
         return (try_iota_t){.error = IOTA_PARSE_NO_EQUALS};
     }
     index += 1;
-    if (index == tokens.length ||
-        tokens.data[index].type != iota_token_left_brace) {
+    if (index == tokens.length || tokens.data[index].type != iota_token_left_brace) {
         free(source_buf);
         free(tokens.data);
         return (try_iota_t){.error = IOTA_PARSE_NO_LBRACE};
     }
     index += 1;
     size_t capacity = 0;
-    while (index < tokens.length &&
-           tokens.data[index].type == iota_token_identifier) {
+    while (index < tokens.length && tokens.data[index].type == iota_token_identifier) {
         if (result.variants.length == capacity) {
             capacity = capacity * 2 + 1;
             string_view_t* new_variants =
-                realloc(result.variants.data, sizeof(string_view_t) * capacity);
+                    realloc(result.variants.data, sizeof(string_view_t) * capacity);
             if (new_variants == NULL) {
                 free(source_buf);
                 free(tokens.data);
@@ -288,16 +277,14 @@ try_iota_t parse_iota(const char* input_path) {
         result.variants.length += 1;
         index += 1;
     }
-    if (index == tokens.length ||
-        tokens.data[index].type != iota_token_right_brace) {
+    if (index == tokens.length || tokens.data[index].type != iota_token_right_brace) {
         free(source_buf);
         free(result.variants.data);
         free(tokens.data);
         return (try_iota_t){.error = IOTA_PARSE_NO_RBRACE};
     }
     index += 1;
-    if (index == tokens.length ||
-        tokens.data[index].type != iota_token_semicolon) {
+    if (index == tokens.length || tokens.data[index].type != iota_token_semicolon) {
         free(source_buf);
         free(result.variants.data);
         free(tokens.data);
@@ -395,11 +382,9 @@ int main(int argc, char** argv) {
     FILE* outfp = fopen(output_path, "w");
 #endif
     fprintf(outfp, "#ifndef ");
-    gen_include_guard(outfp, (string_view_t){.data = output_path,
-                                             .length = strlen(output_path)});
+    gen_include_guard(outfp, (string_view_t){.data = output_path, .length = strlen(output_path)});
     fprintf(outfp, "\n#define ");
-    gen_include_guard(outfp, (string_view_t){.data = output_path,
-                                             .length = strlen(output_path)});
+    gen_include_guard(outfp, (string_view_t){.data = output_path, .length = strlen(output_path)});
     fprintf(outfp, "\n\n");
     gen_iota(outfp, iota);
     fprintf(outfp, "\n#endif\n");

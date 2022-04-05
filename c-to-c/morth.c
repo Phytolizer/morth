@@ -1,4 +1,5 @@
 #include "string_view.h"
+
 #include <config.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -29,10 +30,10 @@
 
 #define ERRBUF_SIZE 64
 
-#define TRY_T(T)                                                               \
-    struct {                                                                   \
-        T value;                                                               \
-        int error;                                                             \
+#define TRY_T(T) \
+    struct { \
+        T value; \
+        int error; \
     }
 
 typedef struct {
@@ -70,8 +71,7 @@ typedef struct {
 int simulation_stack_push(simulation_stack_t* stack, uint64_t value) {
     if (stack->length == stack->capacity) {
         stack->capacity = stack->capacity * 2 + 1;
-        uint64_t* new_data =
-            realloc(stack->data, sizeof(uint64_t) * stack->capacity);
+        uint64_t* new_data = realloc(stack->data, sizeof(uint64_t) * stack->capacity);
         if (new_data == NULL) {
             free(stack->data);
             stack->data = NULL;
@@ -194,8 +194,7 @@ static int run_subcommand(char* program, ...) {
     size_t argv_len = strlen(program) + 3; // '"program" '
     va_start(args, program);
     printf("> %s", program);
-    for (char* arg = va_arg(args, char*); arg != NULL;
-         arg = va_arg(args, char*)) {
+    for (char* arg = va_arg(args, char*); arg != NULL; arg = va_arg(args, char*)) {
         printf(" %s", arg);
         argv_len += strlen(arg) + 1;
     }
@@ -205,25 +204,24 @@ static int run_subcommand(char* program, ...) {
     char* command_line = malloc(argv_len + 1);
     sprintf(command_line, "\"%s\" ", program);
     va_start(args, program);
-    for (char* arg = va_arg(args, char*); arg != NULL;
-         arg = va_arg(args, char*)) {
+    for (char* arg = va_arg(args, char*); arg != NULL; arg = va_arg(args, char*)) {
         strcat_s(command_line, argv_len + 1, arg);
         strcat_s(command_line, argv_len + 1, " ");
     }
     va_end(args);
 
     STARTUPINFO startup_info = {
-        .cb = sizeof(STARTUPINFO),
-        .hStdError = GetStdHandle(STD_ERROR_HANDLE),
-        .hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE),
-        .hStdInput = GetStdHandle(STD_INPUT_HANDLE),
-        .dwFlags = STARTF_USESTDHANDLES,
+            .cb = sizeof(STARTUPINFO),
+            .hStdError = GetStdHandle(STD_ERROR_HANDLE),
+            .hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE),
+            .hStdInput = GetStdHandle(STD_INPUT_HANDLE),
+            .dwFlags = STARTF_USESTDHANDLES,
     };
 
     PROCESS_INFORMATION process_info = {0};
 
-    if (!CreateProcess(program, command_line, NULL, NULL, false, 0, NULL, NULL,
-                       &startup_info, &process_info)) {
+    if (!CreateProcess(program, command_line, NULL, NULL, false, 0, NULL, NULL, &startup_info,
+                &process_info)) {
         free(command_line);
         return ERR_WIN32_SPAWN;
     }
@@ -245,8 +243,7 @@ static int run_subcommand(char* program, ...) {
     size_t argv_count = 2; // program, NULL
     va_start(args, program);
     printf("> %s", program);
-    for (char* arg = va_arg(args, char*); arg != NULL;
-         arg = va_arg(args, char*)) {
+    for (char* arg = va_arg(args, char*); arg != NULL; arg = va_arg(args, char*)) {
         printf(" %s", arg);
         argv_count += 1;
     }
@@ -257,8 +254,7 @@ static int run_subcommand(char* program, ...) {
     argv[0] = program;
     va_start(args, program);
     size_t i = 1;
-    for (char* arg = va_arg(args, char*); arg != NULL;
-         arg = va_arg(args, char*)) {
+    for (char* arg = va_arg(args, char*); arg != NULL; arg = va_arg(args, char*)) {
         argv[i] = arg;
         i += 1;
     }
@@ -300,11 +296,13 @@ static int compile_program(program_t program) {
     fprintf(fp, "#include <string.h>\n");
     fprintf(fp, "#define ERRBUF_SIZE 64\n");
     fprintf(fp, "#ifdef _WIN32\n");
-    fprintf(fp, "#define STRERROR_R(error, buffer, size) strerror_s(buffer, "
-                "size, error)\n");
+    fprintf(fp,
+            "#define STRERROR_R(error, buffer, size) strerror_s(buffer, "
+            "size, error)\n");
     fprintf(fp, "#else\n");
-    fprintf(fp, "#define STRERROR_R(error, buffer, size) strerror_r(error, "
-                "buffer, size)\n");
+    fprintf(fp,
+            "#define STRERROR_R(error, buffer, size) strerror_r(error, "
+            "buffer, size)\n");
     fprintf(fp, "#endif\n");
     fprintf(fp, "typedef struct {\n");
     fprintf(fp, "    uint64_t* data;\n");
@@ -328,8 +326,9 @@ static int compile_program(program_t program) {
     fprintf(fp, "static int stack_push(uint64_t value) {\n");
     fprintf(fp, "    if (stack.length == stack.capacity) {\n");
     fprintf(fp, "        stack.capacity = stack.capacity * 2 + 1;\n");
-    fprintf(fp, "        uint64_t* new_stack = realloc(stack.data, "
-                "sizeof(uint64_t) * stack.capacity);\n");
+    fprintf(fp,
+            "        uint64_t* new_stack = realloc(stack.data, "
+            "sizeof(uint64_t) * stack.capacity);\n");
     fprintf(fp, "        if (new_stack == NULL) {\n");
     fprintf(fp, "            free(stack.data);\n");
     fprintf(fp, "            stack.data = NULL;\n");
@@ -343,24 +342,20 @@ static int compile_program(program_t program) {
     fprintf(fp, "    stack.length += 1;\n");
     fprintf(fp, "    return 0;\n");
     fprintf(fp, "}\n");
-    fprintf(fp,
-            "typedef struct { int error; uint64_t value; } try_uint64_t;\n");
+    fprintf(fp, "typedef struct { int error; uint64_t value; } try_uint64_t;\n");
     fprintf(fp, "static try_uint64_t stack_pop(void) {\n");
     fprintf(fp, "    if (stack.length == 0) {\n");
-    fprintf(fp,
-            "        return (try_uint64_t){.error = ERR_STACK_UNDERFLOW};\n");
+    fprintf(fp, "        return (try_uint64_t){.error = ERR_STACK_UNDERFLOW};\n");
     fprintf(fp, "    }\n");
     fprintf(fp, "    stack.length -= 1;\n");
-    fprintf(fp,
-            "    return (try_uint64_t){.value = stack.data[stack.length]};\n");
+    fprintf(fp, "    return (try_uint64_t){.value = stack.data[stack.length]};\n");
     fprintf(fp, "}\n");
     fprintf(fp, "int main(void) {\n");
     for (size_t i = 0; i < program.length; i += 1) {
         switch (program.data[i].code) {
             case op_code_push:
                 fprintf(fp, "    {\n");
-                fprintf(fp, "        int err = stack_push(%" PRIu64 ");\n",
-                        program.data[i].value);
+                fprintf(fp, "        int err = stack_push(%" PRIu64 ");\n", program.data[i].value);
                 fprintf(fp, "        if (err != 0) {\n");
                 fprintf(fp, "            print_error(err);\n");
                 fprintf(fp, "            return 1;\n");
@@ -379,8 +374,7 @@ static int compile_program(program_t program) {
                 fprintf(fp, "            print_error(a.error);\n");
                 fprintf(fp, "            return 1;\n");
                 fprintf(fp, "        }\n");
-                fprintf(fp,
-                        "        int err = stack_push(a.value + b.value);\n");
+                fprintf(fp, "        int err = stack_push(a.value + b.value);\n");
                 fprintf(fp, "        if (err != 0) {\n");
                 fprintf(fp, "            print_error(err);\n");
                 fprintf(fp, "            return 1;\n");
@@ -399,8 +393,7 @@ static int compile_program(program_t program) {
                 fprintf(fp, "            print_error(a.error);\n");
                 fprintf(fp, "            return 1;\n");
                 fprintf(fp, "        }\n");
-                fprintf(fp,
-                        "        int err = stack_push(a.value - b.value);\n");
+                fprintf(fp, "        int err = stack_push(a.value - b.value);\n");
                 fprintf(fp, "        if (err != 0) {\n");
                 fprintf(fp, "            print_error(err);\n");
                 fprintf(fp, "            return 1;\n");
@@ -414,9 +407,7 @@ static int compile_program(program_t program) {
                 fprintf(fp, "            print_error(value.error);\n");
                 fprintf(fp, "            return 1;\n");
                 fprintf(fp, "        }\n");
-                fprintf(
-                    fp,
-                    "        printf(\"%%\" PRIu64 \"\\n\", value.value);\n");
+                fprintf(fp, "        printf(\"%%\" PRIu64 \"\\n\", value.value);\n");
                 fprintf(fp, "    }\n");
                 break;
             case count_op_code:
@@ -427,8 +418,7 @@ static int compile_program(program_t program) {
     fprintf(fp, "    free(stack.data);\n");
     fprintf(fp, "}\n");
     fclose(fp);
-    int error =
-        run_subcommand(CC, "-O2", "output.c", "-o", "output" EXE_SUFFIX, NULL);
+    int error = run_subcommand(CC, "-O2", "output.c", "-o", "output" EXE_SUFFIX, NULL);
     if (error != 0) {
         return error;
     }
@@ -452,19 +442,16 @@ typedef struct {
     size_t capacity;
 } tokens_builder_t;
 
-static int lex_line(string_view_t file_path, size_t line_index,
-                    string_view_t line, tokens_builder_t* tokens) {
+static int lex_line(
+        string_view_t file_path, size_t line_index, string_view_t line, tokens_builder_t* tokens) {
     string_view_t cursor = line;
     while (true) {
-        cursor = string_view_advance(
-            cursor, string_view_span(cursor, STRING_VIEW_C(" \t\r")));
-        size_t token_end =
-            string_view_compl_span(cursor, STRING_VIEW_C(" \t\r\n"));
+        cursor = string_view_advance(cursor, string_view_span(cursor, STRING_VIEW_C(" \t\r")));
+        size_t token_end = string_view_compl_span(cursor, STRING_VIEW_C(" \t\r\n"));
 
         if (tokens->value.length == tokens->capacity) {
             tokens->capacity = tokens->capacity * 2 + 1;
-            token_t* new_tokens =
-                realloc(tokens->value.data, sizeof(token_t) * tokens->capacity);
+            token_t* new_tokens = realloc(tokens->value.data, sizeof(token_t) * tokens->capacity);
             if (new_tokens == NULL) {
                 free(tokens->value.data);
                 tokens->value.data = NULL;
@@ -475,10 +462,10 @@ static int lex_line(string_view_t file_path, size_t line_index,
             tokens->value.data = new_tokens;
         }
         tokens->value.data[tokens->value.length] = (token_t){
-            .file_path = file_path,
-            .line = line_index + 1,
-            .column = cursor.data - line.data + 1,
-            .text = string_view_new(cursor.data, token_end),
+                .file_path = file_path,
+                .line = line_index + 1,
+                .column = cursor.data - line.data + 1,
+                .text = string_view_new(cursor.data, token_end),
         };
         tokens->value.length += 1;
 
@@ -537,16 +524,15 @@ static try_lexed_file_t lex_file(char* file_path) {
             line = new_line;
             memcpy(line + line_len, line_buffer, buffer_len);
             line_len += buffer_len;
-            if (final_iteration ||
-                fgets(line_buffer, sizeof line_buffer, fp) == NULL) {
+            if (final_iteration || fgets(line_buffer, sizeof line_buffer, fp) == NULL) {
                 break;
             }
             buffer_len = strlen(line_buffer);
         }
         if (lines.value.length == lines.capacity) {
             lines.capacity = lines.capacity * 2 + 1;
-            string_view_t* new_lines = realloc(
-                lines.value.data, sizeof(string_view_t) * lines.capacity);
+            string_view_t* new_lines =
+                    realloc(lines.value.data, sizeof(string_view_t) * lines.capacity);
             if (new_lines == NULL) {
                 free(line);
                 fclose(fp);
@@ -568,8 +554,7 @@ static try_lexed_file_t lex_file(char* file_path) {
     size_t file_path_len = strlen(file_path);
     string_view_t file_path_view = string_view_new(file_path, file_path_len);
     for (size_t i = 0; i < lines.value.length; i += 1) {
-        int error =
-            lex_line(file_path_view, i, lines.value.data[i], &tokens_builder);
+        int error = lex_line(file_path_view, i, lines.value.data[i], &tokens_builder);
         if (error != 0) {
             free(tokens_builder.value.data);
             for (size_t i = 0; i < lines.value.length; i += 1) {
@@ -580,7 +565,7 @@ static try_lexed_file_t lex_file(char* file_path) {
         }
     }
     return (try_lexed_file_t){
-        .value = {.tokens = tokens_builder.value, .lines = lines.value},
+            .value = {.tokens = tokens_builder.value, .lines = lines.value},
     };
 }
 
@@ -624,10 +609,9 @@ static try_program_t parse_program(char* input_file_path) {
 
     lexed_file_t lexed_file = try_lexed_file.value;
     program_t program = {
-        .data = lexed_file.tokens.length == 0
-                    ? NULL
-                    : malloc(sizeof(op_t) * lexed_file.tokens.length),
-        .length = lexed_file.tokens.length,
+            .data = lexed_file.tokens.length == 0 ? NULL
+                                                  : malloc(sizeof(op_t) * lexed_file.tokens.length),
+            .length = lexed_file.tokens.length,
     };
 
     for (size_t i = 0; i < lexed_file.tokens.length; i += 1) {
@@ -673,9 +657,9 @@ char* args_next(args_t* args) {
 
 int main(int argc, char** argv) {
     args_t args = {
-        .argc = argc,
-        .argv = argv,
-        .pos = 0,
+            .argc = argc,
+            .argv = argv,
+            .pos = 0,
     };
     char* program_name = args_next(&args);
     char* subcommand = args_next(&args);
