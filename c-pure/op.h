@@ -20,7 +20,9 @@
     X(do) \
     X(gt) \
     X(lt) \
-    X(mem)
+    X(mem) \
+    X(load) \
+    X(store)
 
 typedef enum {
 #define X(name) op_code_##name,
@@ -48,3 +50,5 @@ op_t doo(token_t tok);
 op_t gt(token_t tok);
 op_t lt(token_t tok);
 op_t mem(token_t tok);
+op_t load(token_t tok);
+op_t store(token_t tok);

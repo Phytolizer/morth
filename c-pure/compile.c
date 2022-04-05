@@ -62,6 +62,7 @@ void compile_program(program_t program, const char* out_file_path) {
     for (size_t i = 0; i < program.length; i++) {
         op_t op = program.begin[i];
         LABL("addr_%zu", i);
+        EMIT(";; -- '%s' --", op.tok.text);
         switch (op.code) {
             case op_code_push:
                 EMIT("push %" PRId64, op.operand);
@@ -131,6 +132,17 @@ void compile_program(program_t program, const char* out_file_path) {
                 break;
             case op_code_mem:
                 EMIT("push mem");
+                break;
+            case op_code_load:
+                EMIT("pop rax");
+                EMIT("xor rbx, rbx");
+                EMIT("mov bl, [rax]");
+                EMIT("push rbx");
+                break;
+            case op_code_store:
+                EMIT("pop rbx");
+                EMIT("pop rax");
+                EMIT("mov [rax], bl");
                 break;
             default:
                 assert(false && "unhandled opcode");

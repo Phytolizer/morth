@@ -98,3 +98,17 @@ op_t mem(token_t tok) {
     result.tok = tok;
     return result;
 }
+
+op_t load(token_t tok) {
+    op_t result;
+    result.code = op_code_load;
+    result.tok = tok;
+    return result;
+}
+
+op_t store(token_t tok) {
+    op_t result;
+    result.code = op_code_store;
+    result.tok = tok;
+    return result;
+}
