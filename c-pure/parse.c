@@ -18,12 +18,18 @@ op_t parse_token_as_op(token_t token) {
     if (strcmp(token.text, "=") == 0) {
         return eq();
     }
+    if (strcmp(token.text, "if") == 0) {
+        return iff();
+    }
+    if (strcmp(token.text, "end") == 0) {
+        return end();
+    }
 
     char* endp;
     errno = 0;
     long long operand = strtoll(token.text, &endp, 10);
     if (errno != 0 || *endp != '\0' || operand < INT64_MIN || operand > INT64_MAX) {
-        fprintf(stderr, "%s:%zu:%zu: Invalid token %s\n", token.file_path, token.row, token.col,
+        fprintf(stderr, "%s:%zu:%zu: Invalid token '%s'\n", token.file_path, token.row, token.col,
                 token.text);
         exit(EXIT_FAILURE);
     }

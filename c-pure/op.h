@@ -7,6 +7,8 @@
     X(plus) \
     X(minus) \
     X(eq) \
+    X(if) \
+    X(end) \
     X(dump)
 
 typedef enum {
@@ -25,3 +27,5 @@ op_t plus(void);
 op_t dump(void);
 op_t minus(void);
 op_t eq(void);
+op_t iff(void);
+op_t end(void);

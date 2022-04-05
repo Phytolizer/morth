@@ -1,5 +1,6 @@
 #include "args_iterator.h"
 #include "compile.h"
+#include "cross_reference.h"
 #include "load.h"
 #include "run_command.h"
 #include "simulate.h"
@@ -37,6 +38,7 @@ int main(int argc, char** argv) {
         }
         char* input_file_path = args_next(&args);
         program_t program = load_program_from_file(input_file_path);
+        cross_reference_blocks(program);
         simulate_program(program);
         free(program.begin);
     } else if (strcmp(subcommand, "com") == 0) {
@@ -47,6 +49,7 @@ int main(int argc, char** argv) {
         }
         char* input_file_path = args_next(&args);
         program_t program = load_program_from_file(input_file_path);
+        cross_reference_blocks(program);
         compile_program(program, "output.asm");
         free(program.begin);
         RUN_COMMAND("nasm", "-f", "elf64", "-o", "output.o", "output.asm");

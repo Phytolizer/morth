@@ -3,6 +3,7 @@
 const char* const morth_sources[] = {
         "args_iterator",
         "compile",
+        "cross_reference",
         "load",
         "main",
         "nasm_emitter",
@@ -40,6 +41,7 @@ int main(int argc, char** argv) {
             newargv[0] = "build/morth";
             memcpy(newargv + 1, argv + 2, sizeof(char*) * newargc);
             newargv[newargc + 1] = NULL;
+            echo_cmd(newargv);
             coolbuild_exec(newargv);
         } else {
             printf("Unknown command: %s\n", argv[1]);

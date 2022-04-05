@@ -30,3 +30,15 @@ op_t eq(void) {
     result.code = op_code_eq;
     return result;
 }
+
+op_t iff(void) {
+    op_t result;
+    result.code = op_code_if;
+    return result;
+}
+
+op_t end(void) {
+    op_t result;
+    result.code = op_code_end;
+    return result;
+}
