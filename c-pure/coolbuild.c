@@ -2,6 +2,9 @@
 
 const char* const morth_sources[] = {
         "main",
+        "op",
+        "simulate",
+        "stack",
 };
 #define MORTH_CFLAGS "-Wall", "-Wextra", "-Wpedantic"
 
