@@ -38,6 +38,7 @@ int main(int argc, char** argv) {
         char* input_file_path = args_next(&args);
         program_t program = load_program_from_file(input_file_path);
         simulate_program(program);
+        free(program.begin);
     } else if (strcmp(subcommand, "com") == 0) {
         if (args_curr(&args) == NULL) {
             usage(program_name);
@@ -47,6 +48,7 @@ int main(int argc, char** argv) {
         char* input_file_path = args_next(&args);
         program_t program = load_program_from_file(input_file_path);
         compile_program(program, "output.asm");
+        free(program.begin);
         RUN_COMMAND("nasm", "-f", "elf64", "-o", "output.o", "output.asm");
         RUN_COMMAND("ld", "-o", "output", "output.o");
     } else {

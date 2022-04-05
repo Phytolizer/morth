@@ -53,4 +53,6 @@ void run_command_impl(int ignore, ...) {
         fprintf(stderr, "[ERR] Command failed: %s (%d)\n", argv[0], status);
         exit(EXIT_FAILURE);
     }
+
+    free(argv);
 }
