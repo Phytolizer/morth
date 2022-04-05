@@ -20,8 +20,8 @@ op_t parse_token_as_op(token_t token) {
     errno = 0;
     long long operand = strtoll(token.text, &endp, 10);
     if (errno != 0 || *endp != '\0' || operand < INT64_MIN || operand > INT64_MAX) {
-        fprintf(stderr, "[ERROR] %s:%zu:%zu: Invalid token %s\n", token.file_path, token.row,
-                token.col, token.text);
+        fprintf(stderr, "%s:%zu:%zu: Invalid token %s\n", token.file_path, token.row, token.col,
+                token.text);
         exit(EXIT_FAILURE);
     }
 
