@@ -42,6 +42,11 @@ int main(int argc, char** argv) {
         simulate_program(program);
         free(program.begin);
     } else if (strcmp(subcommand, "com") == 0) {
+        bool run = false;
+        if (strcmp(args_curr(&args), "-r") == 0) {
+            args_next(&args);
+            run = true;
+        }
         if (args_curr(&args) == NULL) {
             usage(program_name);
             printf("ERROR: no input file provided for 'com'\n");
@@ -54,6 +59,9 @@ int main(int argc, char** argv) {
         free(program.begin);
         RUN_COMMAND("nasm", "-f", "elf64", "-o", "output.o", "output.asm");
         RUN_COMMAND("ld", "-o", "output", "output.o");
+        if (run) {
+            RUN_COMMAND("./output");
+        }
     } else {
         printf("Unknown subcommand: %s\n", argv[1]);
         return EXIT_FAILURE;
