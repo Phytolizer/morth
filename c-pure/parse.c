@@ -12,7 +12,7 @@ op_t parse_token_as_op(token_t token) {
     if (strcmp(token.text, "-") == 0) {
         return minus(token_dup(token));
     }
-    if (strcmp(token.text, ".") == 0) {
+    if (strcmp(token.text, "dump") == 0) {
         return dump(token_dup(token));
     }
     if (strcmp(token.text, "=") == 0) {
