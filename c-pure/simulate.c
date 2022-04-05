@@ -1,5 +1,6 @@
 #include "simulate.h"
 
+#include "memory.h"
 #include "stack.h"
 
 #include <assert.h>
@@ -8,6 +9,7 @@
 
 void simulate_program(program_t program) {
     stack_t stack = STACK_INIT;
+    uint8_t mem[MEM_CAPACITY];
     for (size_t ip = 0; ip < program.length;) {
         op_t op = program.begin[ip];
         switch (op.code) {
@@ -80,6 +82,10 @@ void simulate_program(program_t program) {
             } break;
             case op_code_end:
                 ip = op.operand;
+                break;
+            case op_code_mem:
+                stack_push(&stack, 0);
+                ip++;
                 break;
             default:
                 assert(false && "unhandled opcode");

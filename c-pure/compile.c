@@ -1,5 +1,6 @@
 #include "compile.h"
 
+#include "memory.h"
 #include "nasm_emitter.h"
 
 #include <assert.h>
@@ -128,6 +129,9 @@ void compile_program(program_t program, const char* out_file_path) {
                 EMIT("movzx rax, al");
                 EMIT("push rax");
                 break;
+            case op_code_mem:
+                EMIT("push mem");
+                break;
             default:
                 assert(false && "unhandled opcode");
         }
@@ -137,6 +141,8 @@ void compile_program(program_t program, const char* out_file_path) {
     EMIT("mov rax, 60");
     EMIT("mov rdi, 0");
     EMIT("syscall");
+    EMIT("segment .bss");
+    EMIT("mem: resb %d", MEM_CAPACITY);
 
 #undef LABL
 #undef EMIT

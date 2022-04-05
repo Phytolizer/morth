@@ -19,7 +19,8 @@
     X(while) \
     X(do) \
     X(gt) \
-    X(lt)
+    X(lt) \
+    X(mem)
 
 typedef enum {
 #define X(name) op_code_##name,
@@ -46,3 +47,4 @@ op_t wile(token_t tok);
 op_t doo(token_t tok);
 op_t gt(token_t tok);
 op_t lt(token_t tok);
+op_t mem(token_t tok);

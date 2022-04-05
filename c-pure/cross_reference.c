@@ -32,6 +32,8 @@ void cross_reference_blocks(program_t program) {
                 break;
             case op_code_dup:
                 break;
+            case op_code_mem:
+                break;
             case op_code_if:
                 size_stack_push(&stack, ip);
                 break;
