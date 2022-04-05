@@ -1,15 +1,18 @@
 #include "coolbuild.h"
 
 const char* const morth_sources[] = {
+        "args_iterator",
         "compile",
+        "load",
         "main",
         "nasm_emitter",
         "op",
+        "parse",
         "run_command",
         "simulate",
         "stack",
 };
-#define MORTH_CFLAGS "-Wall", "-Wextra", "-Wpedantic"
+#define MORTH_CFLAGS "-Wall", "-Wextra", "-Wpedantic", "-std=gnu99"
 
 const char* cc(void) {
     const char* result = getenv("CC");

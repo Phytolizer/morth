@@ -1,5 +1,7 @@
 #pragma once
 
+#include "span.h"
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -24,3 +26,5 @@
                     realloc((buffer)->data, (buffer)->capacity * sizeof((buffer)->data[0])); \
         } \
     } while (false)
+
+#define BUFFER_AS_SPAN(buffer) SPAN_WITH_LENGTH((buffer).data, (buffer).length)

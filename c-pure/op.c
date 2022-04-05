@@ -18,3 +18,9 @@ op_t dump(void) {
     result.code = op_code_dump;
     return result;
 }
+
+op_t minus(void) {
+    op_t result;
+    result.code = op_code_minus;
+    return result;
+}

@@ -5,6 +5,7 @@
 #define OP_CODES_X \
     X(push) \
     X(plus) \
+    X(minus) \
     X(dump)
 
 typedef enum {
@@ -21,3 +22,4 @@ typedef struct {
 op_t push(int64_t operand);
 op_t plus(void);
 op_t dump(void);
+op_t minus(void);
