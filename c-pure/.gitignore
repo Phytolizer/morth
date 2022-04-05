@@ -3,3 +3,4 @@
 /coolbuild
 /coolbuild.old
 compile_commands.json
+output.*

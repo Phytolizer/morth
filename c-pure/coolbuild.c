@@ -1,7 +1,9 @@
 #include "coolbuild.h"
 
 const char* const morth_sources[] = {
+        "compile",
         "main",
+        "nasm_emitter",
         "op",
         "simulate",
         "stack",
@@ -29,7 +31,12 @@ int main(int argc, char** argv) {
 
     if (argc > 1) {
         if (strcmp(argv[1], "run") == 0) {
-            CMD(PATH("build", "morth"));
+            int newargc = argc - 2;
+            char** newargv = malloc(sizeof(char*) * (newargc + 2));
+            newargv[0] = "build/morth";
+            memcpy(newargv + 1, argv + 2, sizeof(char*) * newargc);
+            newargv[newargc + 1] = NULL;
+            coolbuild_exec(newargv);
         } else {
             printf("Unknown command: %s\n", argv[1]);
             return EXIT_FAILURE;
