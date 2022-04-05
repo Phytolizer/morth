@@ -146,12 +146,12 @@ void mkdirs_impl(int ignore, ...) {
         result[length] = '\0';
         if (mkdir(result, 0755) < 0) {
             if (errno != EEXIST) {
-                fprintf(stderr, "[ERROR] Could not create directory '%s': %s\n", result,
+                fprintf(stderr, "[CB][ERROR] Could not create directory '%s': %s\n", result,
                         strerror(errno));
                 exit(1);
             }
         } else {
-            printf("[INFO] mkdir %s\n", result);
+            printf("[CB][INFO] mkdir %s\n", result);
         }
 
         if (seps > 0) {
@@ -187,25 +187,25 @@ const char* concat_impl(int ignore, ...) {
 void coolbuild_exec(char** argv) {
     pid_t pid = fork();
     if (pid == -1) {
-        fprintf(stderr, "[ERROR] Could not fork: %s\n", strerror(errno));
+        fprintf(stderr, "[CB][ERROR] Could not fork: %s\n", strerror(errno));
         exit(1);
     }
     if (pid == 0) {
         execvp(argv[0], argv);
-        fprintf(stderr, "[ERROR] Could not execute %s: %s\n", argv[0], strerror(errno));
+        fprintf(stderr, "[CB][ERROR] Could not execute %s: %s\n", argv[0], strerror(errno));
         exit(1);
     }
 
     int status;
     waitpid(pid, &status, 0);
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-        fprintf(stderr, "[ERROR] Subcommand reported non-zero status %d\n", status);
+        fprintf(stderr, "[CB][ERROR] Subcommand reported non-zero status %d\n", status);
         exit(1);
     }
 }
 
 void echo_cmd(char** argv) {
-    printf("[INFO]");
+    printf("[CB][INFO]");
     for (size_t i = 0; argv[i] != NULL; i++) {
         printf(" %s", argv[i]);
     }
@@ -237,7 +237,7 @@ void cmd_impl(int ignore, ...) {
     va_start(args, ignore);
     const char* command_message = vconcat_sep_impl(" ", args);
     va_end(args);
-    printf("[INFO] %s\n", command_message);
+    printf("[CB][INFO] %s\n", command_message);
 
     coolbuild_exec(argv);
 }

@@ -5,6 +5,7 @@ const char* const morth_sources[] = {
         "main",
         "nasm_emitter",
         "op",
+        "run_command",
         "simulate",
         "stack",
 };
