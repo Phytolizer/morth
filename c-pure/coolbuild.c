@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
     const char** objects;
     COMPILE_OBJECTS(morth_sources, MORTH_CFLAGS, &objects);
-    char** build_morth = collect_args("vvvp", cc(), objects, "-o", PATH("build", "morth"));
+    char** build_morth = collect_args("vpvv", cc(), objects, "-o", PATH("build", "morth"));
     echo_cmd(build_morth);
     coolbuild_exec(build_morth);
 
