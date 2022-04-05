@@ -14,7 +14,11 @@
     X(if) \
     X(else) \
     X(end) \
-    X(dump)
+    X(dump) \
+    X(dup) \
+    X(while) \
+    X(do) \
+    X(gt)
 
 typedef enum {
 #define X(name) op_code_##name,
@@ -36,3 +40,7 @@ op_t eq(token_t tok);
 op_t iff(token_t tok);
 op_t elze(token_t tok);
 op_t end(token_t tok);
+op_t dupp(token_t tok);
+op_t wile(token_t tok);
+op_t doo(token_t tok);
+op_t gt(token_t tok);

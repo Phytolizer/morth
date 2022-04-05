@@ -27,6 +27,18 @@ op_t parse_token_as_op(token_t token) {
     if (strcmp(token.text, "else") == 0) {
         return elze(token_dup(token));
     }
+    if (strcmp(token.text, "dup") == 0) {
+        return dupp(token_dup(token));
+    }
+    if (strcmp(token.text, "while") == 0) {
+        return wile(token_dup(token));
+    }
+    if (strcmp(token.text, "do") == 0) {
+        return doo(token_dup(token));
+    }
+    if (strcmp(token.text, ">") == 0) {
+        return gt(token_dup(token));
+    }
 
     char* endp;
     errno = 0;

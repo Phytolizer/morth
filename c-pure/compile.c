@@ -94,16 +94,38 @@ void compile_program(program_t program, const char* out_file_path) {
                 EMIT("jmp addr_%zu", op.operand);
                 break;
             case op_code_end:
+                EMIT("jmp addr_%zu", op.operand);
                 break;
             case op_code_dump:
                 EMIT("pop rdi");
                 EMIT("call dump");
+                break;
+            case op_code_dup:
+                EMIT("pop rax");
+                EMIT("push rax");
+                EMIT("push rax");
+                break;
+            case op_code_while:
+                break;
+            case op_code_do:
+                EMIT("pop rax");
+                EMIT("cmp rax, 0");
+                EMIT("je addr_%zu", op.operand);
+                break;
+            case op_code_gt:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("cmp rax, rdx");
+                EMIT("setg al");
+                EMIT("movzx rax, al");
+                EMIT("push rax");
                 break;
             default:
                 assert(false && "unhandled opcode");
         }
     }
 
+    LABL("addr_%zu", program.length);
     EMIT("mov rax, 60");
     EMIT("mov rdi, 0");
     EMIT("syscall");

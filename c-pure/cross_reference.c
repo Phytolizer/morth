@@ -26,6 +26,10 @@ void cross_reference_blocks(program_t program) {
                 break;
             case op_code_dump:
                 break;
+            case op_code_gt:
+                break;
+            case op_code_dup:
+                break;
             case op_code_if:
                 size_stack_push(&stack, ip);
                 break;
@@ -34,12 +38,32 @@ void cross_reference_blocks(program_t program) {
                 program.begin[if_ip].operand = ip + 1;
                 size_stack_push(&stack, ip);
             } break;
+            case op_code_while:
+                size_stack_push(&stack, ip);
+                break;
+            case op_code_do: {
+                size_t while_ip = size_stack_pop(&stack);
+                program.begin[ip].operand = while_ip;
+                size_stack_push(&stack, ip);
+            } break;
             case op_code_end: {
                 if (stack.length == 0) {
                     die_unbalanced_token(op.tok);
                 }
-                size_t if_ip = size_stack_pop(&stack);
-                program.begin[if_ip].operand = ip;
+                size_t block_ip = size_stack_pop(&stack);
+                switch (program.begin[block_ip].code) {
+                    case op_code_if:
+                        program.begin[block_ip].operand = ip;
+                        program.begin[ip].operand = ip + 1;
+                        break;
+                    case op_code_do: {
+                        size_t while_ip = program.begin[block_ip].operand;
+                        program.begin[block_ip].operand = ip + 1;
+                        program.begin[ip].operand = while_ip;
+                    } break;
+                    default:
+                        die_unbalanced_token(program.begin[block_ip].tok);
+                }
             } break;
             default:
                 assert(false && "unhandled opcode");

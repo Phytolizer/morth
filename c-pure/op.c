@@ -56,3 +56,31 @@ op_t end(token_t tok) {
     result.tok = tok;
     return result;
 }
+
+op_t dupp(token_t tok) {
+    op_t result;
+    result.code = op_code_dup;
+    result.tok = tok;
+    return result;
+}
+
+op_t wile(token_t tok) {
+    op_t result;
+    result.code = op_code_while;
+    result.tok = tok;
+    return result;
+}
+
+op_t doo(token_t tok) {
+    op_t result;
+    result.code = op_code_do;
+    result.tok = tok;
+    return result;
+}
+
+op_t gt(token_t tok) {
+    op_t result;
+    result.code = op_code_gt;
+    result.tok = tok;
+    return result;
+}
