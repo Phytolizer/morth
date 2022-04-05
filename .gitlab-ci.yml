@@ -37,3 +37,9 @@ build-cs-job:
     stage: build
     script:
         - dotnet test cs/morth.sln
+
+build-c-pure-job:
+    stage: build
+    script:
+        - cd build/c-pure && cc -o coolbuild coolbuild.c
+        - cd build/c-pure && ./coolbuild
