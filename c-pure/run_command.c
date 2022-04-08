@@ -51,7 +51,7 @@ void run_command_impl(int ignore, ...) {
     waitpid(pid, &status, 0);
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         fprintf(stderr, "[ERR] Command failed: %s (%d)\n", argv[0], status);
-        exit(EXIT_FAILURE);
+        exit(WEXITSTATUS(status));
     }
 
     free(argv);

@@ -23,6 +23,7 @@
     X(mem) \
     X(load) \
     X(store) \
+    X(syscall1) \
     X(syscall3)
 
 typedef enum {
@@ -53,4 +54,5 @@ op_t lt(token_t tok);
 op_t mem(token_t tok);
 op_t load(token_t tok);
 op_t store(token_t tok);
+op_t syscall1(token_t tok);
 op_t syscall3(token_t tok);

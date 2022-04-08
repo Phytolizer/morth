@@ -113,6 +113,13 @@ op_t store(token_t tok) {
     return result;
 }
 
+op_t syscall1(token_t tok) {
+    op_t result;
+    result.code = op_code_syscall1;
+    result.tok = tok;
+    return result;
+}
+
 op_t syscall3(token_t tok) {
     op_t result;
     result.code = op_code_syscall3;

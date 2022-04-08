@@ -17,7 +17,7 @@ const char* const morth_sources[] = {
 #define MORTH_CFLAGS \
     "-Wall", "-Wextra", "-Wpedantic", "-Wmissing-prototypes", "-std=gnu99", "-ggdb3"
 
-const char* cc(void) {
+static const char* cc(void) {
     const char* result = getenv("CC");
     if (result == NULL) {
         result = "cc";

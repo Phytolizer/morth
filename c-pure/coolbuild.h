@@ -77,7 +77,7 @@
         (*(objects))[i] = NULL; \
     } while (false)
 
-const char* vconcat_sep_impl(const char* sep, va_list args) {
+static inline const char* vconcat_sep_impl(const char* sep, va_list args) {
     size_t length = 0;
     int64_t seps = -1;
     size_t sep_len = strlen(sep);
@@ -113,7 +113,7 @@ const char* vconcat_sep_impl(const char* sep, va_list args) {
     return result;
 }
 
-const char* concat_sep_impl(const char* sep, ...) {
+static inline const char* concat_sep_impl(const char* sep, ...) {
     va_list args;
     va_start(args, sep);
     const char* result = vconcat_sep_impl(sep, args);
@@ -126,7 +126,7 @@ const char* concat_sep_impl(const char* sep, ...) {
 
 #define PATH(...) CONCAT_SEP(PATH_SEPARATOR, __VA_ARGS__)
 
-void mkdirs_impl(int ignore, ...) {
+static inline void mkdirs_impl(int ignore, ...) {
     size_t length = 0;
     int64_t seps = -1;
 
@@ -164,7 +164,7 @@ void mkdirs_impl(int ignore, ...) {
 
 #define MKDIRS(...) mkdirs_impl(0, __VA_ARGS__, NULL)
 
-const char* concat_impl(int ignore, ...) {
+static inline const char* concat_impl(int ignore, ...) {
     size_t length = 0;
 
     FOREACH_VARARGS(const char*, arg, ignore, { length += strlen(arg); });
@@ -184,7 +184,7 @@ const char* concat_impl(int ignore, ...) {
 
 #define CONCAT(...) concat_impl(0, __VA_ARGS__, NULL)
 
-void coolbuild_exec(char** argv) {
+static inline void coolbuild_exec(char** argv) {
     pid_t pid = fork();
     if (pid == -1) {
         fprintf(stderr, "[CB][ERROR] Could not fork: %s\n", strerror(errno));
@@ -200,11 +200,11 @@ void coolbuild_exec(char** argv) {
     waitpid(pid, &status, 0);
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         fprintf(stderr, "[CB][ERROR] Subcommand reported non-zero status %d\n", status);
-        exit(1);
+        exit(WEXITSTATUS(status));
     }
 }
 
-void echo_cmd(char** argv) {
+static inline void echo_cmd(char** argv) {
     printf("[CB][INFO]");
     for (size_t i = 0; argv[i] != NULL; i++) {
         printf(" %s", argv[i]);
@@ -212,7 +212,7 @@ void echo_cmd(char** argv) {
     printf("\n");
 }
 
-void cmd_impl(int ignore, ...) {
+static inline void cmd_impl(int ignore, ...) {
     size_t argc = 0;
 
     FOREACH_VARARGS(const char*, arg, ignore, {
@@ -244,7 +244,7 @@ void cmd_impl(int ignore, ...) {
 
 #define CMD(...) cmd_impl(0, __VA_ARGS__, NULL)
 
-char** collect_args(char* fmt, ...) {
+static inline char** collect_args(char* fmt, ...) {
     size_t length = 0;
     va_list args;
     va_start(args, fmt);
