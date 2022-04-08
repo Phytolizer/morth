@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
+#include <unistd.h>
 
 void simulate_program(program_t program) {
     stack_t stack = STACK_INIT;
@@ -96,6 +97,24 @@ void simulate_program(program_t program) {
                 int64_t value = stack_pop(&stack);
                 int64_t address = stack_pop(&stack);
                 mem[address] = value;
+                ip++;
+            } break;
+            case op_code_syscall1:
+                assert(false && "unhandled syscall");
+            case op_code_syscall3: {
+                int64_t syscall_number = stack_pop(&stack);
+                int64_t arg1 = stack_pop(&stack);
+                int64_t arg2 = stack_pop(&stack);
+                int64_t arg3 = stack_pop(&stack);
+                if (syscall_number == 1) {
+                    int64_t fd = arg1;
+                    int64_t buf = arg2;
+                    int64_t count = arg3;
+                    uint8_t* s = &mem[buf];
+                    write(fd, s, count);
+                } else {
+                    assert(false && "unhandled syscall");
+                }
                 ip++;
             } break;
             default:
