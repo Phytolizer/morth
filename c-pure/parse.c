@@ -51,6 +51,9 @@ op_t parse_token_as_op(token_t token) {
     if (strcmp(token.text, ".") == 0) {
         return store(token_dup(token));
     }
+    if (strcmp(token.text, "syscall3") == 0) {
+        return syscall3(token_dup(token));
+    }
 
     char* endp;
     errno = 0;

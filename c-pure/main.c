@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void usage(char* program_name) {
+static void usage(char* program_name) {
     printf("Usage: %s <SUBCOMMAND> [ARGS]\n", program_name);
     printf("SUBCOMMANDS:\n");
     printf("  sim <FILE>                Simulate the program\n");

@@ -144,6 +144,13 @@ void compile_program(program_t program, const char* out_file_path) {
                 EMIT("pop rax");
                 EMIT("mov [rax], bl");
                 break;
+            case op_code_syscall3:
+                EMIT("pop rax");
+                EMIT("pop rdi");
+                EMIT("pop rsi");
+                EMIT("pop rdx");
+                EMIT("syscall");
+                break;
             default:
                 assert(false && "unhandled opcode");
         }
