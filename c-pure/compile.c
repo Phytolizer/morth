@@ -158,6 +158,14 @@ void compile_program(program_t program, const char* out_file_path) {
                 EMIT("pop rdx");
                 EMIT("syscall");
                 break;
+            case op_code_dup2:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("push rax");
+                EMIT("push rdx");
+                EMIT("push rax");
+                EMIT("push rdx");
+                break;
             default:
                 assert(false && "unhandled opcode");
         }

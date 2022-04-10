@@ -117,6 +117,15 @@ void simulate_program(program_t program) {
                 }
                 ip++;
             } break;
+            case op_code_dup2: {
+                int64_t b = stack_pop(&stack);
+                int64_t a = stack_pop(&stack);
+                stack_push(&stack, a);
+                stack_push(&stack, b);
+                stack_push(&stack, a);
+                stack_push(&stack, b);
+                ip++;
+            } break;
             default:
                 assert(false && "unhandled opcode");
         }

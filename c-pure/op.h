@@ -24,7 +24,8 @@
     X(load) \
     X(store) \
     X(syscall1) \
-    X(syscall3)
+    X(syscall3) \
+    X(dup2)
 
 typedef enum {
 #define X(name) op_code_##name,
@@ -56,3 +57,4 @@ op_t load(token_t tok);
 op_t store(token_t tok);
 op_t syscall1(token_t tok);
 op_t syscall3(token_t tok);
+op_t dupp2(token_t tok);
