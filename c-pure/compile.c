@@ -24,10 +24,11 @@ void compile_program(program_t program, const char* out_file_path) {
     nasm_emitter_t em = nasm_emitter_from_fd(raw_out);
 
 #define EMIT(...) nasm_emitter_emit(&em, __VA_ARGS__)
+#define LEFT(...) nasm_emitter_emit_left(&em, __VA_ARGS__)
 #define LABL(...) nasm_emitter_emit_label(&em, __VA_ARGS__)
+#define LINE() nasm_emitter_emit_left(&em, "")
 
-    EMIT("section .text");
-
+    LEFT("section .text");
     LABL("dump");
     EMIT("sub rsp, 40");
     EMIT("lea rsi, [rsp + 31]");
@@ -55,12 +56,13 @@ void compile_program(program_t program, const char* out_file_path) {
     EMIT("syscall");
     EMIT("add rsp, 40");
     EMIT("ret");
-
+    LINE();
     EMIT("global _start");
     LABL("_start");
 
     for (size_t i = 0; i < program.length; i++) {
         op_t op = program.begin[i];
+        LINE();
         LABL("addr_%zu", i);
         EMIT(";; -- '%s' --", op.tok.text);
         switch (op.code) {
@@ -165,10 +167,13 @@ void compile_program(program_t program, const char* out_file_path) {
     EMIT("mov rax, 60");
     EMIT("mov rdi, 0");
     EMIT("syscall");
-    EMIT("segment .bss");
+    LINE();
+    LEFT("segment .bss");
     EMIT("mem: resb %d", MEM_CAPACITY);
 
 #undef LABL
+#undef LEFT
+#undef LINE
 #undef EMIT
 
     fclose(em.fp);
