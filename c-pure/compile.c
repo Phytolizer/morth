@@ -171,6 +171,7 @@ void compile_program(program_t program, const char* out_file_path) {
         }
     }
 
+    LINE();
     LABL("addr_%zu", program.length);
     EMIT("mov rax, 60");
     EMIT("mov rdi, 0");
