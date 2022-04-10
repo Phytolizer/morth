@@ -166,6 +166,46 @@ void compile_program(program_t program, const char* out_file_path) {
                 EMIT("push rax");
                 EMIT("push rdx");
                 break;
+            case op_code_drop:
+                EMIT("pop rax");
+                break;
+            case op_code_shr:
+                EMIT("pop rcx");
+                EMIT("pop rax");
+                EMIT("shr rax, cl");
+                EMIT("push rax");
+                break;
+            case op_code_shl:
+                EMIT("pop rcx");
+                EMIT("pop rax");
+                EMIT("shl rax, cl");
+                EMIT("push rax");
+                break;
+            case op_code_bor:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("or rax, rdx");
+                EMIT("push rax");
+                break;
+            case op_code_band:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("and rax, rdx");
+                EMIT("push rax");
+                break;
+            case op_code_swap:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("push rdx");
+                EMIT("push rax");
+                break;
+            case op_code_over:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("push rax");
+                EMIT("push rdx");
+                EMIT("push rax");
+                break;
             default:
                 assert(false && "unhandled opcode");
         }

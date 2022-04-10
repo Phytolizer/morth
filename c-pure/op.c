@@ -133,3 +133,52 @@ op_t dupp2(token_t tok) {
     result.tok = tok;
     return result;
 }
+
+op_t drop(token_t tok) {
+    op_t result;
+    result.code = op_code_drop;
+    result.tok = tok;
+    return result;
+}
+
+op_t shr(token_t tok) {
+    op_t result;
+    result.code = op_code_shr;
+    result.tok = tok;
+    return result;
+}
+
+op_t shl(token_t tok) {
+    op_t result;
+    result.code = op_code_shl;
+    result.tok = tok;
+    return result;
+}
+
+op_t bor(token_t tok) {
+    op_t result;
+    result.code = op_code_bor;
+    result.tok = tok;
+    return result;
+}
+
+op_t band(token_t tok) {
+    op_t result;
+    result.code = op_code_band;
+    result.tok = tok;
+    return result;
+}
+
+op_t swap(token_t tok) {
+    op_t result;
+    result.code = op_code_swap;
+    result.tok = tok;
+    return result;
+}
+
+op_t over(token_t tok) {
+    op_t result;
+    result.code = op_code_over;
+    result.tok = tok;
+    return result;
+}

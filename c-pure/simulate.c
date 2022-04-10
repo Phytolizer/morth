@@ -126,6 +126,49 @@ void simulate_program(program_t program) {
                 stack_push(&stack, b);
                 ip++;
             } break;
+            case op_code_drop:
+                stack_pop(&stack);
+                ip++;
+                break;
+            case op_code_shr: {
+                int64_t b = stack_pop(&stack);
+                int64_t a = stack_pop(&stack);
+                stack_push(&stack, a >> b);
+                ip++;
+            } break;
+            case op_code_shl: {
+                int64_t b = stack_pop(&stack);
+                int64_t a = stack_pop(&stack);
+                stack_push(&stack, a << b);
+                ip++;
+            } break;
+            case op_code_bor: {
+                int64_t b = stack_pop(&stack);
+                int64_t a = stack_pop(&stack);
+                stack_push(&stack, a | b);
+                ip++;
+            } break;
+            case op_code_band: {
+                int64_t b = stack_pop(&stack);
+                int64_t a = stack_pop(&stack);
+                stack_push(&stack, a & b);
+                ip++;
+            } break;
+            case op_code_swap: {
+                int64_t b = stack_pop(&stack);
+                int64_t a = stack_pop(&stack);
+                stack_push(&stack, b);
+                stack_push(&stack, a);
+                ip++;
+            } break;
+            case op_code_over: {
+                int64_t b = stack_pop(&stack);
+                int64_t a = stack_pop(&stack);
+                stack_push(&stack, a);
+                stack_push(&stack, b);
+                stack_push(&stack, a);
+                ip++;
+            } break;
             default:
                 assert(false && "unhandled opcode");
         }
