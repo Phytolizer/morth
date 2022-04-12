@@ -7,6 +7,19 @@
     },
     "configurePresets": [
         {
+            "name": "vcpkg",
+            "hidden": true,
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        },
+        {
+            "name": "flags-windows",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_FLAGS": "/utf-8 /W4 /permissive- /volatile:iso /Zc:preprocessor",
+                "CMAKE_CXX_FLAGS": "/utf-8 /W4 /permissive- /volatile:iso /Zc:preprocessor /EHsc /Zc:__cplusplus /Zc:externConstexpr /Zc:throwingNew"
+            }
+        },
+        {
             "name": "default",
             "displayName": "C++ Default Config",
             "description": "Default configuration for C++ using Ninja",
