@@ -24,10 +24,11 @@ void compile_program(program_t program, const char* out_file_path) {
     nasm_emitter_t em = nasm_emitter_from_fd(raw_out);
 
 #define EMIT(...) nasm_emitter_emit(&em, __VA_ARGS__)
+#define LEFT(...) nasm_emitter_emit_left(&em, __VA_ARGS__)
 #define LABL(...) nasm_emitter_emit_label(&em, __VA_ARGS__)
+#define LINE() nasm_emitter_emit_left(&em, "")
 
-    EMIT("section .text");
-
+    LEFT("section .text");
     LABL("dump");
     EMIT("sub rsp, 40");
     EMIT("lea rsi, [rsp + 31]");
@@ -55,12 +56,13 @@ void compile_program(program_t program, const char* out_file_path) {
     EMIT("syscall");
     EMIT("add rsp, 40");
     EMIT("ret");
-
+    LINE();
     EMIT("global _start");
     LABL("_start");
 
     for (size_t i = 0; i < program.length; i++) {
         op_t op = program.begin[i];
+        LINE();
         LABL("addr_%zu", i);
         EMIT(";; -- '%s' --", op.tok.text);
         switch (op.code) {
@@ -156,19 +158,71 @@ void compile_program(program_t program, const char* out_file_path) {
                 EMIT("pop rdx");
                 EMIT("syscall");
                 break;
+            case op_code_dup2:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("push rax");
+                EMIT("push rdx");
+                EMIT("push rax");
+                EMIT("push rdx");
+                break;
+            case op_code_drop:
+                EMIT("pop rax");
+                break;
+            case op_code_shr:
+                EMIT("pop rcx");
+                EMIT("pop rax");
+                EMIT("shr rax, cl");
+                EMIT("push rax");
+                break;
+            case op_code_shl:
+                EMIT("pop rcx");
+                EMIT("pop rax");
+                EMIT("shl rax, cl");
+                EMIT("push rax");
+                break;
+            case op_code_bor:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("or rax, rdx");
+                EMIT("push rax");
+                break;
+            case op_code_band:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("and rax, rdx");
+                EMIT("push rax");
+                break;
+            case op_code_swap:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("push rdx");
+                EMIT("push rax");
+                break;
+            case op_code_over:
+                EMIT("pop rdx");
+                EMIT("pop rax");
+                EMIT("push rax");
+                EMIT("push rdx");
+                EMIT("push rax");
+                break;
             default:
                 assert(false && "unhandled opcode");
         }
     }
 
+    LINE();
     LABL("addr_%zu", program.length);
     EMIT("mov rax, 60");
     EMIT("mov rdi, 0");
     EMIT("syscall");
-    EMIT("segment .bss");
+    LINE();
+    LEFT("segment .bss");
     EMIT("mem: resb %d", MEM_CAPACITY);
 
 #undef LABL
+#undef LEFT
+#undef LINE
 #undef EMIT
 
     fclose(em.fp);

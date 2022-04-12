@@ -17,6 +17,14 @@ void nasm_emitter_emit_label(nasm_emitter_t* emitter, const char* format, ...) {
     fputs(":\n", emitter->fp);
 }
 
+void nasm_emitter_emit_left(nasm_emitter_t* emitter, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vfprintf(emitter->fp, format, args);
+    va_end(args);
+    fputc('\n', emitter->fp);
+}
+
 void nasm_emitter_emit(nasm_emitter_t* emitter, const char* format, ...) {
     fputs("    ", emitter->fp);
     va_list args;

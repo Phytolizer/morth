@@ -42,6 +42,22 @@ void cross_reference_blocks(program_t program) {
                 break;
             case op_code_syscall3:
                 break;
+            case op_code_dup2:
+                break;
+            case op_code_drop:
+                break;
+            case op_code_shr:
+                break;
+            case op_code_shl:
+                break;
+            case op_code_bor:
+                break;
+            case op_code_band:
+                break;
+            case op_code_swap:
+                break;
+            case op_code_over:
+                break;
             case op_code_if:
                 size_stack_push(&stack, ip);
                 break;
@@ -65,6 +81,7 @@ void cross_reference_blocks(program_t program) {
                 size_t block_ip = size_stack_pop(&stack);
                 switch (program.begin[block_ip].code) {
                     case op_code_if:
+                    case op_code_else:
                         program.begin[block_ip].operand = ip;
                         program.begin[ip].operand = ip + 1;
                         break;

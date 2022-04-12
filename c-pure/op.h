@@ -24,7 +24,15 @@
     X(load) \
     X(store) \
     X(syscall1) \
-    X(syscall3)
+    X(syscall3) \
+    X(dup2) \
+    X(drop) \
+    X(shr) \
+    X(shl) \
+    X(bor) \
+    X(band) \
+    X(swap) \
+    X(over)
 
 typedef enum {
 #define X(name) op_code_##name,
@@ -56,3 +64,11 @@ op_t load(token_t tok);
 op_t store(token_t tok);
 op_t syscall1(token_t tok);
 op_t syscall3(token_t tok);
+op_t dupp2(token_t tok);
+op_t drop(token_t tok);
+op_t shr(token_t tok);
+op_t shl(token_t tok);
+op_t bor(token_t tok);
+op_t band(token_t tok);
+op_t swap(token_t tok);
+op_t over(token_t tok);

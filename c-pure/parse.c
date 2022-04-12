@@ -57,6 +57,30 @@ op_t parse_token_as_op(token_t token) {
     if (strcmp(token.text, "syscall3") == 0) {
         return syscall3(token_dup(token));
     }
+    if (strcmp(token.text, "2dup") == 0) {
+        return dupp2(token_dup(token));
+    }
+    if (strcmp(token.text, "drop") == 0) {
+        return drop(token_dup(token));
+    }
+    if (strcmp(token.text, "shr") == 0) {
+        return shr(token_dup(token));
+    }
+    if (strcmp(token.text, "shl") == 0) {
+        return shl(token_dup(token));
+    }
+    if (strcmp(token.text, "bor") == 0) {
+        return bor(token_dup(token));
+    }
+    if (strcmp(token.text, "band") == 0) {
+        return band(token_dup(token));
+    }
+    if (strcmp(token.text, "swap") == 0) {
+        return swap(token_dup(token));
+    }
+    if (strcmp(token.text, "over") == 0) {
+        return over(token_dup(token));
+    }
 
     char* endp;
     errno = 0;
