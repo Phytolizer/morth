@@ -1,0 +1,5 @@
+0
+while dup 10 < do /// hello
+    dup dump
+    1 +
+end

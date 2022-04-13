@@ -28,12 +28,14 @@ Program LoadProgramFromFile(const std::string& inputFilePath) {
     Size row = 1;
     while (std::getline(inputFile, line)) {
         auto wordStart = std::find_if(line.begin(), line.end(), nonSpace);
-        Size col = 1;
         while (wordStart != line.end()) {
             auto wordEnd = std::find_if(wordStart, line.end(), space);
-            col = wordStart - line.begin();
-            auto tok =
-                Token{std::string{wordStart, wordEnd}, SourceLocation{inputFilePath, row, col}};
+            Size col = wordStart - line.begin() + 1;
+            auto word = std::string{wordStart, wordEnd};
+            if (word == "//") {
+                break;
+            }
+            auto tok = Token{word, SourceLocation{inputFilePath, row, col}};
             program.emplace_back(ParseTokenAsOp(tok));
             wordStart = std::find_if(wordEnd, line.end(), nonSpace);
         }
