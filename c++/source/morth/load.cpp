@@ -30,7 +30,7 @@ Program LoadProgramFromFile(const std::string& inputFilePath) {
         auto wordStart = std::find_if(line.begin(), line.end(), nonSpace);
         while (wordStart != line.end()) {
             auto wordEnd = std::find_if(wordStart, line.end(), space);
-            Size col = wordStart - line.begin() + 1;
+            Size col = static_cast<Size>(wordStart - line.begin() + 1);
             auto word = std::string{wordStart, wordEnd};
             if (word == "//") {
                 break;
