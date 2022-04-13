@@ -11,8 +11,6 @@ template <typename ValueType, typename Container = std::vector<ValueType>> class
     OwningSpan() = default;
     // NOLINTNEXTLINE(google-explicit-constructor)
     inline OwningSpan(Container&& data) : m_data(std::move(data)) {}
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    inline OwningSpan(Container data) : m_data(std::move(data)) {}
 
     inline auto begin() const {
         return m_data.begin();
