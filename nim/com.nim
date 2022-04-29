@@ -1,0 +1,45 @@
+import op
+import std/[
+  strformat,
+]
+
+const STACK_LL = readFile("stack.ll")
+
+var register: uint64 = 1
+
+proc allocateRegister: uint64 =
+  result = register
+  register += 1
+
+proc compileProgram*(program: openArray[Op]) =
+  let f = open("output.ll", fmWrite)
+  defer: f.close()
+
+  f.writeLine(STACK_LL)
+  f.writeLine("; Generated code follows.")
+  f.writeLine("")
+  f.writeLine("define i64 @main() {")
+  for op in program:
+    case op.code:
+    of OpCode.PUSH:
+      f.writeLine(fmt"  call void(i64) @push(i64 {op.operand})")
+    of OpCode.PLUS:
+      let b = allocateRegister()
+      f.writeLine(fmt"  %{b} = call i64() @pop()")
+      let a = allocateRegister()
+      f.writeLine(fmt"  %{a} = call i64() @pop()")
+      let res = allocateRegister()
+      f.writeLine(fmt"  %{res} = add i64 %{a}, %{b}")
+    of OpCode.MINUS:
+      let b = allocateRegister()
+      f.writeLine(fmt"  %{b} = call i64() @pop()")
+      let a = allocateRegister()
+      f.writeLine(fmt"  %{a} = call i64() @pop()")
+      let res = allocateRegister()
+      f.writeLine(fmt"  %{res} = sub i64 %{a}, %{b}")
+    of OpCode.DUMP:
+      discard
+    else:
+      raiseAssert("unreachable")
+  f.writeLine("  ret i64 0")
+  f.writeLine("}")

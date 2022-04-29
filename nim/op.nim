@@ -1,5 +1,5 @@
 type
-  Word* = int64
+  Word* = uint64
 
   OpCode* {.pure.} = enum
     PUSH

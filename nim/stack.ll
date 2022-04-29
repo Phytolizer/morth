@@ -78,47 +78,47 @@ define i64 @pop() {
 ; The `declare` keyword allows the declaration of external globals
 ; which can then be used, and will be resolved by the linker.
 
-declare i64 @printf(i8* noalias nocapture, ...)
+;declare i64 @printf(i8* noalias nocapture, ...)
 
 ; String literals are defined as global constants.
 ;  - private = only directly accessible to things in this module
 ;  - unnamed_addr = the address doesn't matter, only the value
 
-@welcome = private unnamed_addr constant [49 x i8] c"barrucadu's wonderful LLVM stack implementation\0A\00"
-@pushing = private unnamed_addr constant [12 x i8] c"Pushing %i\0A\00"
-@popped  = private unnamed_addr constant [11 x i8] c"Popped %i\0A\00"
+;@welcome = private unnamed_addr constant [49 x i8] c"barrucadu's wonderful LLVM stack implementation\0A\00"
+;@pushing = private unnamed_addr constant [12 x i8] c"Pushing %i\0A\00"
+;@popped  = private unnamed_addr constant [11 x i8] c"Popped %i\0A\00"
 
-define i64 @main() {
-    ; printf doesn't take an array of characters, it takes a pointer
-    ; to the start of an array of characters! So, we have to get one
-    ; using our old friend `getelementptr`.
-
-    %welcomeptr = getelementptr [49 x i8], [49 x i8]* @welcome, i64 0, i64 0
-    call i64 (i8*, ...) @printf(i8* %welcomeptr)
-
-    ; Let's try pushing some values
-    %pushingptr = getelementptr [12 x i8], [12 x i8]* @pushing, i64 0, i64 0
-
-    call i64(i8*, ...) @printf(i8* %pushingptr, i64 1)
-    call void(i64) @push(i64 1)
-
-    call i64(i8*, ...) @printf(i8* %pushingptr, i64 10)
-    call void(i64) @push(i64 10)
-
-    call i64(i8*, ...) @printf(i8* %pushingptr, i64 100)
-    call void(i64) @push(i64 100)
-
-    ; And popping them again
-    %poppedptr = getelementptr [11 x i8], [11 x i8]* @popped, i64 0, i64 0
-
-    %first  = call i64() @pop()
-    %second = call i64() @pop()
-    %third  = call i64() @pop()
-
-    call i64(i8*, ...) @printf(i8* %poppedptr, i64 %first)
-    call i64(i8*, ...) @printf(i8* %poppedptr, i64 %second)
-    call i64(i8*, ...) @printf(i8* %poppedptr, i64 %third)
-
-    ; Return EXIT_SUCCESS
-    ret i64 0
-}
+;define i64 @main() {
+;    ; printf doesn't take an array of characters, it takes a pointer
+;    ; to the start of an array of characters! So, we have to get one
+;    ; using our old friend `getelementptr`.
+;
+;    %welcomeptr = getelementptr [49 x i8], [49 x i8]* @welcome, i64 0, i64 0
+;    call i64 (i8*, ...) @printf(i8* %welcomeptr)
+;
+;    ; Let's try pushing some values
+;    %pushingptr = getelementptr [12 x i8], [12 x i8]* @pushing, i64 0, i64 0
+;
+;    call i64(i8*, ...) @printf(i8* %pushingptr, i64 1)
+;    call void(i64) @push(i64 1)
+;
+;    call i64(i8*, ...) @printf(i8* %pushingptr, i64 10)
+;    call void(i64) @push(i64 10)
+;
+;    call i64(i8*, ...) @printf(i8* %pushingptr, i64 100)
+;    call void(i64) @push(i64 100)
+;
+;    ; And popping them again
+;    %poppedptr = getelementptr [11 x i8], [11 x i8]* @popped, i64 0, i64 0
+;
+;    %first  = call i64() @pop()
+;    %second = call i64() @pop()
+;    %third  = call i64() @pop()
+;
+;    call i64(i8*, ...) @printf(i8* %poppedptr, i64 %first)
+;    call i64(i8*, ...) @printf(i8* %poppedptr, i64 %second)
+;    call i64(i8*, ...) @printf(i8* %poppedptr, i64 %third)
+;
+;    ; Return EXIT_SUCCESS
+;    ret i64 0
+;}

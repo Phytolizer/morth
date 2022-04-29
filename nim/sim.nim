@@ -1,20 +1,23 @@
 import op
 
-proc simulateProgram*(program: openArray[Op]) =
+static:
   assert int(OpCode.COUNT) == 4
+
+proc simulateProgram*(program: openArray[Op]) =
   var stack: seq[Word] = @[]
   for op in program:
-    if op.code == OpCode.PUSH:
+    case op.code:
+    of OpCode.PUSH:
       stack.add(op.operand)
-    elif op.code == OpCode.PLUS:
+    of OpCode.PLUS:
       let b = stack.pop()
       let a = stack.pop()
       stack.add(a + b)
-    elif op.code == OpCode.MINUS:
+    of OpCode.MINUS:
       let b = stack.pop()
       let a = stack.pop()
       stack.add(a - b)
-    elif op.code == OpCode.DUMP:
+    of OpCode.DUMP:
       let val = stack.pop()
       echo val
     else:
