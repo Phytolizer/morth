@@ -45,6 +45,16 @@ proc compileProgram*(program: openArray[Op], outPath: string) =
       let val = allocateRegister()
       f.writeLine(fmt"  %{val} = call i64() @pop()")
       f.writeLine(fmt"  call void(i64) @dump(i64 %{val})")
+    of OpCode.EQ:
+      let b = allocateRegister()
+      f.writeLine(fmt"  %{b} = call i64() @pop()")
+      let a = allocateRegister()
+      f.writeLine(fmt"  %{a} = call i64() @pop()")
+      let res = allocateRegister()
+      f.writeLine(fmt"  %{res} = icmp eq i64 %{a}, %{b}")
+      let res2 = allocateRegister()
+      f.writeLine(fmt"  %{res2} = zext i1 %{res} to i64")
+      f.writeLine(fmt"  call void(i64) @push(i64 %{res2})")
     else:
       raiseAssert("unreachable")
   f.writeLine("  ret i64 0")

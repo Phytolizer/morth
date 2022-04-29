@@ -6,6 +6,7 @@ type
     PLUS
     MINUS
     DUMP
+    EQ
     COUNT
 
   Op* = object
@@ -24,3 +25,6 @@ func opMinus*: Op =
 
 func opDump*: Op =
   result.code = OpCode.DUMP
+
+func opEq*: Op =
+  result.code = OpCode.EQ

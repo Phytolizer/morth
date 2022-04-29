@@ -13,6 +13,8 @@ proc parseTokenAsOp*(tok: Token): Op =
     return opMinus()
   of ".":
     return opDump()
+  of "=":
+    return opEq()
   else:
     try:
       return opPush(parseBiggestUInt(tok.text))
