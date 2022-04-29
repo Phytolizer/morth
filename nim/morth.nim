@@ -14,6 +14,10 @@ proc usage =
   stderr.writeLine "  com             Compile the program"
   stderr.writeLine "  help            Print this help message"
 
+proc cmdEchoed(cmd: string) =
+  echo "[CMD] " & cmd
+  discard execShellCmd(cmd)
+
 when isMainModule:
   if paramCount() < 1:
     usage()
@@ -45,10 +49,10 @@ when isMainModule:
 
     let program = loadProgramFromFile(filePath)
     let (dir, file, _) = splitFile(filePath)
-    let outputPath = dir & file
+    let outputPath = dir & "/" & file
     let llPath = outputPath & ".ll"
-    compileProgram(program, outputPath)
-    discard execShellCmd(fmt"clang -o {outputPath}{ExeExt} {llPath} dump.ll")
+    compileProgram(program, llPath)
+    cmdEchoed(fmt"clang -o {outputPath}{ExeExt} {llPath} dump.ll")
   of "help":
     usage()
   else:
