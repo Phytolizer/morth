@@ -1,6 +1,7 @@
 import op
 
 proc simulateProgram*(program: openArray[Op]) =
+  assert int(OpCode.COUNT) == 3
   var stack: seq[Word] = @[]
   for op in program:
     if op.code == OpCode.PUSH:

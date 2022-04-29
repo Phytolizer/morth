@@ -5,6 +5,7 @@ type
     PUSH
     PLUS
     DUMP
+    COUNT
 
   Op* = object
     code*: OpCode
