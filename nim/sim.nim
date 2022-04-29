@@ -1,7 +1,7 @@
 import op
 
 proc simulateProgram*(program: openArray[Op]) =
-  assert int(OpCode.COUNT) == 3
+  assert int(OpCode.COUNT) == 4
   var stack: seq[Word] = @[]
   for op in program:
     if op.code == OpCode.PUSH:
@@ -10,6 +10,10 @@ proc simulateProgram*(program: openArray[Op]) =
       let b = stack.pop()
       let a = stack.pop()
       stack.add(a + b)
+    elif op.code == OpCode.MINUS:
+      let b = stack.pop()
+      let a = stack.pop()
+      stack.add(a - b)
     elif op.code == OpCode.DUMP:
       let val = stack.pop()
       echo val

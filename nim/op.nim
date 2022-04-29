@@ -4,6 +4,7 @@ type
   OpCode* {.pure.} = enum
     PUSH
     PLUS
+    MINUS
     DUMP
     COUNT
 
@@ -17,6 +18,9 @@ func opPush*(x: Word): Op =
 
 func opPlus*: Op =
   result.code = OpCode.PLUS
+
+func opMinus*: Op =
+  result.code = OpCode.MINUS
 
 func opDump*: Op =
   result.code = OpCode.DUMP

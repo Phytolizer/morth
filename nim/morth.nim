@@ -7,6 +7,10 @@ const
     opPush(35),
     opPlus(),
     opDump(),
+    opPush(500),
+    opPush(80),
+    opMinus(),
+    opDump(),
   ]
 
 when isMainModule:
