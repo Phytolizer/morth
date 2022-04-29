@@ -51,6 +51,7 @@ when isMainModule:
     let (dir, file, _) = splitFile(filePath)
     let outputPath = dir & "/" & file
     let llPath = outputPath & ".ll"
+    echo fmt"[INFO] Generating {llPath}"
     compileProgram(program, llPath)
     cmdEchoed(fmt"clang -o {outputPath}{ExeExt} {llPath} dump.ll")
   of "help":
