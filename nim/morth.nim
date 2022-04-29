@@ -3,6 +3,7 @@ import sim
 import com
 import std/[
   os,
+  strformat,
 ]
 
 const
@@ -34,6 +35,7 @@ when isMainModule:
     simulateProgram(PROGRAM)
   of "com":
     compileProgram(PROGRAM)
+    discard execShellCmd(fmt"clang -o output{ExeExt} output.ll")
   else:
     usage()
     stderr.writeLine "ERROR: unknown subcommand `" & paramStr(1) & "`"
