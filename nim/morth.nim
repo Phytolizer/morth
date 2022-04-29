@@ -8,7 +8,7 @@ import std/[
 ]
 
 proc usage =
-  stderr.writeLine "Usage: morth <SUBCOMMAND> [ARGS]"
+  stderr.writeLine fmt"Usage: {getAppFilename()} <SUBCOMMAND> [ARGS]"
   stderr.writeLine "SUBCOMMANDS:"
   stderr.writeLine "  sim             Simulate the program"
   stderr.writeLine "  com             Compile the program"
