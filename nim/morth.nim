@@ -1,22 +1,11 @@
 import op
 import sim
 import com
+import load
 import std/[
   os,
   strformat,
 ]
-
-const
-  PROGRAM = [
-    opPush(34),
-    opPush(35),
-    opPlus(),
-    opDump(),
-    opPush(500),
-    opPush(80),
-    opMinus(),
-    opDump(),
-  ]
 
 proc usage =
   stderr.writeLine "Usage: morth <SUBCOMMAND> [ARGS]"
@@ -30,11 +19,31 @@ when isMainModule:
     stderr.writeLine "ERROR: no subcommand provided"
     quit 1
 
-  case paramStr(1):
+  var i = 1
+  let subcommand = paramStr(i)
+  i += 1
+
+  case subcommand:
   of "sim":
-    simulateProgram(PROGRAM)
+    if paramCount() < i:
+      usage()
+      stderr.writeLine "ERROR: no input file provided"
+      quit 1
+    let filePath = paramStr(i)
+    i += 1
+
+    let program = loadProgramFromFile(filePath)
+    simulateProgram(program)
   of "com":
-    compileProgram(PROGRAM)
+    if paramCount() < i:
+      usage()
+      stderr.writeLine "ERROR: no input file provided"
+      quit 1
+    let filePath = paramStr(i)
+    i += 1
+
+    let program = loadProgramFromFile(filePath)
+    compileProgram(program)
     discard execShellCmd(fmt"clang -o output{ExeExt} output.ll dump.ll")
   else:
     usage()
