@@ -12,6 +12,7 @@ proc usage =
   stderr.writeLine "SUBCOMMANDS:"
   stderr.writeLine "  sim             Simulate the program"
   stderr.writeLine "  com             Compile the program"
+  stderr.writeLine "  help            Print this help message"
 
 when isMainModule:
   if paramCount() < 1:
@@ -45,6 +46,8 @@ when isMainModule:
     let program = loadProgramFromFile(filePath)
     compileProgram(program)
     discard execShellCmd(fmt"clang -o output{ExeExt} output.ll dump.ll")
+  of "help":
+    usage()
   else:
     usage()
     stderr.writeLine "ERROR: unknown subcommand `" & paramStr(1) & "`"
