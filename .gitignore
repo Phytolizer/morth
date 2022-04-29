@@ -10,6 +10,7 @@ cmake-build-*/
 output
 *.exe
 *.o
+*.out
 *.hi
 /Morth
 /.cache/
