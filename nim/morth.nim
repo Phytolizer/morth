@@ -44,8 +44,11 @@ when isMainModule:
     i += 1
 
     let program = loadProgramFromFile(filePath)
-    compileProgram(program)
-    discard execShellCmd(fmt"clang -o output{ExeExt} output.ll dump.ll")
+    let (dir, file, _) = splitFile(filePath)
+    let outputPath = dir & file
+    let llPath = outputPath & ".ll"
+    compileProgram(program, outputPath)
+    discard execShellCmd(fmt"clang -o {outputPath}{ExeExt} {llPath} dump.ll")
   of "help":
     usage()
   else:

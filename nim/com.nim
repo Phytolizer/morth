@@ -11,8 +11,8 @@ proc allocateRegister: uint64 =
   result = register
   register += 1
 
-proc compileProgram*(program: openArray[Op]) =
-  let f = open("output.ll", fmWrite)
+proc compileProgram*(program: openArray[Op], outPath: string) =
+  let f = open(outPath, fmWrite)
   defer: f.close()
 
   f.writeLine(STACK_LL)
