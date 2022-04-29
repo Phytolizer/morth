@@ -4,7 +4,6 @@ import std/[
 ]
 
 const STACK_LL = readFile("stack.ll")
-const DUMP_LL = readFile("dump.ll")
 
 var register: uint64 = 1
 
