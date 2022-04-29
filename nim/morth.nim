@@ -35,7 +35,7 @@ when isMainModule:
     simulateProgram(PROGRAM)
   of "com":
     compileProgram(PROGRAM)
-    discard execShellCmd(fmt"clang -o output{ExeExt} output.ll")
+    discard execShellCmd(fmt"clang -o output{ExeExt} output.ll dump.ll")
   else:
     usage()
     stderr.writeLine "ERROR: unknown subcommand `" & paramStr(1) & "`"

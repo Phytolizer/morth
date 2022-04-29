@@ -4,6 +4,7 @@ import std/[
 ]
 
 const STACK_LL = readFile("stack.ll")
+const DUMP_LL = readFile("dump.ll")
 
 var register: uint64 = 1
 
@@ -18,6 +19,8 @@ proc compileProgram*(program: openArray[Op]) =
   f.writeLine(STACK_LL)
   f.writeLine("; Generated code follows.")
   f.writeLine("")
+  f.writeLine("declare void @dump(i64)")
+  f.writeLine("")
   f.writeLine("define i64 @main() {")
   for op in program:
     case op.code:
@@ -30,6 +33,7 @@ proc compileProgram*(program: openArray[Op]) =
       f.writeLine(fmt"  %{a} = call i64() @pop()")
       let res = allocateRegister()
       f.writeLine(fmt"  %{res} = add i64 %{a}, %{b}")
+      f.writeLine(fmt"  call void(i64) @push(i64 %{res})")
     of OpCode.MINUS:
       let b = allocateRegister()
       f.writeLine(fmt"  %{b} = call i64() @pop()")
@@ -37,8 +41,11 @@ proc compileProgram*(program: openArray[Op]) =
       f.writeLine(fmt"  %{a} = call i64() @pop()")
       let res = allocateRegister()
       f.writeLine(fmt"  %{res} = sub i64 %{a}, %{b}")
+      f.writeLine(fmt"  call void(i64) @push(i64 %{res})")
     of OpCode.DUMP:
-      discard
+      let val = allocateRegister()
+      f.writeLine(fmt"  %{val} = call i64() @pop()")
+      f.writeLine(fmt"  call void(i64) @dump(i64 %{val})")
     else:
       raiseAssert("unreachable")
   f.writeLine("  ret i64 0")
