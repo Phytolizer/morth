@@ -5,6 +5,7 @@ out/
 build/
 cmake-build-*/
 *.ll
+!stack.ll
 *.bc
 output
 *.exe
