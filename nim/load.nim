@@ -1,10 +1,7 @@
-import parse
+import lex
 import op
-import std/[
-  strutils,
-]
+import parse
 
 proc loadProgramFromFile*(filePath: string): seq[Op] =
-  for line in lines(filePath):
-    for word in line.splitWhitespace():
-      result.add(parseWordAsOp(word))
+  for tok in lexFile(filePath):
+    result.add(parseTokenAsOp(tok))

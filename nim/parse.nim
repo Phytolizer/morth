@@ -1,10 +1,12 @@
 import op
+import lex
 import std/[
+  strformat,
   strutils,
 ]
 
-func parseWordAsOp*(word: string): Op =
-  case word:
+proc parseTokenAsOp*(tok: Token): Op =
+  case tok.text:
   of "+":
     return opPlus()
   of "-":
@@ -12,4 +14,8 @@ func parseWordAsOp*(word: string): Op =
   of ".":
     return opDump()
   else:
-    return opPush(parseBiggestUInt(word))
+    try:
+      return opPush(parseBiggestUInt(tok.text))
+    except ValueError as e:
+      stderr.writeLine(fmt"{tok.filePath}:{tok.row}:{tok.col}: {e.msg}")
+      quit 1
