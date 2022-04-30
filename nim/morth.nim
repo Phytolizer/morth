@@ -48,15 +48,24 @@ when isMainModule:
     let program = loadProgramFromFile(filePath)
     simulateProgram(program)
   of "com":
-    if paramCount() < i:
+    var programPath = ""
+    var run = false
+    while i <= paramCount():
+      let flag = paramStr(i)
+      i += 1
+      case flag:
+      of "-r":
+        run = true
+      else:
+        programPath = flag
+        break
+    if programPath == "":
       usage()
       stderr.writeLine "ERROR: no input file provided"
       quit 1
-    let filePath = paramStr(i)
-    i += 1
 
-    let program = loadProgramFromFile(filePath)
-    let (dir, file, _) = splitFile(filePath)
+    let program = loadProgramFromFile(programPath)
+    let (dir, file, _) = splitFile(programPath)
     let outputPath = dir & "/" & file
     let llPath = outputPath & ".ll"
     echo fmt"[INFO] Generating {llPath}"
@@ -64,7 +73,10 @@ when isMainModule:
     let (cfile, dumpPath) = createTempFile("morth_", ".c")
     cfile.write(DUMP_C)
     cfile.close()
-    cmdEchoed(fmt"clang -o {exePath(outputPath)} {llPath} {dumpPath}")
+    let resultPath = exePath(outputPath)
+    cmdEchoed(fmt"clang -o {resultPath} {llPath} {dumpPath}")
+    if run:
+      cmdEchoed(resultPath)
   of "help":
     usage()
   else:
