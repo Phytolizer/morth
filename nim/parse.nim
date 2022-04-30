@@ -14,7 +14,7 @@ proc parseTokenAsOp*(tok: Token): Op =
     return opPlus(tok)
   of "-":
     return opMinus(tok)
-  of ".":
+  of "dump":
     return opDump(tok)
   of "=":
     return opEq(tok)
