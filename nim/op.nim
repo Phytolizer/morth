@@ -9,6 +9,7 @@ type
     EQ
     IF
     END
+    ELSE
     COUNT
 
   Op* = object
@@ -36,3 +37,6 @@ func opIf*: Op =
 
 func opEnd*: Op =
   result.code = OpCode.END
+
+func opElse*: Op =
+  result.code = OpCode.ELSE

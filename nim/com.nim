@@ -4,6 +4,9 @@ import std/[
   strformat,
 ]
 
+static:
+  assert int(OpCode.COUNT) == 8
+
 const STACK_LL = readFile("stack.ll")
 
 var register: uint64 = 0
@@ -69,8 +72,9 @@ proc compileProgram*(program: openArray[Op], outPath: string) =
       f.writeLine(fmt"  %{res} = icmp eq i64 %{val}, 0")
       f.writeLine(fmt"  br i1 %{res}, label %MorthInstr{op.operand}, label %MorthInstr{i + 1}")
     of OpCode.END:
-      # no output for end marker
       f.writeLine(fmt"  br label %MorthInstr{i + 1}")
+    of OpCode.ELSE:
+      f.writeLine(fmt"  br label %MorthInstr{op.operand}")
     else:
       raiseAssert("unreachable")
   f.writeLine(fmt"MorthInstr{program.len}:")

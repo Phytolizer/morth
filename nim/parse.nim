@@ -5,6 +5,9 @@ import std/[
   strutils,
 ]
 
+static:
+  assert int(OpCode.COUNT) == 8
+
 proc parseTokenAsOp*(tok: Token): Op =
   case tok.text:
   of "+":
@@ -19,6 +22,8 @@ proc parseTokenAsOp*(tok: Token): Op =
     return opIf()
   of "end":
     return opEnd()
+  of "else":
+    return opElse()
   else:
     try:
       return opPush(parseBiggestUInt(tok.text))
