@@ -4,7 +4,10 @@ import load
 import std/[
   os,
   strformat,
+  tempfiles,
 ]
+
+const DUMP_C = readFile("assembly_src/dump.c")
 
 proc usage =
   stderr.writeLine fmt"Usage: {getAppFilename()} <SUBCOMMAND> [ARGS]"
@@ -58,7 +61,10 @@ when isMainModule:
     let llPath = outputPath & ".ll"
     echo fmt"[INFO] Generating {llPath}"
     compileProgram(program, llPath)
-    cmdEchoed(fmt"clang -o {exePath(outputPath)} {llPath} dump.ll")
+    let (cfile, dumpPath) = createTempFile("morth_", ".c")
+    cfile.write(DUMP_C)
+    cfile.close()
+    cmdEchoed(fmt"clang -o {exePath(outputPath)} {llPath} {dumpPath}")
   of "help":
     usage()
   else:
