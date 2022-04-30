@@ -4,7 +4,6 @@ import load
 import std/[
   os,
   strformat,
-  tempfiles,
 ]
 
 const DUMP_C = readFile("assembly_src/dump.c")
@@ -61,10 +60,10 @@ when isMainModule:
     let llPath = outputPath & ".ll"
     echo fmt"[INFO] Generating {llPath}"
     compileProgram(program, llPath)
-    let (cfile, dumpPath) = createTempFile("morth_", ".c")
-    cfile.write(DUMP_C)
-    cfile.close()
-    cmdEchoed(fmt"clang -o {exePath(outputPath)} {llPath} {dumpPath}")
+    let dumpFile = open("dump.c", fmWrite)
+    dumpFile.write(DUMP_C)
+    dumpFile.close()
+    cmdEchoed(fmt"clang -o {exePath(outputPath)} {llPath} dump.c")
   of "help":
     usage()
   else:
