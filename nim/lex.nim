@@ -20,6 +20,7 @@ func newToken(filePath: string, row: int, col: int, text: string): Token =
 let
   WS_RE = re"\s"
   NWS_RE = re"\S"
+  COMMENT_RE = re"//.*"
 
 func findCol(line: string, col: int, r: Regex): int =
   result = find(line.substr(col), r)
@@ -36,4 +37,5 @@ proc lexLine(filePath: string, row: int, line: string): seq[Token] =
 
 proc lexFile*(filePath: string): seq[Token] =
   for (row, line) in enumerate(lines(filePath)):
-    result = result.concat(lexLine(filePath, row + 1, line))
+    let commentRemoved = line.replace(COMMENT_RE, "")
+    result = result.concat(lexLine(filePath, row + 1, commentRemoved))
