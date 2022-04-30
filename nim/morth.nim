@@ -17,6 +17,12 @@ proc cmdEchoed(cmd: string) =
   echo "[CMD] " & cmd
   discard execShellCmd(cmd)
 
+func exePath(path: string): string =
+  if ExeExt.len > 0:
+    path & "." & ExeExt
+  else:
+    path
+
 when isMainModule:
   if paramCount() < 1:
     usage()
@@ -52,7 +58,7 @@ when isMainModule:
     let llPath = outputPath & ".ll"
     echo fmt"[INFO] Generating {llPath}"
     compileProgram(program, llPath)
-    cmdEchoed(fmt"clang -o {outputPath}{ExtSep}{ExeExt} {llPath} dump.ll")
+    cmdEchoed(fmt"clang -o {exePath(outputPath)} {llPath} dump.ll")
   of "help":
     usage()
   else:
