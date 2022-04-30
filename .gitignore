@@ -6,7 +6,6 @@ build/
 cmake-build-*/
 *.ll
 !stack.ll
-!dump.ll
 *.bc
 morth
 output
