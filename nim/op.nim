@@ -7,6 +7,8 @@ type
     MINUS
     DUMP
     EQ
+    IF
+    END
     COUNT
 
   Op* = object
@@ -28,3 +30,9 @@ func opDump*: Op =
 
 func opEq*: Op =
   result.code = OpCode.EQ
+
+func opIf*: Op =
+  result.code = OpCode.IF
+
+func opEnd*: Op =
+  result.code = OpCode.END
