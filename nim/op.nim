@@ -12,6 +12,8 @@ type
     ELSE
     DUP
     GT
+    WHILE
+    DO
     COUNT
 
   Op* = object
@@ -48,3 +50,9 @@ func opDup*: Op =
 
 func opGt*: Op =
   result.code = OpCode.GT
+
+func opWhile*: Op =
+  result.code = OpCode.WHILE
+
+func opDo*: Op =
+  result.code = OpCode.DO

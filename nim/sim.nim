@@ -1,7 +1,7 @@
 import op
 
 static:
-  assert int(OpCode.COUNT) == 10
+  assert int(OpCode.COUNT) == 12
 
 proc simulateProgram*(program: openArray[Op]) =
   var stack: seq[Word] = @[]
@@ -38,7 +38,7 @@ proc simulateProgram*(program: openArray[Op]) =
       else:
         i += 1
     of OpCode.END:
-      i += 1
+      i = op.operand
     of OpCode.ELSE:
       i = op.operand
     of OpCode.DUP:
@@ -51,5 +51,13 @@ proc simulateProgram*(program: openArray[Op]) =
       let a = stack.pop()
       stack.add(Word(a > b))
       i += 1
+    of OpCode.WHILE:
+      i += 1
+    of OpCode.DO:
+      let a = stack.pop()
+      if a == 0:
+        i = op.operand
+      else:
+        i += 1
     else:
       raiseAssert("unreachable")

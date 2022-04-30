@@ -4,7 +4,7 @@ import std/[
 ]
 
 static:
-  assert int(OpCode.COUNT) == 10
+  assert int(OpCode.COUNT) == 12
 
 proc crossReferenceBlocks*(program: var openArray[Op]) =
   var stack: seq[int] = @[]
@@ -18,11 +18,21 @@ proc crossReferenceBlocks*(program: var openArray[Op]) =
       program[ifIp].operand = Word(i + 1)
       stack.add(i)
     of OpCode.END:
-      let ifIp = stack.pop()
-      case program[ifIp].code:
+      let blockIp = stack.pop()
+      case program[blockIp].code:
       of OpCode.IF, OpCode.ELSE:
-        program[ifIp].operand = Word(i)
+        program[blockIp].operand = Word(i)
+        program[i].operand = Word(i + 1)
+      of OpCode.DO:
+        program[i].operand = program[blockIp].operand
+        program[blockIp].operand = Word(i + 1)
       else:
         raiseAssert("unreachable")
+    of OpCode.WHILE:
+      stack.add(i)
+    of OpCode.DO:
+      let whileIp = stack.pop()
+      program[i].operand = Word(whileIp)
+      stack.add(i)
     else:
       discard

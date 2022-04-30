@@ -5,7 +5,7 @@ import std/[
 ]
 
 static:
-  assert int(OpCode.COUNT) == 10
+  assert int(OpCode.COUNT) == 12
 
 const STACK_LL = readFile("stack.ll")
 
@@ -72,7 +72,7 @@ proc compileProgram*(program: openArray[Op], outPath: string) =
       f.writeLine(fmt"  %{res} = icmp eq i64 %{val}, 0")
       f.writeLine(fmt"  br i1 %{res}, label %MorthInstr{op.operand}, label %MorthInstr{i + 1}")
     of OpCode.END:
-      f.writeLine(fmt"  br label %MorthInstr{i + 1}")
+      f.writeLine(fmt"  br label %MorthInstr{op.operand}")
     of OpCode.ELSE:
       f.writeLine(fmt"  br label %MorthInstr{op.operand}")
     of OpCode.DUP:
@@ -92,6 +92,14 @@ proc compileProgram*(program: openArray[Op], outPath: string) =
       f.writeLine(fmt"  %{res2} = zext i1 %{res} to i64")
       f.writeLine(fmt"  call void(i64) @push(i64 %{res2})")
       f.writeLine(fmt"  br label %MorthInstr{i + 1}")
+    of OpCode.WHILE:
+      f.writeLine(fmt"  br label %MorthInstr{i + 1}")
+    of OpCode.DO:
+      let val = allocateRegister()
+      f.writeLine(fmt"  %{val} = call i64 @pop()")
+      let res = allocateRegister()
+      f.writeLine(fmt"  %{res} = icmp eq i64 %{val}, 0")
+      f.writeLine(fmt"  br i1 %{res}, label %MorthInstr{op.operand}, label %MorthInstr{i + 1}")
     else:
       raiseAssert("unreachable")
   f.writeLine(fmt"MorthInstr{program.len}:")
