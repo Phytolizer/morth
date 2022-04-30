@@ -17,6 +17,8 @@ type
     WHILE
     DO
     MEM
+    LOAD
+    STORE
     COUNT
 
   Op* = object
@@ -76,3 +78,11 @@ func opDo*(token: Token): Op =
 func opMem*(token: Token): Op =
   result.token = token
   result.code = OpCode.MEM
+
+func opLoad*(token: Token): Op =
+  result.token = token
+  result.code = OpCode.LOAD
+
+func opStore*(token: Token): Op =
+  result.token = token
+  result.code = OpCode.STORE

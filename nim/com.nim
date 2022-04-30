@@ -5,7 +5,7 @@ import std/[
 ]
 
 static:
-  assert int(OpCode.COUNT) == 13
+  assert int(OpCode.COUNT) == 15
 
 const
   STACK_LL = readFile("stack.ll")
@@ -108,6 +108,28 @@ proc compileProgram*(program: openArray[Op], outPath: string) =
       let tmp = allocateRegister()
       f.writeLine(fmt"  %{tmp} = ptrtoint [{MEM_CAPACITY} x i8]* @mem to i64")
       f.writeLine(fmt"  call void(i64) @push(i64 %{tmp})")
+      f.writeLine(fmt"  br label %MorthInstr{i + 1}")
+    of OpCode.LOAD:
+      let address = allocateRegister()
+      f.writeLine(fmt"  %{address} = call i64() @pop()")
+      let p = allocateRegister()
+      f.writeLine(fmt"  %{p} = inttoptr i64 %{address} to i8*")
+      let val = allocateRegister()
+      f.writeLine(fmt"  %{val} = load i8, i8* %{p}")
+      let extVal = allocateRegister()
+      f.writeLine(fmt"  %{extVal} = sext i8 %{val} to i64")
+      f.writeLine(fmt"  call void(i64) @push(i64 %{extVal})")
+      f.writeLine(fmt"  br label %MorthInstr{i + 1}")
+    of OpCode.STORE:
+      let val = allocateRegister()
+      f.writeLine(fmt"  %{val} = call i64() @pop()")
+      let address = allocateRegister()
+      f.writeLine(fmt"  %{address} = call i64() @pop()")
+      let p = allocateRegister()
+      f.writeLine(fmt"  %{p} = inttoptr i64 %{address} to i8*")
+      let valTrunc = allocateRegister()
+      f.writeLine(fmt"  %{valTrunc} = trunc i64 %{val} to i8")
+      f.writeLine(fmt"  store i8 %{valTrunc}, i8* %{p}")
       f.writeLine(fmt"  br label %MorthInstr{i + 1}")
     else:
       raiseAssert("unreachable")
