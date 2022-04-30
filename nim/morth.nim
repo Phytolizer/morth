@@ -1,4 +1,3 @@
-import op
 import sim
 import com
 import load
@@ -53,7 +52,7 @@ when isMainModule:
     let llPath = outputPath & ".ll"
     echo fmt"[INFO] Generating {llPath}"
     compileProgram(program, llPath)
-    cmdEchoed(fmt"clang -o {outputPath}{ExeExt} {llPath} dump.ll")
+    cmdEchoed(fmt"clang -o {outputPath}{ExtSep}{ExeExt} {llPath} dump.ll")
   of "help":
     usage()
   else:

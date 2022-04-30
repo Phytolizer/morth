@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <stdio.h>
-#include <unistd.h>
 
 void dump(uint64_t x) {
   char buf[32];
@@ -11,5 +10,5 @@ void dump(uint64_t x) {
     buf_sz++;
     x /= 10;
   } while (x);
-  write(1, &buf[sizeof(buf) - buf_sz], buf_sz);
+  fwrite(&buf[sizeof(buf) - buf_sz], 1, buf_sz, stdout);
 }
