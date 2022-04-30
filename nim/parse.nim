@@ -6,7 +6,7 @@ import std/[
 ]
 
 static:
-  assert int(OpCode.COUNT) == 12
+  assert int(OpCode.COUNT) == 13
 
 proc parseTokenAsOp*(tok: Token): Op =
   case tok.text:
@@ -32,6 +32,8 @@ proc parseTokenAsOp*(tok: Token): Op =
     return opWhile(tok)
   of "do":
     return opDo(tok)
+  of "mem":
+    return opMem(tok)
   else:
     try:
       return opPush(tok, parseBiggestUInt(tok.text))

@@ -1,7 +1,7 @@
 import op
 
 static:
-  assert int(OpCode.COUNT) == 12
+  assert int(OpCode.COUNT) == 13
 
 proc simulateProgram*(program: openArray[Op]) =
   var stack: seq[Word] = @[]
@@ -59,5 +59,7 @@ proc simulateProgram*(program: openArray[Op]) =
         i = op.operand
       else:
         i += 1
+    of OpCode.MEM:
+      raiseAssert("unimplemented: `mem`")
     else:
       raiseAssert("unreachable")

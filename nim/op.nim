@@ -16,6 +16,7 @@ type
     GT
     WHILE
     DO
+    MEM
     COUNT
 
   Op* = object
@@ -71,3 +72,7 @@ func opWhile*(token: Token): Op =
 func opDo*(token: Token): Op =
   result.token = token
   result.code = OpCode.DO
+
+func opMem*(token: Token): Op =
+  result.token = token
+  result.code = OpCode.MEM

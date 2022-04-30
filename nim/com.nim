@@ -5,9 +5,11 @@ import std/[
 ]
 
 static:
-  assert int(OpCode.COUNT) == 12
+  assert int(OpCode.COUNT) == 13
 
-const STACK_LL = readFile("stack.ll")
+const
+  STACK_LL = readFile("stack.ll")
+  MEM_CAPACITY = 640_000
 
 var register: uint64 = 0
 
@@ -21,6 +23,8 @@ proc compileProgram*(program: openArray[Op], outPath: string) =
 
   f.writeLine(STACK_LL)
   f.writeLine("; Generated code follows.")
+  f.writeLine("")
+  f.writeLine(fmt"@mem = global [{MEM_CAPACITY} x i8] zeroinitializer")
   f.writeLine("")
   f.writeLine("declare void @dump(i64)")
   f.writeLine("")
@@ -100,6 +104,11 @@ proc compileProgram*(program: openArray[Op], outPath: string) =
       let res = allocateRegister()
       f.writeLine(fmt"  %{res} = icmp eq i64 %{val}, 0")
       f.writeLine(fmt"  br i1 %{res}, label %MorthInstr{op.operand}, label %MorthInstr{i + 1}")
+    of OpCode.MEM:
+      let tmp = allocateRegister()
+      f.writeLine(fmt"  %{tmp} = ptrtoint [{MEM_CAPACITY} x i8]* @mem to i64")
+      f.writeLine(fmt"  call void(i64) @push(i64 %{tmp})")
+      f.writeLine(fmt"  br label %MorthInstr{i + 1}")
     else:
       raiseAssert("unreachable")
   f.writeLine(fmt"MorthInstr{program.len}:")
