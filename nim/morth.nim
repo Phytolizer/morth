@@ -76,7 +76,7 @@ when isMainModule:
     let resultPath = exePath(outputPath)
     cmdEchoed(fmt"clang -o {resultPath} {llPath} {dumpPath}")
     if run:
-      cmdEchoed(resultPath)
+      cmdEchoed(joinPath(".", resultPath))
   of "help":
     usage()
   else:
