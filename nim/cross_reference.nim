@@ -1,6 +1,7 @@
 import op
 import std/[
   enumerate,
+  strformat,
 ]
 
 static:
@@ -14,7 +15,10 @@ proc crossReferenceBlocks*(program: var openArray[Op]) =
       stack.add(i)
     of OpCode.ELSE:
       let ifIp = stack.pop()
-      assert program[ifIp].code == OpCode.IF
+      if program[ifIp].code != OpCode.IF:
+        let tok = program[ifIp].token
+        stderr.writeLine fmt"{tok.filePath}:{tok.row}:{tok.col}: ERROR: `else` can only be used with `if`"
+        quit 1
       program[ifIp].operand = Word(i + 1)
       stack.add(i)
     of OpCode.END:
@@ -27,7 +31,9 @@ proc crossReferenceBlocks*(program: var openArray[Op]) =
         program[i].operand = program[blockIp].operand
         program[blockIp].operand = Word(i + 1)
       else:
-        raiseAssert("unreachable")
+        let tok = program[blockIp].token
+        stderr.writeLine fmt"{tok.filePath}:{tok.row}:{tok.col}: ERROR: `end` cannot close `{tok.text}`"
+        quit 1
     of OpCode.WHILE:
       stack.add(i)
     of OpCode.DO:
@@ -36,3 +42,8 @@ proc crossReferenceBlocks*(program: var openArray[Op]) =
       stack.add(i)
     else:
       discard
+
+  if stack.len() > 0:
+    let tok = program[stack.pop()].token
+    stderr.writeLine fmt"{tok.filePath}:{tok.row}:{tok.col}: ERROR: unclosed `{tok.text}`"
+    quit 1
