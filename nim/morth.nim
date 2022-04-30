@@ -12,9 +12,12 @@ const DUMP_C = readFile("assembly_src/dump.c")
 proc usage =
   stderr.writeLine fmt"Usage: {getAppFilename()} <SUBCOMMAND> [ARGS]"
   stderr.writeLine "SUBCOMMANDS:"
-  stderr.writeLine "  sim             Simulate the program"
-  stderr.writeLine "  com             Compile the program"
-  stderr.writeLine "  help            Print this help message"
+  stderr.writeLine "  sim <FILE>                 Simulate the program"
+  stderr.writeLine "  com [OPTIONS] <FILE>      Compile the program"
+  stderr.writeLine "    OPTIONS:"
+  stderr.writeLine "      -r                    Run program after successful compilation"
+  stderr.writeLine "      -o <FILE|DIR>         Set output path"
+  stderr.writeLine "  help                      Print this help message"
 
 proc cmdEchoed(cmd: string) =
   echo "[CMD] " & cmd
@@ -76,6 +79,10 @@ when isMainModule:
     let (dir, file, _) = splitFile(programPath)
     if outputPath == "":
       outputPath = joinPath(dir, file)
+    else:
+      let outputInfo = getFileInfo(outputPath)
+      if outputInfo.kind == pcDir:
+        outputPath = joinPath(outputPath, file)
     let llPath = outputPath & ".ll"
     echo fmt"[INFO] Generating {llPath}"
     compileProgram(program, llPath)
