@@ -80,9 +80,12 @@ when isMainModule:
     if outputPath == "":
       outputPath = joinPath(dir, file)
     else:
-      let outputInfo = getFileInfo(outputPath)
-      if outputInfo.kind == pcDir:
-        outputPath = joinPath(outputPath, file)
+      try:
+        let outputInfo = getFileInfo(outputPath)
+        if outputInfo.kind == pcDir:
+          outputPath = joinPath(outputPath, file)
+      except OSError:
+        discard
     let llPath = outputPath & ".ll"
     echo fmt"[INFO] Generating {llPath}"
     compileProgram(program, llPath)
