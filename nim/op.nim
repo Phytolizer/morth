@@ -10,6 +10,7 @@ type
     IF
     END
     ELSE
+    DUP
     COUNT
 
   Op* = object
@@ -40,3 +41,6 @@ func opEnd*: Op =
 
 func opElse*: Op =
   result.code = OpCode.ELSE
+
+func opDup*: Op =
+  result.code = OpCode.DUP
