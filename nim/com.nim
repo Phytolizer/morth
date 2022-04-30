@@ -87,7 +87,7 @@ proc compileProgram*(program: openArray[Op], outPath: string) =
       let a = allocateRegister()
       f.writeLine(fmt"  %{a} = call i64() @pop()")
       let res = allocateRegister()
-      f.writeLine(fmt"  %{res} = icmp gt i64 %{a}, %{b}")
+      f.writeLine(fmt"  %{res} = icmp ugt i64 %{a}, %{b}")
       let res2 = allocateRegister()
       f.writeLine(fmt"  %{res2} = zext i1 %{res} to i64")
       f.writeLine(fmt"  call void(i64) @push(i64 %{res2})")
