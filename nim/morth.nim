@@ -66,7 +66,7 @@ when isMainModule:
 
     let program = loadProgramFromFile(programPath)
     let (dir, file, _) = splitFile(programPath)
-    let outputPath = dir & "/" & file
+    let outputPath = joinPath(dir, file)
     let llPath = outputPath & ".ll"
     echo fmt"[INFO] Generating {llPath}"
     compileProgram(program, llPath)
