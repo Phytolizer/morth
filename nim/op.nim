@@ -11,6 +11,7 @@ type
     END
     ELSE
     DUP
+    GT
     COUNT
 
   Op* = object
@@ -44,3 +45,6 @@ func opElse*: Op =
 
 func opDup*: Op =
   result.code = OpCode.DUP
+
+func opGt*: Op =
+  result.code = OpCode.GT

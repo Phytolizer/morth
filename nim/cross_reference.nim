@@ -4,7 +4,7 @@ import std/[
 ]
 
 static:
-  assert int(OpCode.COUNT) == 9
+  assert int(OpCode.COUNT) == 10
 
 proc crossReferenceBlocks*(program: var openArray[Op]) =
   var stack: seq[int] = @[]

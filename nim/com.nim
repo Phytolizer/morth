@@ -5,7 +5,7 @@ import std/[
 ]
 
 static:
-  assert int(OpCode.COUNT) == 9
+  assert int(OpCode.COUNT) == 10
 
 const STACK_LL = readFile("stack.ll")
 
@@ -80,6 +80,17 @@ proc compileProgram*(program: openArray[Op], outPath: string) =
       f.writeLine(fmt"  %{a} = call i64() @pop()")
       f.writeLine(fmt"  call void(i64) @push(i64 %{a})")
       f.writeLine(fmt"  call void(i64) @push(i64 %{a})")
+      f.writeLine(fmt"  br label %MorthInstr{i + 1}")
+    of OpCode.GT:
+      let b = allocateRegister()
+      f.writeLine(fmt"  %{b} = call i64() @pop()")
+      let a = allocateRegister()
+      f.writeLine(fmt"  %{a} = call i64() @pop()")
+      let res = allocateRegister()
+      f.writeLine(fmt"  %{res} = icmp gt i64 %{a}, %{b}")
+      let res2 = allocateRegister()
+      f.writeLine(fmt"  %{res2} = zext i1 %{res} to i64")
+      f.writeLine(fmt"  call void(i64) @push(i64 %{res2})")
       f.writeLine(fmt"  br label %MorthInstr{i + 1}")
     else:
       raiseAssert("unreachable")
