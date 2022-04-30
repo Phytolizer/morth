@@ -24,7 +24,7 @@ proc compileProgram*(program: openArray[Op], outPath: string) =
   f.writeLine(STACK_LL)
   f.writeLine("; Generated code follows.")
   f.writeLine("")
-  f.writeLine(fmt"@mem = global [{MEM_CAPACITY} x i8] zeroinitializer")
+  f.writeLine(fmt"@mem = global [{MEM_CAPACITY} x i8] undef")
   f.writeLine("")
   f.writeLine("declare void @dump(i64)")
   f.writeLine("")
