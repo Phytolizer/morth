@@ -1,3 +1,5 @@
+import lex
+
 type
   Word* = uint64
 
@@ -17,42 +19,55 @@ type
     COUNT
 
   Op* = object
+    token*: Token
     code*: OpCode
     operand*: Word
 
-func opPush*(x: Word): Op =
+func opPush*(token: Token, x: Word): Op =
+  result.token = token
   result.code = OpCode.PUSH
   result.operand = x
 
-func opPlus*: Op =
+func opPlus*(token: Token): Op =
+  result.token = token
   result.code = OpCode.PLUS
 
-func opMinus*: Op =
+func opMinus*(token: Token): Op =
+  result.token = token
   result.code = OpCode.MINUS
 
-func opDump*: Op =
+func opDump*(token: Token): Op =
+  result.token = token
   result.code = OpCode.DUMP
 
-func opEq*: Op =
+func opEq*(token: Token): Op =
+  result.token = token
   result.code = OpCode.EQ
 
-func opIf*: Op =
+func opIf*(token: Token): Op =
+  result.token = token
   result.code = OpCode.IF
 
-func opEnd*: Op =
+func opEnd*(token: Token): Op =
+  result.token = token
   result.code = OpCode.END
 
-func opElse*: Op =
+func opElse*(token: Token): Op =
+  result.token = token
   result.code = OpCode.ELSE
 
-func opDup*: Op =
+func opDup*(token: Token): Op =
+  result.token = token
   result.code = OpCode.DUP
 
-func opGt*: Op =
+func opGt*(token: Token): Op =
+  result.token = token
   result.code = OpCode.GT
 
-func opWhile*: Op =
+func opWhile*(token: Token): Op =
+  result.token = token
   result.code = OpCode.WHILE
 
-func opDo*: Op =
+func opDo*(token: Token): Op =
+  result.token = token
   result.code = OpCode.DO

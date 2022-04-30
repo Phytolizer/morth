@@ -11,30 +11,30 @@ static:
 proc parseTokenAsOp*(tok: Token): Op =
   case tok.text:
   of "+":
-    return opPlus()
+    return opPlus(tok)
   of "-":
-    return opMinus()
+    return opMinus(tok)
   of ".":
-    return opDump()
+    return opDump(tok)
   of "=":
-    return opEq()
+    return opEq(tok)
   of "if":
-    return opIf()
+    return opIf(tok)
   of "end":
-    return opEnd()
+    return opEnd(tok)
   of "else":
-    return opElse()
+    return opElse(tok)
   of "dup":
-    return opDup()
+    return opDup(tok)
   of ">":
-    return opGt()
+    return opGt(tok)
   of "while":
-    return opWhile()
+    return opWhile(tok)
   of "do":
-    return opDo()
+    return opDo(tok)
   else:
     try:
-      return opPush(parseBiggestUInt(tok.text))
+      return opPush(tok, parseBiggestUInt(tok.text))
     except ValueError as e:
       stderr.writeLine(fmt"{tok.filePath}:{tok.row}:{tok.col}: {e.msg}")
       quit 1
