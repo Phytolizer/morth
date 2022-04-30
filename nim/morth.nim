@@ -49,6 +49,7 @@ when isMainModule:
     simulateProgram(program)
   of "com":
     var programPath = ""
+    var outputPath = ""
     var run = false
     while i <= paramCount():
       let flag = paramStr(i)
@@ -56,6 +57,13 @@ when isMainModule:
       case flag:
       of "-r":
         run = true
+      of "-o":
+        if paramCount() < i:
+          usage()
+          stderr.writeLine "ERROR: no argument for `-o` provided"
+          quit 1
+        outputPath = paramStr(i)
+        i += 1
       else:
         programPath = flag
         break
@@ -66,7 +74,8 @@ when isMainModule:
 
     let program = loadProgramFromFile(programPath)
     let (dir, file, _) = splitFile(programPath)
-    let outputPath = joinPath(dir, file)
+    if outputPath == "":
+      outputPath = joinPath(dir, file)
     let llPath = outputPath & ".ll"
     echo fmt"[INFO] Generating {llPath}"
     compileProgram(program, llPath)
