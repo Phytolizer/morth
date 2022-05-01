@@ -1,4 +1,8 @@
 import op
+import mem
+import std/[
+  sequtils,
+]
 
 static:
   assert int(OpCode.COUNT) == 15
@@ -6,6 +10,7 @@ static:
 proc simulateProgram*(program: openArray[Op]) =
   var stack: seq[Word] = @[]
   var i: Word = 0
+  var mem: seq[int8] = newSeqWith(MEM_CAPACITY, 0'i8)
   while i < Word(program.len):
     let op = program[i]
     case op.code:
@@ -60,10 +65,16 @@ proc simulateProgram*(program: openArray[Op]) =
       else:
         i += 1
     of OpCode.MEM:
-      raiseAssert("unimplemented: `mem`")
+      stack.add(0)
+      i += 1
     of OpCode.LOAD:
-      raiseAssert("unimplemented: `,`")
+      let address = stack.pop()
+      stack.add(Word(mem[address]))
+      i += 1
     of OpCode.STORE:
-      raiseAssert("unimplemented: `.`")
+      let val = stack.pop()
+      let address = stack.pop()
+      mem[address] = int8(val)
+      i += 1
     else:
       raiseAssert("unreachable")

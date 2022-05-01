@@ -1,4 +1,5 @@
 import op
+import mem
 import std/[
   enumerate,
   strformat,
@@ -7,9 +8,7 @@ import std/[
 static:
   assert int(OpCode.COUNT) == 15
 
-const
-  STACK_LL = readFile("stack.ll")
-  MEM_CAPACITY = 640_000
+const STACK_LL = readFile("stack.ll")
 
 var register: uint64 = 0
 
