@@ -19,13 +19,7 @@ const program = [_]Op{
 };
 
 fn usage(writer: Writer, executableName: []const u8) !void {
-    const usageString =
-        \\Usage: {s} <SUBCOMMAND> [ARGS]
-        \\  SUBCOMMANDS:
-        \\    sim               Simulate the program
-        \\    com               Compile the program
-        \\
-    ;
+    const usageString = @embedFile("usage.txt");
     try writer.print(usageString, .{executableName});
 }
 

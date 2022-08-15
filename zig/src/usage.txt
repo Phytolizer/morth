@@ -1,0 +1,4 @@
+Usage: {s} <SUBCOMMAND> [ARGS]
+  SUBCOMMANDS:
+    sim               Simulate the program
+    com               Compile the program
