@@ -17,12 +17,11 @@ fn compileDumpSource(cwd: []const u8, dumpOutputPath: []const u8, allocator: All
         try dumpCFile.writeAll(dumpCSource);
     }
     var compileCommand = std.ChildProcess.init(&.{
-        "clang",
+        "zig",
+        "cc",
         "-O2",
         "-o",
         dumpOutputPath,
-        "-x",
-        "c",
         "-c",
         "-fno-stack-protector",
         dumpCPath,
