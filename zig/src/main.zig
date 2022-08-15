@@ -48,7 +48,7 @@ pub fn main() !void {
                 try simulateProgram(allocator.backing_allocator, &program);
             },
             .com => |comOptions| {
-                try compileProgram(&program);
+                try compileProgram(allocator.backing_allocator, &program);
                 if (comOptions.run) {
                     std.debug.print("Running...\n", .{});
                 }

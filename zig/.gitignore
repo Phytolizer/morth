@@ -3,3 +3,7 @@ zig-out/
 .gyro/
 deps.zig
 gyro.lock
+*.nasm
+!src/*.nasm
+*.c
+!src/*.c
