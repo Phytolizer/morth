@@ -2,6 +2,7 @@ const std = @import("std");
 const Op = @import("op.zig").Op;
 const simulateProgram = @import("sim.zig").simulateProgram;
 const compileProgram = @import("com.zig").compileProgram;
+const argsParser = @import("args");
 
 const Writer = std.fs.File.Writer;
 
@@ -29,20 +30,32 @@ fn usage(writer: Writer, executableName: []const u8) !void {
 
 pub fn main() !void {
     const allocator = std.heap.GeneralPurposeAllocator(.{}){};
-    const args = try std.process.argsAlloc(allocator.backing_allocator);
-    defer std.process.argsFree(allocator.backing_allocator, args);
+    const options = try argsParser.parseWithVerbForCurrentProcess(struct {}, union(enum) {
+        sim: struct {},
+        com: struct {
+            run: bool = false,
 
-    if (args.len < 2) {
-        try usage(std.io.getStdErr().writer(), args[0]);
-        return error.InvalidUsage;
-    }
+            pub const shorthands = .{
+                .r = "run",
+            };
+        },
+    }, allocator.backing_allocator, .print);
+    defer options.deinit();
 
-    if (std.mem.eql(u8, args[1], "sim")) {
-        try simulateProgram(allocator.backing_allocator, &program);
-    } else if (std.mem.eql(u8, args[1], "com")) {
-        try compileProgram(&program);
+    if (options.verb) |verb| {
+        switch (verb) {
+            .sim => {
+                try simulateProgram(allocator.backing_allocator, &program);
+            },
+            .com => |comOptions| {
+                try compileProgram(&program);
+                if (comOptions.run) {
+                    std.debug.print("Running...\n", .{});
+                }
+            },
+        }
     } else {
-        try usage(std.io.getStdErr().writer(), args[0]);
+        try usage(std.io.getStdErr().writer(), options.executable_name.?);
         return error.InvalidUsage;
     }
 }

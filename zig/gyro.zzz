@@ -1,0 +1,16 @@
+pkgs:
+  morth:
+    version: 0.0.0
+    description: Porth but More.
+    license: MIT
+    source_url: "https://github.com/Phytolizer/morth"
+    root: zig/src/main.zig
+    files:
+      README.md
+      LICENSE
+deps:
+  args:
+    git:
+      url: "https://github.com/MasterQ32/zig-args.git"
+      ref: 21bdea5051dc92e7962e0eda1668942ed1448efc
+      root: args.zig
