@@ -25,7 +25,7 @@ fn usage(writer: Writer, executableName: []const u8) !void {
 
 pub fn main() !void {
     const allocator = std.heap.GeneralPurposeAllocator(.{}){};
-    const options = try argsParser.parseWithVerbForCurrentProcess(struct {
+    const parsed = try argsParser.parseWithVerbForCurrentProcess(struct {
         help: bool = false,
 
         pub const shorthands = .{
@@ -41,14 +41,14 @@ pub fn main() !void {
             };
         },
     }, allocator.backing_allocator, .print);
-    defer options.deinit();
+    defer parsed.deinit();
 
-    if (options.options.help) {
-        try usage(std.io.getStdOut().writer(), options.executable_name.?);
+    if (parsed.options.help) {
+        try usage(std.io.getStdOut().writer(), parsed.executable_name.?);
         return;
     }
 
-    if (options.verb) |verb| {
+    if (parsed.verb) |verb| {
         switch (verb) {
             .sim => {
                 try simulateProgram(allocator.backing_allocator, &program);
@@ -62,7 +62,7 @@ pub fn main() !void {
             },
         }
     } else {
-        try usage(std.io.getStdErr().writer(), options.executable_name.?);
+        try usage(std.io.getStdErr().writer(), parsed.executable_name.?);
         return error.InvalidUsage;
     }
 }
