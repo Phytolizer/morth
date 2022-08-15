@@ -44,7 +44,7 @@ fn compileDumpSource(cwd: []const u8, dumpOutputPath: []const u8, allocator: All
     return error.CommandFailed;
 }
 
-pub fn compileProgram(allocator: Allocator, program: []const Op) !void {
+pub fn compileProgram(allocator: Allocator, program: []const Op) ![]u8 {
     const cwd = try std.process.getCwdAlloc(allocator);
     defer allocator.free(cwd);
     const absPath = try std.fs.path.join(allocator, &.{ cwd, "output.nasm" });
@@ -103,4 +103,6 @@ pub fn compileProgram(allocator: Allocator, program: []const Op) !void {
         "output.o",
         dumpOutputPath,
     }, allocator);
+
+    return try std.fs.path.join(allocator, &.{ cwd, "output" });
 }

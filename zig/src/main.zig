@@ -3,6 +3,7 @@ const Op = @import("op.zig").Op;
 const simulateProgram = @import("sim.zig").simulateProgram;
 const compileProgram = @import("com.zig").compileProgram;
 const argsParser = @import("args");
+const runCommand = @import("process.zig").runCommand;
 
 const Writer = std.fs.File.Writer;
 
@@ -48,9 +49,10 @@ pub fn main() !void {
                 try simulateProgram(allocator.backing_allocator, &program);
             },
             .com => |comOptions| {
-                try compileProgram(allocator.backing_allocator, &program);
+                const exePath = try compileProgram(allocator.backing_allocator, &program);
+                defer allocator.backing_allocator.free(exePath);
                 if (comOptions.run) {
-                    std.debug.print("Running...\n", .{});
+                    try runCommand(&.{exePath}, allocator.backing_allocator);
                 }
             },
         }
