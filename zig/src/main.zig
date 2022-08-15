@@ -25,7 +25,13 @@ fn usage(writer: Writer, executableName: []const u8) !void {
 
 pub fn main() !void {
     const allocator = std.heap.GeneralPurposeAllocator(.{}){};
-    const options = try argsParser.parseWithVerbForCurrentProcess(struct {}, union(enum) {
+    const options = try argsParser.parseWithVerbForCurrentProcess(struct {
+        help: bool = false,
+
+        pub const shorthands = .{
+            .h = "help",
+        };
+    }, union(enum) {
         sim: struct {},
         com: struct {
             run: bool = false,
@@ -36,6 +42,11 @@ pub fn main() !void {
         },
     }, allocator.backing_allocator, .print);
     defer options.deinit();
+
+    if (options.options.help) {
+        try usage(std.io.getStdOut().writer(), options.executable_name.?);
+        return;
+    }
 
     if (options.verb) |verb| {
         switch (verb) {
