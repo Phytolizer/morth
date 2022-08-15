@@ -70,3 +70,8 @@ pub fn main() !void {
 test "simulate program" {
     try simulateProgram(std.testing.allocator, &program);
 }
+
+test "compile program" {
+    const exePath = try compileProgram(std.testing.allocator, &program);
+    std.testing.allocator.free(exePath);
+}
