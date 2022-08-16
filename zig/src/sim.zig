@@ -41,6 +41,9 @@ pub fn simulateProgram(allocator: Allocator, program: []const Op) !void {
                     ip += 1;
                 }
             },
+            .Else => |target| {
+                ip = target.?;
+            },
             .End => {
                 ip += 1;
             },

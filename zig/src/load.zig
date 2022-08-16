@@ -35,6 +35,9 @@ fn parseTokenAsOp(token: Token) !Op {
     if (std.mem.eql(u8, token.word, "if")) {
         return Op.iff();
     }
+    if (std.mem.eql(u8, token.word, "else")) {
+        return Op.elze();
+    }
     if (std.mem.eql(u8, token.word, "end")) {
         return Op.end();
     }

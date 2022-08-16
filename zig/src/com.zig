@@ -101,6 +101,9 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
                     try fileWriter.writeAll("    cmp rax, 0\n");
                     try fileWriter.print("    je .morth_addr_{d}\n", .{target.?});
                 },
+                .Else => |target| {
+                    try fileWriter.print("    jmp .morth_addr_{d}\n", .{target.?});
+                },
                 .End => {},
                 .Dump => {
                     try fileWriter.writeAll("    pop rdi\n");

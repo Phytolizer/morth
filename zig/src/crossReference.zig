@@ -12,10 +12,25 @@ pub fn crossReferenceBlocks(allocator: Allocator, program: []Op) !void {
             .If => {
                 try stack.append(ip);
             },
-            .End => {
+            .Else => {
                 const ifIp = stack.pop();
                 switch (program[ifIp]) {
                     .If => |*target| {
+                        target.* = ip + 1;
+                    },
+                    else => {
+                        return error.MismathedElse;
+                    },
+                }
+                try stack.append(ip);
+            },
+            .End => {
+                const blockIp = stack.pop();
+                switch (program[blockIp]) {
+                    .If => |*target| {
+                        target.* = ip;
+                    },
+                    .Else => |*target| {
                         target.* = ip;
                     },
                     else => {
