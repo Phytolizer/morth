@@ -28,9 +28,11 @@ pub fn main() !void {
         sim: struct {},
         com: struct {
             run: bool = false,
+            output: ?[]const u8 = null,
 
             pub const shorthands = .{
                 .r = "run",
+                .o = "output",
             };
         },
     }, allocator.backing_allocator, .print);
@@ -66,7 +68,13 @@ pub fn main() !void {
                 const exePath = try compileProgram(allocator.backing_allocator, program, inputFilePath);
                 defer allocator.backing_allocator.free(exePath);
                 if (comOptions.run) {
-                    try runCommand(.Echo, &.{exePath}, allocator.backing_allocator);
+                    const stdout = std.io.getStdOut().writer();
+                    try runCommand(
+                        @TypeOf(stdout),
+                        .{ .shouldEcho = .Echo, .writer = stdout },
+                        &.{exePath},
+                        allocator.backing_allocator,
+                    );
                 }
             },
         }
