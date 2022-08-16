@@ -1,4 +1,7 @@
 Usage: {s} <SUBCOMMAND> [ARGS]
   SUBCOMMANDS:
-    sim               Simulate the program
-    com               Compile the program
+    sim                     Simulate the program
+    com                     Compile the program
+      OPTIONS:
+        -o <FILE|DIR>       Set the output path
+        -r                  Run the program after compiling
