@@ -2,6 +2,7 @@ const std = @import("std");
 const Op = @import("op.zig").Op;
 const runCommand = @import("process.zig").runCommand;
 const toAbsolute = @import("path.zig").toAbsolute;
+const memCapacity = @import("mem.zig").memCapacity;
 
 const Allocator = std.mem.Allocator;
 
@@ -130,10 +131,13 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
                     try fileWriter.writeAll("    cmp rax, 0\n");
                     try fileWriter.print("    je .morth_addr_{d}\n", .{target.?});
                 },
+                .Mem => {
+                    try fileWriter.writeAll("    push mem\n");
+                },
             }
         }
         try fileWriter.print(".morth_addr_{d}:\n", .{program.len});
-        try fileWriter.writeAll(epilogue);
+        try fileWriter.print(epilogue, .{memCapacity});
     }
 
     const objPath = try std.mem.concat(allocator, u8, &.{ basename, ".o" });

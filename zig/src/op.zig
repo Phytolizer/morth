@@ -20,6 +20,7 @@ pub const Op = struct {
         Gt,
         While,
         Do: ?usize,
+        Mem,
     };
 
     const Self = @This();

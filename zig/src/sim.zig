@@ -1,5 +1,6 @@
 const std = @import("std");
 const Op = @import("op.zig").Op;
+const memCapacity = @import("mem.zig").memCapacity;
 
 const Allocator = std.mem.Allocator;
 
@@ -9,6 +10,8 @@ pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocat
     };
     var stack = std.ArrayList(u64).init(allocator);
     defer stack.deinit();
+    var mem = try allocator.alloc(u8, memCapacity);
+    defer allocator.free(mem);
     var ip: usize = 0;
     while (ip < program.len) {
         const op = program[ip];
@@ -75,6 +78,10 @@ pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocat
             .Dump => {
                 const value = stack.pop();
                 try writer.print("{d}\n", .{value});
+                ip += 1;
+            },
+            .Mem => {
+                try stack.append(0);
                 ip += 1;
             },
         }
