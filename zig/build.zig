@@ -11,6 +11,17 @@ fn findLast(comptime T: type, slice: []const T, value: T) ?usize {
     return null;
 }
 
+fn generateTests(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.builtin.Mode, testStep: *std.build.Step) !void {
+    const dir = try std.fs.cwd().openIterableDir("src/tests", .{});
+    var dirIterator = dir.iterate();
+
+    while (try dirIterator.next()) |path| {
+        if (std.mem.endsWith(u8, path.name, ".morth")) {
+            try generateTest(b, target, mode, testStep, path.name);
+        }
+    }
+}
+
 const testTemplate = @embedFile("test.zig_template");
 
 fn generateTest(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.builtin.Mode, testStep: *std.build.Step, morthPathIn: []const u8) !void {
@@ -73,12 +84,5 @@ pub fn build(b: *std.build.Builder) void {
 
     const test_step = b.step("test", "Run unit tests");
 
-    const dir = std.fs.cwd().openIterableDir("src/tests", .{}) catch unreachable;
-    var dirIterator = dir.iterate();
-
-    while (dirIterator.next() catch unreachable) |path| {
-        if (std.mem.endsWith(u8, path.name, ".morth")) {
-            generateTest(b, target, mode, test_step, path.name) catch unreachable;
-        }
-    }
+    generateTests(b, target, mode, test_step) catch unreachable;
 }
