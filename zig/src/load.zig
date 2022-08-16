@@ -73,9 +73,13 @@ fn loadProgram(comptime Reader: type, filePath: []const u8, allocator: Allocator
 
     var lineNumber: u64 = 1;
 
-    while (try reader.readUntilDelimiterOrEofAlloc(allocator, '\n', maxLine)) |line| : (lineNumber += 1) {
-        defer allocator.free(line);
+    while (try reader.readUntilDelimiterOrEofAlloc(allocator, '\n', maxLine)) |rawLine| : (lineNumber += 1) {
+        defer allocator.free(rawLine);
 
+        const line = if (std.mem.indexOf(u8, rawLine, "//")) |commentStart|
+            rawLine[0..commentStart]
+        else
+            rawLine;
         var col = findCol(line, 0, isNotSpace);
         while (col < line.len) {
             const colEnd = findCol(line, col, std.ascii.isSpace);
