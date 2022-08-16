@@ -57,7 +57,7 @@ pub fn main() !void {
                 }
                 const inputFilePath = parsed.positionals[0];
                 const program = try loadProgramFromFile(allocator.backing_allocator, inputFilePath);
-                const exePath = try compileProgram(allocator.backing_allocator, program);
+                const exePath = try compileProgram(allocator.backing_allocator, program, inputFilePath);
                 defer allocator.backing_allocator.free(exePath);
                 if (comOptions.run) {
                     try runCommand(&.{exePath}, allocator.backing_allocator);
@@ -71,14 +71,14 @@ pub fn main() !void {
 }
 
 test "simulate program" {
-    const program = try loadProgramFromText(std.testing.allocator, @embedFile("../test.morth"));
+    const program = try loadProgramFromText(std.testing.allocator, @embedFile("../tests/test.morth"));
     defer std.testing.allocator.free(program);
     try simulateProgram(std.testing.allocator, program);
 }
 
 test "compile program" {
-    const program = try loadProgramFromText(std.testing.allocator, @embedFile("../test.morth"));
+    const program = try loadProgramFromText(std.testing.allocator, @embedFile("../tests/test.morth"));
     defer std.testing.allocator.free(program);
-    const exePath = try compileProgram(std.testing.allocator, program);
+    const exePath = try compileProgram(std.testing.allocator, program, "tests/test.morth");
     std.testing.allocator.free(exePath);
 }

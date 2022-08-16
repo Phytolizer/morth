@@ -45,8 +45,19 @@ fn compileDumpSource(dumpOutputPath: []const u8, allocator: Allocator) !void {
     return error.CommandFailed;
 }
 
-pub fn compileProgram(allocator: Allocator, program: []const Op) ![]u8 {
-    const absPath = try toAbsolute(allocator, "output.nasm");
+fn computeBaseName(path: []const u8) []const u8 {
+    const morthExt = ".morth";
+    if (std.mem.endsWith(u8, path, morthExt)) {
+        return path[0 .. path.len - morthExt.len];
+    }
+    return path;
+}
+
+pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []const u8) ![]u8 {
+    const basename = computeBaseName(sourcePath);
+    const outputPath = try std.mem.concat(allocator, u8, &.{ basename, ".nasm" });
+    defer allocator.free(outputPath);
+    const absPath = try toAbsolute(allocator, outputPath);
     defer allocator.free(absPath);
     const dumpOutputPath = try toAbsolute(allocator, "dump.o");
     defer allocator.free(dumpOutputPath);
@@ -85,21 +96,23 @@ pub fn compileProgram(allocator: Allocator, program: []const Op) ![]u8 {
         try fileWriter.writeAll(epilogue);
     }
 
+    const objPath = try std.mem.concat(allocator, u8, &.{ basename, ".o" });
+    defer allocator.free(objPath);
     try runCommand(&.{
         "nasm",
         "-f",
         "elf64",
         "-o",
-        "output.o",
+        objPath,
         absPath,
     }, allocator);
     try runCommand(&.{
         "ld",
         "-o",
-        "output",
+        basename,
         "-z",
         "noexecstack",
-        "output.o",
+        objPath,
         dumpOutputPath,
     }, allocator);
 
