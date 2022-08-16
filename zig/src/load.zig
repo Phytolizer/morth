@@ -10,13 +10,7 @@ const Token = struct {
     filePath: []const u8,
     row: u64,
     col: u64,
-    word: []u8,
-
-    const Self = @This();
-
-    pub fn deinit(self: *Self, allocator: Allocator) void {
-        allocator.free(self.word);
-    }
+    word: []const u8,
 };
 
 fn parseTokenAsOp(token: Token) !Op {
