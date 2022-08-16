@@ -4,6 +4,8 @@ pub const Op = union(enum) {
     Minus,
     Equal,
     Dump,
+    If: ?usize,
+    End,
 
     const Self = @This();
 
@@ -25,5 +27,13 @@ pub const Op = union(enum) {
 
     pub fn dump() Self {
         return Self.Dump;
+    }
+
+    pub fn iff() Self {
+        return Self{ .If = null };
+    }
+
+    pub fn end() Self {
+        return Self.End;
     }
 };

@@ -7,6 +7,7 @@ const runCommand = @import("process.zig").runCommand;
 const loadProgramFromFile = @import("load.zig").loadProgramFromFile;
 const loadProgramFromText = @import("load.zig").loadProgramFromText;
 const toAbsolute = @import("path.zig").toAbsolute;
+const crossReferenceBlocks = @import("crossReference.zig").crossReferenceBlocks;
 
 const Writer = std.fs.File.Writer;
 
@@ -49,6 +50,7 @@ pub fn main() !void {
                 }
                 const inputFilePath = parsed.positionals[0];
                 const program = try loadProgramFromFile(allocator.backing_allocator, inputFilePath);
+                try crossReferenceBlocks(allocator.backing_allocator, program);
                 try simulateProgram(allocator.backing_allocator, program);
             },
             .com => |comOptions| {
@@ -59,6 +61,7 @@ pub fn main() !void {
                 const inputFilePath = try toAbsolute(allocator.backing_allocator, parsed.positionals[0]);
                 defer allocator.backing_allocator.free(inputFilePath);
                 const program = try loadProgramFromFile(allocator.backing_allocator, inputFilePath);
+                try crossReferenceBlocks(allocator.backing_allocator, program);
                 const exePath = try compileProgram(allocator.backing_allocator, program, inputFilePath);
                 defer allocator.backing_allocator.free(exePath);
                 if (comOptions.run) {
@@ -75,12 +78,14 @@ pub fn main() !void {
 test "simulate program" {
     const program = try loadProgramFromText(std.testing.allocator, @embedFile("../tests/test.morth"));
     defer std.testing.allocator.free(program);
+    try crossReferenceBlocks(std.testing.allocator, program);
     try simulateProgram(std.testing.allocator, program);
 }
 
 test "compile program" {
     const program = try loadProgramFromText(std.testing.allocator, @embedFile("../tests/test.morth"));
     defer std.testing.allocator.free(program);
+    try crossReferenceBlocks(std.testing.allocator, program);
     const testPath = try toAbsolute(std.testing.allocator, "tests/test.morth");
     defer std.testing.allocator.free(testPath);
     const exePath = try compileProgram(std.testing.allocator, program, testPath);

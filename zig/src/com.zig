@@ -67,7 +67,10 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
         const fileWriter = file.writer();
 
         try fileWriter.writeAll(prelude);
-        for (program) |op| {
+        var ip: usize = 0;
+        while (ip < program.len) : (ip += 1) {
+            const op = program[ip];
+            try fileWriter.print(".morth_addr_{d}:\n", .{ip});
             try fileWriter.print("    ;; -- {s} --\n", .{@tagName(op)});
             switch (op) {
                 .Push => |value| {
@@ -93,12 +96,19 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
                     try fileWriter.writeAll("    movzx rax, al\n");
                     try fileWriter.writeAll("    push rax\n");
                 },
+                .If => |target| {
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    cmp rax, 0\n");
+                    try fileWriter.print("    je .morth_addr_{d}\n", .{target.?});
+                },
+                .End => {},
                 .Dump => {
                     try fileWriter.writeAll("    pop rdi\n");
                     try fileWriter.writeAll("    call dump\n");
                 },
             }
         }
+        try fileWriter.print(".morth_addr_{d}:\n", .{program.len});
         try fileWriter.writeAll(epilogue);
     }
 
