@@ -53,7 +53,7 @@ fn computeBaseName(path: []const u8) []const u8 {
     return path;
 }
 
-pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []const u8) ![]u8 {
+pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []const u8, outputPathArg: ?[]const u8) ![]u8 {
     const basename = computeBaseName(sourcePath);
     const outputPath = try std.mem.concat(allocator, u8, &.{ basename, ".nasm" });
     defer allocator.free(outputPath);
@@ -152,13 +152,14 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
         },
         allocator,
     );
+    const exePath = outputPathArg orelse basename;
     try runCommand(
         @TypeOf(stdout),
         .{ .shouldEcho = .Echo, .writer = stdout },
         &.{
             "ld",
             "-o",
-            basename,
+            exePath,
             "-z",
             "noexecstack",
             objPath,
@@ -167,5 +168,5 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
         allocator,
     );
 
-    return try allocator.dupe(u8, basename);
+    return try allocator.dupe(u8, exePath);
 }

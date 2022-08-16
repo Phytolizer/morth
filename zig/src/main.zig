@@ -65,7 +65,8 @@ pub fn main() !void {
                 defer allocator.backing_allocator.free(inputFilePath);
                 const program = try loadProgramFromFile(allocator.backing_allocator, inputFilePath);
                 try crossReferenceBlocks(allocator.backing_allocator, program);
-                const exePath = try compileProgram(allocator.backing_allocator, program, inputFilePath);
+                const outputPath = comOptions.output;
+                const exePath = try compileProgram(allocator.backing_allocator, program, inputFilePath, outputPath);
                 defer allocator.backing_allocator.free(exePath);
                 if (comOptions.run) {
                     const stdout = std.io.getStdOut().writer();
