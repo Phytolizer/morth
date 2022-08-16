@@ -8,6 +8,7 @@ pub const Op = union(enum) {
     Else: ?usize,
     End,
     Dup,
+    Gt,
 
     const Self = @This();
 
@@ -45,5 +46,9 @@ pub const Op = union(enum) {
 
     pub fn dup() Self {
         return Self.Dup;
+    }
+
+    pub fn gt() Self {
+        return Self.Gt;
     }
 };

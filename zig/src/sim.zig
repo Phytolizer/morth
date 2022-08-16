@@ -53,6 +53,12 @@ pub fn simulateProgram(allocator: Allocator, program: []const Op) !void {
                 try stack.append(value);
                 ip += 1;
             },
+            .Gt => {
+                const b = stack.pop();
+                const a = stack.pop();
+                try stack.append(if (a > b) 1 else 0);
+                ip += 1;
+            },
             .Dump => {
                 const value = stack.pop();
                 try stdout.print("{d}\n", .{value});
