@@ -5,6 +5,7 @@ const Allocator = std.mem.Allocator;
 
 pub fn crossReferenceBlocks(allocator: Allocator, program: []Op) !void {
     var stack = std.ArrayList(usize).init(allocator);
+    defer stack.deinit();
     var ip: usize = 0;
     while (ip < program.len) : (ip += 1) {
         const op = program[ip];
