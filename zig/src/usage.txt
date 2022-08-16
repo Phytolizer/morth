@@ -3,5 +3,5 @@ Usage: {s} <SUBCOMMAND> [ARGS]
     sim                     Simulate the program
     com                     Compile the program
       OPTIONS:
-        -o <FILE>       Set the output path
+        -o <FILE>           Set the output path
         -r                  Run the program after compiling
