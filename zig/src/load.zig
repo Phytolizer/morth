@@ -1,5 +1,6 @@
 const std = @import("std");
 const Op = @import("op.zig").Op;
+const toAbsolute = @import("path.zig").toAbsolute;
 
 const Allocator = std.mem.Allocator;
 
@@ -49,12 +50,7 @@ pub fn loadProgramFromFile(allocator: Allocator, filePath: []const u8) ![]Op {
     var program = std.ArrayList(Op).init(allocator);
     errdefer program.deinit();
 
-    const cwd = try std.process.getCwdAlloc(allocator);
-    defer allocator.free(cwd);
-    var inputFilePath = if (!std.fs.path.isAbsolute(filePath))
-        try std.fs.path.join(allocator, &.{ cwd, filePath })
-    else
-        try allocator.dupe(u8, filePath);
+    const inputFilePath = try toAbsolute(allocator, filePath);
     defer allocator.free(inputFilePath);
 
     var f = try std.fs.openFileAbsolute(inputFilePath, .{});

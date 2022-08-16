@@ -1,6 +1,7 @@
 const std = @import("std");
 const Op = @import("op.zig").Op;
 const runCommand = @import("process.zig").runCommand;
+const toAbsolute = @import("path.zig").toAbsolute;
 
 const Allocator = std.mem.Allocator;
 
@@ -8,8 +9,8 @@ const prelude = @embedFile("prelude.nasm");
 const epilogue = @embedFile("epilogue.nasm");
 const dumpCSource = @embedFile("dump.c");
 
-fn compileDumpSource(cwd: []const u8, dumpOutputPath: []const u8, allocator: Allocator) !void {
-    var dumpCPath = try std.fs.path.join(allocator, &.{ cwd, "dump.c" });
+fn compileDumpSource(dumpOutputPath: []const u8, allocator: Allocator) !void {
+    var dumpCPath = try toAbsolute(allocator, "dump.c");
     defer allocator.free(dumpCPath);
     {
         var dumpCFile = try std.fs.createFileAbsolute(dumpCPath, .{});
@@ -45,14 +46,12 @@ fn compileDumpSource(cwd: []const u8, dumpOutputPath: []const u8, allocator: All
 }
 
 pub fn compileProgram(allocator: Allocator, program: []const Op) ![]u8 {
-    const cwd = try std.process.getCwdAlloc(allocator);
-    defer allocator.free(cwd);
-    const absPath = try std.fs.path.join(allocator, &.{ cwd, "output.nasm" });
+    const absPath = try toAbsolute(allocator, "output.nasm");
     defer allocator.free(absPath);
-    const dumpOutputPath = try std.fs.path.join(allocator, &.{ cwd, "dump.o" });
+    const dumpOutputPath = try toAbsolute(allocator, "dump.o");
     defer allocator.free(dumpOutputPath);
     std.fs.accessAbsolute(dumpOutputPath, .{}) catch
-        try compileDumpSource(cwd, dumpOutputPath, allocator);
+        try compileDumpSource(dumpOutputPath, allocator);
     {
         var file = try std.fs.createFileAbsolute(absPath, .{});
         defer file.close();
@@ -104,5 +103,5 @@ pub fn compileProgram(allocator: Allocator, program: []const Op) ![]u8 {
         dumpOutputPath,
     }, allocator);
 
-    return try std.fs.path.join(allocator, &.{ cwd, "output" });
+    return try toAbsolute(allocator, "output");
 }
