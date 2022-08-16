@@ -51,7 +51,8 @@ pub fn main() !void {
                 const inputFilePath = parsed.positionals[0];
                 const program = try loadProgramFromFile(allocator.backing_allocator, inputFilePath);
                 try crossReferenceBlocks(allocator.backing_allocator, program);
-                try simulateProgram(allocator.backing_allocator, program);
+                const stdout = std.io.getStdOut().writer();
+                try simulateProgram(@TypeOf(stdout), stdout, allocator.backing_allocator, program);
             },
             .com => |comOptions| {
                 if (parsed.positionals.len == 0) {

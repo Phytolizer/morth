@@ -3,8 +3,10 @@ const Op = @import("op.zig").Op;
 
 const Allocator = std.mem.Allocator;
 
-pub fn simulateProgram(allocator: Allocator, program: []const Op) !void {
-    const stdout = std.io.getStdOut().writer();
+pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocator, program: []const Op) !void {
+    comptime if (!@hasDecl(Writer, "print")) {
+        @compileError("invalid writer type");
+    };
     var stack = std.ArrayList(u64).init(allocator);
     defer stack.deinit();
     var ip: usize = 0;
@@ -72,7 +74,7 @@ pub fn simulateProgram(allocator: Allocator, program: []const Op) !void {
             },
             .Dump => {
                 const value = stack.pop();
-                try stdout.print("{d}\n", .{value});
+                try writer.print("{d}\n", .{value});
                 ip += 1;
             },
         }

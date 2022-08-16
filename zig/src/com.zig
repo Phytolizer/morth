@@ -138,23 +138,34 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
 
     const objPath = try std.mem.concat(allocator, u8, &.{ basename, ".o" });
     defer allocator.free(objPath);
-    try runCommand(.Echo, &.{
-        "nasm",
-        "-f",
-        "elf64",
-        "-o",
-        objPath,
-        outputPath,
-    }, allocator);
-    try runCommand(.Echo, &.{
-        "ld",
-        "-o",
-        basename,
-        "-z",
-        "noexecstack",
-        objPath,
-        dumpOutputPath,
-    }, allocator);
+    const stdout = std.io.getStdOut().writer();
+    try runCommand(
+        @TypeOf(stdout),
+        .{ .shouldEcho = .Echo, .writer = stdout },
+        &.{
+            "nasm",
+            "-f",
+            "elf64",
+            "-o",
+            objPath,
+            outputPath,
+        },
+        allocator,
+    );
+    try runCommand(
+        @TypeOf(stdout),
+        .{ .shouldEcho = .Echo, .writer = stdout },
+        &.{
+            "ld",
+            "-o",
+            basename,
+            "-z",
+            "noexecstack",
+            objPath,
+            dumpOutputPath,
+        },
+        allocator,
+    );
 
     return try allocator.dupe(u8, basename);
 }

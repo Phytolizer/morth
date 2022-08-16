@@ -9,8 +9,20 @@ pub fn doTest(comptime path: []const u8, comptime source: []const u8) !void {
     const program = try loadProgramFromText(std.testing.allocator, source);
     defer std.testing.allocator.free(program);
     try crossReferenceBlocks(std.testing.allocator, program);
-    try simulateProgram(std.testing.allocator, program);
+    var buffer = std.ArrayList(u8).init(std.testing.allocator);
+    var bufWriter = buffer.writer();
+    try simulateProgram(@TypeOf(bufWriter), bufWriter, std.testing.allocator, program);
+    const simOutput = buffer.toOwnedSlice();
+    defer std.testing.allocator.free(simOutput);
     const exePath = try compileProgram(std.testing.allocator, program, path);
     defer std.testing.allocator.free(exePath);
-    try runCommand(.NoEcho, &.{exePath}, std.testing.allocator);
+    try runCommand(
+        @TypeOf(bufWriter),
+        .{ .shouldEcho = .NoEcho, .writer = bufWriter },
+        &.{exePath},
+        std.testing.allocator,
+    );
+    const comOutput = buffer.toOwnedSlice();
+    defer std.testing.allocator.free(comOutput);
+    try std.testing.expectEqualStrings(simOutput, comOutput);
 }
