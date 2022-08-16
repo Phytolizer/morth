@@ -21,44 +21,44 @@ const Token = struct {
 
 fn parseTokenAsOp(token: Token) !Op {
     if (std.mem.eql(u8, token.word, "+")) {
-        return Op.plus();
+        return Op.Plus;
     }
     if (std.mem.eql(u8, token.word, "-")) {
-        return Op.minus();
+        return Op.Minus;
     }
     if (std.mem.eql(u8, token.word, ".")) {
-        return Op.dump();
+        return Op.Dump;
     }
     if (std.mem.eql(u8, token.word, "=")) {
-        return Op.equal();
+        return Op.Equal;
     }
     if (std.mem.eql(u8, token.word, "if")) {
-        return Op.iff();
+        return Op{ .If = null };
     }
     if (std.mem.eql(u8, token.word, "else")) {
-        return Op.elze();
+        return Op{ .Else = null };
     }
     if (std.mem.eql(u8, token.word, "end")) {
-        return Op.end();
+        return Op{ .End = null };
     }
     if (std.mem.eql(u8, token.word, "dup")) {
-        return Op.dup();
+        return Op.Dup;
     }
     if (std.mem.eql(u8, token.word, ">")) {
-        return Op.gt();
+        return Op.Gt;
     }
     if (std.mem.eql(u8, token.word, "while")) {
-        return Op.wile();
+        return Op.While;
     }
     if (std.mem.eql(u8, token.word, "do")) {
-        return Op.doo();
+        return Op{ .Do = null };
     }
 
     const value = std.fmt.parseInt(u64, token.word, 10) catch {
         std.debug.print("{s}:{d}:{d}: Invalid number '{s}'\n", .{ token.filePath, token.row, token.col, token.word });
         std.process.exit(1);
     };
-    return Op.push(value);
+    return Op{ .Push = value };
 }
 
 fn findCol(line: []const u8, start: usize, predicate: fn (u8) bool) usize {
