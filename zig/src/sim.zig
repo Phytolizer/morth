@@ -22,6 +22,11 @@ pub fn simulateProgram(allocator: Allocator, program: []const Op) !void {
                 const a = stack.pop();
                 try stack.append(a - b);
             },
+            .Equal => {
+                const b = stack.pop();
+                const a = stack.pop();
+                try stack.append(if (a == b) 1 else 0);
+            },
             .Dump => {
                 const value = stack.pop();
                 try stdout.print("{d}\n", .{value});

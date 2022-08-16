@@ -2,6 +2,7 @@ pub const Op = union(enum) {
     Push: u64,
     Plus,
     Minus,
+    Equal,
     Dump,
 
     const Self = @This();
@@ -16,6 +17,10 @@ pub const Op = union(enum) {
 
     pub fn minus() Self {
         return Self.Minus;
+    }
+
+    pub fn equal() Self {
+        return Self.Equal;
     }
 
     pub fn dump() Self {

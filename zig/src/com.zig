@@ -85,6 +85,14 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
                     try fileWriter.writeAll("    sub rax, rdi\n");
                     try fileWriter.writeAll("    push rax\n");
                 },
+                .Equal => {
+                    try fileWriter.writeAll("    pop rdi\n");
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    cmp rax, rdi\n");
+                    try fileWriter.writeAll("    sete al\n");
+                    try fileWriter.writeAll("    movzx rax, al\n");
+                    try fileWriter.writeAll("    push rax\n");
+                },
                 .Dump => {
                     try fileWriter.writeAll("    pop rdi\n");
                     try fileWriter.writeAll("    call dump\n");
