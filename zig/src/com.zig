@@ -152,7 +152,7 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
         },
         allocator,
     );
-    const exePath = outputPathArg orelse basename;
+    const exePath = try toAbsolute(allocator, outputPathArg orelse basename);
     try runCommand(
         @TypeOf(stdout),
         .{ .shouldEcho = .Echo, .writer = stdout },
