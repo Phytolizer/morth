@@ -18,7 +18,7 @@ pub fn doTest(comptime path: []const u8, comptime source: []const u8) !void {
     defer std.testing.allocator.free(exePath);
     try runCommand(
         @TypeOf(bufWriter),
-        .{ .shouldEcho = .NoEcho, .writer = bufWriter },
+        .{ .writer = bufWriter },
         &.{exePath},
         std.testing.allocator,
     );

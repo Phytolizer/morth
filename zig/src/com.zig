@@ -141,7 +141,7 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
     const stdout = std.io.getStdOut().writer();
     try runCommand(
         @TypeOf(stdout),
-        .{ .shouldEcho = .Echo, .writer = stdout },
+        .{ .shouldEcho = true, .writer = stdout },
         &.{
             "nasm",
             "-f",
@@ -155,7 +155,7 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
     const exePath = try toAbsolute(allocator, outputPathArg orelse basename);
     try runCommand(
         @TypeOf(stdout),
-        .{ .shouldEcho = .Echo, .writer = stdout },
+        .{ .shouldEcho = true, .writer = stdout },
         &.{
             "ld",
             "-o",

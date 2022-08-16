@@ -4,12 +4,7 @@ const Allocator = std.mem.Allocator;
 
 pub fn RunCommandOptions(comptime Writer: type) type {
     return struct {
-        pub const ShouldEcho = enum {
-            Echo,
-            NoEcho,
-        };
-
-        shouldEcho: ShouldEcho,
+        shouldEcho: bool = false,
         writer: Writer,
     };
 }
@@ -18,13 +13,10 @@ pub fn runCommand(comptime Writer: type, options: RunCommandOptions(Writer), com
     comptime if (!(@hasDecl(Writer, "writeAll") and @hasDecl(Writer, "print"))) {
         @compileError("Writer does not have a writeAll and print method");
     };
-    switch (options.shouldEcho) {
-        .Echo => {
-            const commandJoined = try std.mem.join(allocator, " ", command);
-            defer allocator.free(commandJoined);
-            try options.writer.print("[CMD] {s}\n", .{commandJoined});
-        },
-        .NoEcho => {},
+    if (options.shouldEcho) {
+        const commandJoined = try std.mem.join(allocator, " ", command);
+        defer allocator.free(commandJoined);
+        try options.writer.print("[CMD] {s}\n", .{commandJoined});
     }
     var child = std.ChildProcess.init(command, allocator);
     child.stdout_behavior = .Pipe;

@@ -72,7 +72,7 @@ pub fn main() !void {
                     const stdout = std.io.getStdOut().writer();
                     try runCommand(
                         @TypeOf(stdout),
-                        .{ .shouldEcho = .Echo, .writer = stdout },
+                        .{ .shouldEcho = true, .writer = stdout },
                         &.{exePath},
                         allocator.backing_allocator,
                     );
