@@ -7,4 +7,3 @@ gyro.lock
 !src/*.nasm
 *.c
 !src/*.c
-test_*.zig
