@@ -61,7 +61,12 @@ fn loadProgram(comptime Reader: type, filePath: []const u8, allocator: Allocator
         var col = findCol(line, 0, isNotSpace);
         while (col < line.len) {
             const colEnd = findCol(line, col, std.ascii.isSpace);
-            const token = Token{ .filePath = filePath, .row = lineNumber, .col = col + 1, .word = line[col..colEnd] };
+            const token = Token{
+                .filePath = filePath,
+                .row = lineNumber,
+                .col = col + 1,
+                .word = line[col..colEnd],
+            };
             try program.append(try parseTokenAsOp(token));
             col = findCol(line, colEnd, isNotSpace);
         }
