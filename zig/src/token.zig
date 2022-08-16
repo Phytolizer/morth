@@ -11,6 +11,7 @@ pub const Token = struct {
     const Self = @This();
 
     pub fn deinit(self: *Self, allocator: Allocator) void {
+        allocator.free(self.filePath);
         allocator.free(self.word);
     }
 };

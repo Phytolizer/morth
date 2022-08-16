@@ -51,10 +51,11 @@ pub fn main() !void {
                     return error.InvalidUsage;
                 }
                 const inputFilePath = parsed.positionals[0];
-                const program = try loadProgramFromFile(allocator.backing_allocator, inputFilePath);
-                try crossReferenceBlocks(allocator.backing_allocator, program);
+                var program = try loadProgramFromFile(allocator.backing_allocator, inputFilePath);
+                defer program.deinit();
+                try crossReferenceBlocks(allocator.backing_allocator, program.ops);
                 const stdout = std.io.getStdOut().writer();
-                try simulateProgram(@TypeOf(stdout), stdout, allocator.backing_allocator, program);
+                try simulateProgram(@TypeOf(stdout), stdout, allocator.backing_allocator, program.ops);
             },
             .com => |comOptions| {
                 if (parsed.positionals.len == 0) {
@@ -63,10 +64,11 @@ pub fn main() !void {
                 }
                 const inputFilePath = try toAbsolute(allocator.backing_allocator, parsed.positionals[0]);
                 defer allocator.backing_allocator.free(inputFilePath);
-                const program = try loadProgramFromFile(allocator.backing_allocator, inputFilePath);
-                try crossReferenceBlocks(allocator.backing_allocator, program);
+                var program = try loadProgramFromFile(allocator.backing_allocator, inputFilePath);
+                defer program.deinit();
+                try crossReferenceBlocks(allocator.backing_allocator, program.ops);
                 const outputPath = comOptions.output;
-                const exePath = try compileProgram(allocator.backing_allocator, program, inputFilePath, outputPath);
+                const exePath = try compileProgram(allocator.backing_allocator, program.ops, inputFilePath, outputPath);
                 defer allocator.backing_allocator.free(exePath);
                 if (comOptions.run) {
                     const stdout = std.io.getStdOut().writer();

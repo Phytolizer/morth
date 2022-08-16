@@ -2,6 +2,7 @@ const std = @import("std");
 const Op = @import("op.zig").Op;
 const toAbsolute = @import("path.zig").toAbsolute;
 const Token = @import("token.zig").Token;
+const Program = @import("program.zig").Program;
 
 const Allocator = std.mem.Allocator;
 
@@ -61,7 +62,7 @@ fn isNotSpace(c: u8) bool {
     return !std.ascii.isSpace(c);
 }
 
-fn loadProgram(comptime Reader: type, filePath: []const u8, allocator: Allocator, reader: Reader) ![]Op {
+fn loadProgram(comptime Reader: type, filePath: []const u8, allocator: Allocator, reader: Reader) !Program {
     var program = std.ArrayList(Op).init(allocator);
     errdefer program.deinit();
 
@@ -88,17 +89,17 @@ fn loadProgram(comptime Reader: type, filePath: []const u8, allocator: Allocator
         }
     }
 
-    return program.toOwnedSlice();
+    return Program{ .ops = program.toOwnedSlice(), .allocator = allocator };
 }
 
-pub fn loadProgramFromText(allocator: Allocator, text: []const u8) ![]Op {
+pub fn loadProgramFromText(allocator: Allocator, text: []const u8) !Program {
     var stream = std.io.fixedBufferStream(text);
     var streamReader = stream.reader();
 
     return try loadProgram(@TypeOf(streamReader), "<memory>", allocator, streamReader);
 }
 
-pub fn loadProgramFromFile(allocator: Allocator, filePath: []const u8) ![]Op {
+pub fn loadProgramFromFile(allocator: Allocator, filePath: []const u8) !Program {
     var program = std.ArrayList(Op).init(allocator);
     errdefer program.deinit();
 
