@@ -14,7 +14,7 @@ pub fn doTest(comptime path: []const u8, comptime source: []const u8) !void {
     try simulateProgram(@TypeOf(bufWriter), bufWriter, std.testing.allocator, program);
     const simOutput = buffer.toOwnedSlice();
     defer std.testing.allocator.free(simOutput);
-    const exePath = try compileProgram(std.testing.allocator, program, path);
+    const exePath = try compileProgram(std.testing.allocator, program, path, null);
     defer std.testing.allocator.free(exePath);
     try runCommand(
         @TypeOf(bufWriter),
