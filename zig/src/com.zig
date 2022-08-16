@@ -71,8 +71,8 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
         while (ip < program.len) : (ip += 1) {
             const op = program[ip];
             try fileWriter.print(".morth_addr_{d}:\n", .{ip});
-            try fileWriter.print("    ;; -- {s} --\n", .{@tagName(op)});
-            switch (op) {
+            try fileWriter.print("    ;; -- {s} --\n", .{@tagName(op.code)});
+            switch (op.code) {
                 .Push => |value| {
                     try fileWriter.print("    push {d}\n", .{value});
                 },

@@ -1,58 +1,52 @@
 const std = @import("std");
 const Op = @import("op.zig").Op;
 const toAbsolute = @import("path.zig").toAbsolute;
+const Token = @import("token.zig").Token;
 
 const Allocator = std.mem.Allocator;
 
 const maxLine = 1024;
 
-const Token = struct {
-    filePath: []const u8,
-    row: u64,
-    col: u64,
-    word: []const u8,
-};
-
 fn parseTokenAsOp(token: Token) !Op {
     if (std.mem.eql(u8, token.word, "+")) {
-        return Op.Plus;
+        return Op.init(token, .Plus);
     }
     if (std.mem.eql(u8, token.word, "-")) {
-        return Op.Minus;
+        return Op.init(token, .Minus);
     }
     if (std.mem.eql(u8, token.word, ".")) {
-        return Op.Dump;
+        return Op.init(token, .Dump);
     }
     if (std.mem.eql(u8, token.word, "=")) {
-        return Op.Equal;
+        return Op.init(token, .Equal);
     }
     if (std.mem.eql(u8, token.word, "if")) {
-        return Op{ .If = null };
+        return Op.init(token, .{ .If = null });
     }
     if (std.mem.eql(u8, token.word, "else")) {
-        return Op{ .Else = null };
+        return Op.init(token, .{ .Else = null });
     }
     if (std.mem.eql(u8, token.word, "end")) {
-        return Op{ .End = null };
+        return Op.init(token, .{ .End = null });
     }
     if (std.mem.eql(u8, token.word, "dup")) {
-        return Op.Dup;
+        return Op.init(token, .Dup);
     }
     if (std.mem.eql(u8, token.word, ">")) {
-        return Op.Gt;
+        return Op.init(token, .Gt);
     }
     if (std.mem.eql(u8, token.word, "while")) {
-        return Op.While;
+        return Op.init(token, .While);
     }
     if (std.mem.eql(u8, token.word, "do")) {
-        return Op{ .Do = null };
+        return Op.init(token, .{ .Do = null });
     }
 
     const value = std.fmt.parseInt(u64, token.word, 10) catch {
         std.debug.print("{s}:{d}:{d}: Invalid number '{s}'\n", .{ token.filePath, token.row, token.col, token.word });
         std.process.exit(1);
     };
-    return Op{ .Push = value };
+    return Op.init(token, .{ .Push = value });
 }
 
 fn findCol(line: []const u8, start: usize, predicate: fn (u8) bool) usize {
@@ -84,10 +78,10 @@ fn loadProgram(comptime Reader: type, filePath: []const u8, allocator: Allocator
         while (col < line.len) {
             const colEnd = findCol(line, col, std.ascii.isSpace);
             const token = Token{
-                .filePath = filePath,
+                .filePath = try allocator.dupe(u8, filePath),
                 .row = lineNumber,
                 .col = col + 1,
-                .word = line[col..colEnd],
+                .word = try allocator.dupe(u8, line[col..colEnd]),
             };
             try program.append(try parseTokenAsOp(token));
             col = findCol(line, colEnd, isNotSpace);

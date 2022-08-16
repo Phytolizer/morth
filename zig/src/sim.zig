@@ -12,7 +12,7 @@ pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocat
     var ip: usize = 0;
     while (ip < program.len) {
         const op = program[ip];
-        switch (op) {
+        switch (op.code) {
             .Push => |value| {
                 try stack.append(value);
                 ip += 1;
