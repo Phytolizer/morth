@@ -20,7 +20,7 @@ pub fn crossReferenceBlocks(allocator: Allocator, program: []Op) !void {
                         target.* = ip + 1;
                     },
                     else => {
-                        return error.MismathedElse;
+                        return error.MismatchedElse;
                     },
                 }
                 try stack.append(ip);
