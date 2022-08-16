@@ -47,6 +47,12 @@ fn parseTokenAsOp(token: Token) !Op {
     if (std.mem.eql(u8, token.word, ">")) {
         return Op.gt();
     }
+    if (std.mem.eql(u8, token.word, "while")) {
+        return Op.wile();
+    }
+    if (std.mem.eql(u8, token.word, "do")) {
+        return Op.doo();
+    }
 
     const value = std.fmt.parseInt(u64, token.word, 10) catch {
         std.debug.print("{s}:{d}:{d}: Invalid number '{s}'\n", .{ token.filePath, token.row, token.col, token.word });

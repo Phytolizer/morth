@@ -104,7 +104,9 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
                 .Else => |target| {
                     try fileWriter.print("    jmp .morth_addr_{d}\n", .{target.?});
                 },
-                .End => {},
+                .End => |target| {
+                    try fileWriter.print("    jmp .morth_addr_{d}\n", .{target.?});
+                },
                 .Dup => {
                     try fileWriter.writeAll("    pop rax\n");
                     try fileWriter.writeAll("    push rax\n");
@@ -121,6 +123,12 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
                 .Dump => {
                     try fileWriter.writeAll("    pop rdi\n");
                     try fileWriter.writeAll("    call dump\n");
+                },
+                .While => {},
+                .Do => |target| {
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    cmp rax, 0\n");
+                    try fileWriter.print("    je .morth_addr_{d}\n", .{target.?});
                 },
             }
         }

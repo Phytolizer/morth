@@ -8,8 +8,8 @@ pub fn crossReferenceBlocks(allocator: Allocator, program: []Op) !void {
     defer stack.deinit();
     var ip: usize = 0;
     while (ip < program.len) : (ip += 1) {
-        const op = program[ip];
-        switch (op) {
+        const op = &program[ip];
+        switch (op.*) {
             .If => {
                 try stack.append(ip);
             },
@@ -25,19 +25,36 @@ pub fn crossReferenceBlocks(allocator: Allocator, program: []Op) !void {
                 }
                 try stack.append(ip);
             },
-            .End => {
+            .End => |*endTarget| {
                 const blockIp = stack.pop();
                 switch (program[blockIp]) {
-                    .If => |*target| {
+                    .If, .Else => |*target| {
                         target.* = ip;
+                        endTarget.* = ip + 1;
                     },
-                    .Else => |*target| {
-                        target.* = ip;
+                    .Do => |*target| {
+                        endTarget.* = target.*;
+                        target.* = ip + 1;
                     },
                     else => {
                         return error.MismatchedEnd;
                     },
                 }
+            },
+            .While => {
+                try stack.append(ip);
+            },
+            .Do => |*target| {
+                const whileIp = stack.pop();
+                switch (program[whileIp]) {
+                    .While => {
+                        target.* = whileIp;
+                    },
+                    else => {
+                        return error.MismatchedDo;
+                    },
+                }
+                try stack.append(ip);
             },
             else => {},
         }

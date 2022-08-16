@@ -6,9 +6,11 @@ pub const Op = union(enum) {
     Dump,
     If: ?usize,
     Else: ?usize,
-    End,
+    End: ?usize,
     Dup,
     Gt,
+    While,
+    Do: ?usize,
 
     const Self = @This();
 
@@ -41,7 +43,7 @@ pub const Op = union(enum) {
     }
 
     pub fn end() Self {
-        return Self.End;
+        return Self{ .End = null };
     }
 
     pub fn dup() Self {
@@ -50,5 +52,13 @@ pub const Op = union(enum) {
 
     pub fn gt() Self {
         return Self.Gt;
+    }
+
+    pub fn wile() Self {
+        return Self.While;
+    }
+
+    pub fn doo() Self {
+        return Self{ .Do = null };
     }
 };

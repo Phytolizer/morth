@@ -44,8 +44,8 @@ pub fn simulateProgram(allocator: Allocator, program: []const Op) !void {
             .Else => |target| {
                 ip = target.?;
             },
-            .End => {
-                ip += 1;
+            .End => |target| {
+                ip = target.?;
             },
             .Dup => {
                 const value = stack.pop();
@@ -58,6 +58,17 @@ pub fn simulateProgram(allocator: Allocator, program: []const Op) !void {
                 const a = stack.pop();
                 try stack.append(if (a > b) 1 else 0);
                 ip += 1;
+            },
+            .While => {
+                ip += 1;
+            },
+            .Do => |target| {
+                const value = stack.pop();
+                if (value == 0) {
+                    ip = target.?;
+                } else {
+                    ip += 1;
+                }
             },
             .Dump => {
                 const value = stack.pop();
