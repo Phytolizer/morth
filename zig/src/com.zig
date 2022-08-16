@@ -72,22 +72,22 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
         for (program) |op| {
             try fileWriter.print("    ;; -- {s} --\n", .{@tagName(op)});
             switch (op) {
-                .op_push => |value| {
+                .Push => |value| {
                     try fileWriter.print("    push {d}\n", .{value});
                 },
-                .op_plus => {
+                .Plus => {
                     try fileWriter.writeAll("    pop rdi\n");
                     try fileWriter.writeAll("    pop rax\n");
                     try fileWriter.writeAll("    add rax, rdi\n");
                     try fileWriter.writeAll("    push rax\n");
                 },
-                .op_minus => {
+                .Minus => {
                     try fileWriter.writeAll("    pop rdi\n");
                     try fileWriter.writeAll("    pop rax\n");
                     try fileWriter.writeAll("    sub rax, rdi\n");
                     try fileWriter.writeAll("    push rax\n");
                 },
-                .op_dump => {
+                .Dump => {
                     try fileWriter.writeAll("    pop rdi\n");
                     try fileWriter.writeAll("    call dump\n");
                 },
