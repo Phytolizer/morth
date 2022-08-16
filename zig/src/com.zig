@@ -153,7 +153,6 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
         allocator,
     );
     const exePath = try toAbsolute(allocator, outputPathArg orelse basename);
-    defer allocator.free(exePath);
     try runCommand(
         @TypeOf(stdout),
         .{ .shouldEcho = .Echo, .writer = stdout },
@@ -169,5 +168,5 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
         allocator,
     );
 
-    return try allocator.dupe(u8, exePath);
+    return exePath;
 }
