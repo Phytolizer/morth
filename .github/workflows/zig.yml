@@ -31,4 +31,7 @@ jobs:
       - uses: goto-bus-stop/setup-zig@v1
         with:
           version: master
-      - run: zig build test
+      - uses: mattnite/setup-gyro@v1
+        with:
+          access-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: gyro build test
