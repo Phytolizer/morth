@@ -57,14 +57,12 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
     const basename = computeBaseName(sourcePath);
     const outputPath = try std.mem.concat(allocator, u8, &.{ basename, ".nasm" });
     defer allocator.free(outputPath);
-    const absPath = try toAbsolute(allocator, outputPath);
-    defer allocator.free(absPath);
     const dumpOutputPath = try toAbsolute(allocator, "dump.o");
     defer allocator.free(dumpOutputPath);
     std.fs.accessAbsolute(dumpOutputPath, .{}) catch
         try compileDumpSource(dumpOutputPath, allocator);
     {
-        var file = try std.fs.createFileAbsolute(absPath, .{});
+        var file = try std.fs.createFileAbsolute(outputPath, .{});
         defer file.close();
         const fileWriter = file.writer();
 
@@ -98,15 +96,15 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
 
     const objPath = try std.mem.concat(allocator, u8, &.{ basename, ".o" });
     defer allocator.free(objPath);
-    try runCommand(&.{
+    try runCommand(.Echo, &.{
         "nasm",
         "-f",
         "elf64",
         "-o",
         objPath,
-        absPath,
+        outputPath,
     }, allocator);
-    try runCommand(&.{
+    try runCommand(.Echo, &.{
         "ld",
         "-o",
         basename,

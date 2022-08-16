@@ -6,6 +6,7 @@ const argsParser = @import("args");
 const runCommand = @import("process.zig").runCommand;
 const loadProgramFromFile = @import("load.zig").loadProgramFromFile;
 const loadProgramFromText = @import("load.zig").loadProgramFromText;
+const toAbsolute = @import("path.zig").toAbsolute;
 
 const Writer = std.fs.File.Writer;
 
@@ -55,12 +56,13 @@ pub fn main() !void {
                     try usage(std.io.getStdErr().writer(), parsed.executable_name.?);
                     return error.InvalidUsage;
                 }
-                const inputFilePath = parsed.positionals[0];
+                const inputFilePath = try toAbsolute(allocator.backing_allocator, parsed.positionals[0]);
+                defer allocator.backing_allocator.free(inputFilePath);
                 const program = try loadProgramFromFile(allocator.backing_allocator, inputFilePath);
                 const exePath = try compileProgram(allocator.backing_allocator, program, inputFilePath);
                 defer allocator.backing_allocator.free(exePath);
                 if (comOptions.run) {
-                    try runCommand(&.{exePath}, allocator.backing_allocator);
+                    try runCommand(.Echo, &.{exePath}, allocator.backing_allocator);
                 }
             },
         }
@@ -79,6 +81,8 @@ test "simulate program" {
 test "compile program" {
     const program = try loadProgramFromText(std.testing.allocator, @embedFile("../tests/test.morth"));
     defer std.testing.allocator.free(program);
-    const exePath = try compileProgram(std.testing.allocator, program, "tests/test.morth");
+    const testPath = try toAbsolute(std.testing.allocator, "tests/test.morth");
+    defer std.testing.allocator.free(testPath);
+    const exePath = try compileProgram(std.testing.allocator, program, testPath);
     std.testing.allocator.free(exePath);
 }
