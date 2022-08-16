@@ -11,7 +11,7 @@ fn findLast(comptime T: type, slice: []const T, value: T) ?usize {
     return null;
 }
 
-const testTemplate = @embedFile("testTemplate.zig");
+const testTemplate = @embedFile("test.zig_template");
 
 fn generateTest(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.builtin.Mode, testStep: *std.build.Step, morthPathIn: []const u8) !void {
     const gpAllocator = std.heap.GeneralPurposeAllocator(.{}){};
