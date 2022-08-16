@@ -74,20 +74,3 @@ pub fn main() !void {
         return error.InvalidUsage;
     }
 }
-
-test "simulate program" {
-    const program = try loadProgramFromText(std.testing.allocator, @embedFile("../tests/test.morth"));
-    defer std.testing.allocator.free(program);
-    try crossReferenceBlocks(std.testing.allocator, program);
-    try simulateProgram(std.testing.allocator, program);
-}
-
-test "compile program" {
-    const program = try loadProgramFromText(std.testing.allocator, @embedFile("../tests/test.morth"));
-    defer std.testing.allocator.free(program);
-    try crossReferenceBlocks(std.testing.allocator, program);
-    const testPath = try toAbsolute(std.testing.allocator, "tests/test.morth");
-    defer std.testing.allocator.free(testPath);
-    const exePath = try compileProgram(std.testing.allocator, program, testPath);
-    std.testing.allocator.free(exePath);
-}
