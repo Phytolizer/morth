@@ -93,5 +93,5 @@ pub fn loadProgramFromFile(allocator: Allocator, filePath: []const u8) ![]Op {
     defer f.close();
     const fReader = f.reader();
 
-    return try loadProgram(@TypeOf(fReader), filePath, allocator, fReader);
+    return try loadProgram(@TypeOf(fReader), inputFilePath, allocator, fReader);
 }
