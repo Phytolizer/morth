@@ -114,5 +114,5 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
         dumpOutputPath,
     }, allocator);
 
-    return try toAbsolute(allocator, "output");
+    return try allocator.dupe(u8, basename);
 }
