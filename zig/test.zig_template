@@ -1,8 +1,5 @@
-const std = @import("std");
-const doTest = @import("doTest.zig").doTest;
-
-const source = @embedFile("tests/{s}");
+const {s}_source = @embedFile("{s}");
 
 test "{s}" {{
-    try doTest("{s}", source);
+    try doTest("{s}", {s}_source);
 }}

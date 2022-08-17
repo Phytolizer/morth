@@ -15,45 +15,41 @@ fn generateTests(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.b
     const dir = try std.fs.cwd().openIterableDir("src/tests", .{});
     var dirIterator = dir.iterate();
 
-    while (try dirIterator.next()) |path| {
-        if (std.mem.endsWith(u8, path.name, ".morth")) {
-            try generateTest(b, target, mode, testStep, path.name);
-        }
-    }
-}
-
-const testTemplate = @embedFile("test.zig_template");
-
-fn generateTest(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.builtin.Mode, testStep: *std.build.Step, morthPathIn: []const u8) !void {
     const gpAllocator = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpAllocator.backing_allocator;
-    const morthPath = try std.fs.path.join(allocator, &.{ "src", morthPathIn });
-    defer allocator.free(morthPath);
-    const lastSlash = findLast(u8, morthPath, '/') orelse 0;
-    const baseDir = if (morthPath[0..lastSlash].len > 0)
-        morthPath[0..lastSlash]
-    else
-        ".";
+
     const cwd = try std.process.getCwdAlloc(allocator);
     defer allocator.free(cwd);
-    const absoluteMorthPath = try std.fs.path.join(allocator, &.{ cwd, "src", "tests", morthPathIn });
-    defer allocator.free(absoluteMorthPath);
-    const morthName = std.fs.path.basename(morthPath);
-    const morthPeriod = findLast(u8, morthName, '.') orelse morthName.len;
-    const morthBase = morthName[0..morthPeriod];
-    const zigPath = try std.mem.concat(allocator, u8, &.{ baseDir, "/test_", morthBase, ".zig" });
+    const baseDir = "src";
+    const zigPath = try std.mem.concat(allocator, u8, &.{ baseDir, "/test.zig" });
     defer allocator.free(zigPath);
     const absoluteZigPath = try std.fs.path.join(allocator, &.{ try std.process.getCwdAlloc(allocator), zigPath });
     defer allocator.free(absoluteZigPath);
-    {
-        var file = try std.fs.createFileAbsolute(absoluteZigPath, .{});
-        defer file.close();
-        try file.writer().print(testTemplate, .{ morthPathIn, morthName, absoluteMorthPath });
+    var zigFile = try std.fs.createFileAbsolute(absoluteZigPath, .{});
+    defer zigFile.close();
+    const zigWriter = zigFile.writer();
+    try zigWriter.writeAll(testHeader);
+    while (try dirIterator.next()) |path| {
+        if (std.mem.endsWith(u8, path.name, ".morth")) {
+            const absoluteMorthPath = try std.fs.path.join(allocator, &.{ cwd, baseDir, "tests", path.name });
+            defer allocator.free(absoluteMorthPath);
+            try generateTest(absoluteMorthPath, zigWriter);
+        }
     }
-    const testCmd = b.addTest(zigPath);
+    const testCmd = b.addTest(absoluteZigPath);
     testCmd.setTarget(target);
     testCmd.setBuildMode(mode);
     testStep.dependOn(&testCmd.step);
+}
+
+const testHeader = @embedFile("test_header.zig_template");
+const testTemplate = @embedFile("test.zig_template");
+
+fn generateTest(morthPath: []const u8, zigWriter: std.fs.File.Writer) !void {
+    const morthName = std.fs.path.basename(morthPath);
+    const morthPeriod = findLast(u8, morthName, '.') orelse morthName.len;
+    const morthBase = morthName[0..morthPeriod];
+    try zigWriter.print(testTemplate, .{ morthBase, morthPath, morthName, morthPath, morthBase });
 }
 
 pub fn build(b: *std.build.Builder) void {

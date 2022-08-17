@@ -1,0 +1,2 @@
+const std = @import("std");
+const doTest = @import("doTest.zig").doTest;
