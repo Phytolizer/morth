@@ -148,6 +148,10 @@ pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocat
                 try stack.append(a);
                 ip += 1;
             },
+            .Drop => {
+                _ = stack.pop();
+                ip += 1;
+            },
         }
     }
 }
