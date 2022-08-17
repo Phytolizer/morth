@@ -96,9 +96,8 @@ pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocat
                 mem[addr] = @truncate(u8, byte);
                 ip += 1;
             },
-            .Syscall1 => {
-                return error.NotImplemented;
-            },
+            .Syscall1 => return error.NotImplemented,
+            .Syscall2 => return error.NotImplemented,
             .Syscall3 => {
                 const syscallNumber = stack.pop();
                 const arg1 = stack.pop();
@@ -124,6 +123,9 @@ pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocat
                 }
                 ip += 1;
             },
+            .Syscall4 => return error.NotImplemented,
+            .Syscall5 => return error.NotImplemented,
+            .Syscall6 => return error.NotImplemented,
         }
     }
 }

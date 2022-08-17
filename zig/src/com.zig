@@ -150,11 +150,44 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
                     try fileWriter.writeAll("    pop rdi\n");
                     try fileWriter.writeAll("    syscall\n");
                 },
+                .Syscall2 => {
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    pop rdi\n");
+                    try fileWriter.writeAll("    pop rsi\n");
+                    try fileWriter.writeAll("    syscall\n");
+                },
                 .Syscall3 => {
                     try fileWriter.writeAll("    pop rax\n");
                     try fileWriter.writeAll("    pop rdi\n");
                     try fileWriter.writeAll("    pop rsi\n");
                     try fileWriter.writeAll("    pop rdx\n");
+                    try fileWriter.writeAll("    syscall\n");
+                },
+                .Syscall4 => {
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    pop rdi\n");
+                    try fileWriter.writeAll("    pop rsi\n");
+                    try fileWriter.writeAll("    pop rdx\n");
+                    try fileWriter.writeAll("    pop r10\n");
+                    try fileWriter.writeAll("    syscall\n");
+                },
+                .Syscall5 => {
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    pop rdi\n");
+                    try fileWriter.writeAll("    pop rsi\n");
+                    try fileWriter.writeAll("    pop rdx\n");
+                    try fileWriter.writeAll("    pop r10\n");
+                    try fileWriter.writeAll("    pop r8\n");
+                    try fileWriter.writeAll("    syscall\n");
+                },
+                .Syscall6 => {
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    pop rdi\n");
+                    try fileWriter.writeAll("    pop rsi\n");
+                    try fileWriter.writeAll("    pop rdx\n");
+                    try fileWriter.writeAll("    pop r10\n");
+                    try fileWriter.writeAll("    pop r8\n");
+                    try fileWriter.writeAll("    pop r9\n");
                     try fileWriter.writeAll("    syscall\n");
                 },
             }

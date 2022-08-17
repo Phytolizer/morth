@@ -55,8 +55,20 @@ fn parseTokenAsOp(token: Token) !Op {
     if (std.mem.eql(u8, token.word, "syscall1")) {
         return Op.init(token, .Syscall1);
     }
+    if (std.mem.eql(u8, token.word, "syscall2")) {
+        return Op.init(token, .Syscall2);
+    }
     if (std.mem.eql(u8, token.word, "syscall3")) {
         return Op.init(token, .Syscall3);
+    }
+    if (std.mem.eql(u8, token.word, "syscall4")) {
+        return Op.init(token, .Syscall4);
+    }
+    if (std.mem.eql(u8, token.word, "syscall5")) {
+        return Op.init(token, .Syscall5);
+    }
+    if (std.mem.eql(u8, token.word, "syscall6")) {
+        return Op.init(token, .Syscall6);
     }
 
     const value = std.fmt.parseInt(u64, token.word, 10) catch
