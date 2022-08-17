@@ -1,5 +1,5 @@
 // This is a comment.
 10 while dup 0 > do
-    dup .
+    dup dump
     1 - // They work at the end of lines.
 end

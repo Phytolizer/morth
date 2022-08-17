@@ -15,7 +15,7 @@ fn parseTokenAsOp(token: Token) !Op {
     if (std.mem.eql(u8, token.word, "-")) {
         return Op.init(token, .Minus);
     }
-    if (std.mem.eql(u8, token.word, ".")) {
+    if (std.mem.eql(u8, token.word, "dump")) {
         return Op.init(token, .Dump);
     }
     if (std.mem.eql(u8, token.word, "=")) {
