@@ -84,6 +84,17 @@ pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocat
                 try stack.append(0);
                 ip += 1;
             },
+            .Load => {
+                const addr = stack.pop();
+                try stack.append(mem[addr]);
+                ip += 1;
+            },
+            .Store => {
+                const byte = stack.pop();
+                const addr = stack.pop();
+                mem[addr] = @truncate(u8, byte);
+                ip += 1;
+            },
         }
     }
 }

@@ -134,6 +134,17 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
                 .Mem => {
                     try fileWriter.writeAll("    push mem\n");
                 },
+                .Load => {
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    mov rbx, 0\n");
+                    try fileWriter.writeAll("    mov bl, [rax]\n");
+                    try fileWriter.writeAll("    push rbx\n");
+                },
+                .Store => {
+                    try fileWriter.writeAll("    pop rbx\n");
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    mov [rax], bl\n");
+                },
             }
         }
         try fileWriter.print(".morth_addr_{d}:\n", .{program.len});

@@ -21,6 +21,8 @@ pub const Op = struct {
         While,
         Do: ?usize,
         Mem,
+        Load,
+        Store,
     };
 
     const Self = @This();
