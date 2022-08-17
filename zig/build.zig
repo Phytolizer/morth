@@ -12,9 +12,6 @@ fn findLast(comptime T: type, slice: []const T, value: T) ?usize {
 }
 
 fn generateTests(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.builtin.Mode, testStep: *std.build.Step) !void {
-    const dir = try std.fs.cwd().openIterableDir("src/tests", .{});
-    var dirIterator = dir.iterate();
-
     const gpAllocator = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpAllocator.backing_allocator;
 
@@ -29,6 +26,9 @@ fn generateTests(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.b
     defer zigFile.close();
     const zigWriter = zigFile.writer();
     try zigWriter.writeAll(testHeader);
+
+    const dir = try std.fs.cwd().openIterableDir("src/tests", .{});
+    var dirIterator = dir.iterate();
     while (try dirIterator.next()) |path| {
         if (std.mem.endsWith(u8, path.name, ".morth")) {
             const absoluteMorthPath = try std.fs.path.join(allocator, &.{ cwd, baseDir, "tests", path.name });
