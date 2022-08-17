@@ -2,7 +2,6 @@ const std = @import("std");
 const pkgs = @import("deps.zig").pkgs;
 
 const Builder = std.build.Builder;
-const CrossTarget = std.zig.CrossTarget;
 const LibExeObjStep = std.build.LibExeObjStep;
 
 fn findLast(comptime T: type, slice: []const T, value: T) ?usize {
