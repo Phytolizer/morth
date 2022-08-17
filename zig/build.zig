@@ -1,6 +1,10 @@
 const std = @import("std");
 const pkgs = @import("deps.zig").pkgs;
 
+const Builder = std.build.Builder;
+const CrossTarget = std.zig.CrossTarget;
+const LibExeObjStep = std.build.LibExeObjStep;
+
 fn findLast(comptime T: type, slice: []const T, value: T) ?usize {
     var i: usize = slice.len;
     while (i > 0) : (i -= 1) {
@@ -11,7 +15,7 @@ fn findLast(comptime T: type, slice: []const T, value: T) ?usize {
     return null;
 }
 
-fn generateTests(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.builtin.Mode, testStep: *std.build.Step) !void {
+fn generateTests(b: *Builder) !*LibExeObjStep {
     const gpAllocator = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpAllocator.backing_allocator;
 
@@ -36,10 +40,7 @@ fn generateTests(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.b
             try generateTest(absoluteMorthPath, zigWriter);
         }
     }
-    const testCmd = b.addTest(absoluteZigPath);
-    testCmd.setTarget(target);
-    testCmd.setBuildMode(mode);
-    testStep.dependOn(&testCmd.step);
+    return b.addTest(absoluteZigPath);
 }
 
 const testHeader = @embedFile("test_header.zig_template");
@@ -58,12 +59,13 @@ fn generateTest(morthPath: []const u8, zigWriter: std.fs.File.Writer) !void {
     });
 }
 
-pub fn build(b: *std.build.Builder) void {
-    // Standard target options allows the person running `zig build` to choose
-    // what target to build for. Here we do not override the defaults, which
-    // means any target is allowed, and the default is native. Other options
-    // for restricting supported target set are available.
-    const target = b.standardTargetOptions(.{});
+pub fn build(b: *Builder) !void {
+    const target = b.standardTargetOptions(.{
+        // Only supports x86_64-linux-gnu target.
+        .whitelist = &.{
+            .{ .cpu_arch = .x86_64, .os_tag = .linux, .abi = .gnu },
+        },
+    });
 
     // Standard release options allow the person running `zig build` to select
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
@@ -86,5 +88,8 @@ pub fn build(b: *std.build.Builder) void {
 
     const test_step = b.step("test", "Run unit tests");
 
-    generateTests(b, target, mode, test_step) catch unreachable;
+    const test_cmd = try generateTests(b);
+    test_cmd.setTarget(target);
+    test_cmd.setBuildMode(mode);
+    test_step.dependOn(&test_cmd.step);
 }

@@ -70,6 +70,12 @@ fn parseTokenAsOp(token: Token) !Op {
     if (std.mem.eql(u8, token.word, "syscall6")) {
         return Op.init(token, .Syscall6);
     }
+    if (std.mem.eql(u8, token.word, "2dup")) {
+        return Op.init(token, .Dup2);
+    }
+    if (std.mem.eql(u8, token.word, "<")) {
+        return Op.init(token, .Lt);
+    }
 
     const value = std.fmt.parseInt(u64, token.word, 10) catch
         die("{s}:{d}:{d}: Invalid number '{s}'\n", .{ token.filePath, token.row, token.col, token.word });

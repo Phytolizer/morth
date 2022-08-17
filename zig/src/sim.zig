@@ -126,6 +126,21 @@ pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocat
             .Syscall4 => return error.NotImplemented,
             .Syscall5 => return error.NotImplemented,
             .Syscall6 => return error.NotImplemented,
+            .Dup2 => {
+                const b = stack.pop();
+                const a = stack.pop();
+                try stack.append(a);
+                try stack.append(b);
+                try stack.append(a);
+                try stack.append(b);
+                ip += 1;
+            },
+            .Lt => {
+                const b = stack.pop();
+                const a = stack.pop();
+                try stack.append(if (a < b) 1 else 0);
+                ip += 1;
+            },
         }
     }
 }

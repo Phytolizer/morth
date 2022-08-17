@@ -190,6 +190,22 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
                     try fileWriter.writeAll("    pop r9\n");
                     try fileWriter.writeAll("    syscall\n");
                 },
+                .Dup2 => {
+                    try fileWriter.writeAll("    pop rbx\n");
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    push rax\n");
+                    try fileWriter.writeAll("    push rbx\n");
+                    try fileWriter.writeAll("    push rax\n");
+                    try fileWriter.writeAll("    push rbx\n");
+                },
+                .Lt => {
+                    try fileWriter.writeAll("    pop rdi\n");
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    cmp rax, rdi\n");
+                    try fileWriter.writeAll("    setl al\n");
+                    try fileWriter.writeAll("    movzx rax, al\n");
+                    try fileWriter.writeAll("    push rax\n");
+                },
             }
         }
         try fileWriter.print(".morth_addr_{d}:\n", .{program.len});
