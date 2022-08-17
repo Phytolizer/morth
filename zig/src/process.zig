@@ -37,6 +37,7 @@ pub fn runCommand(comptime Writer: type, options: RunCommandOptions(Writer), com
             if (code == 0) {
                 return;
             }
+            std.process.exit(code);
         },
         else => {},
     }
