@@ -239,6 +239,13 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
                     try fileWriter.writeAll("    and rax, rdi\n");
                     try fileWriter.writeAll("    push rax\n");
                 },
+                .Over => {
+                    try fileWriter.writeAll("    pop rbx\n");
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    push rax\n");
+                    try fileWriter.writeAll("    push rbx\n");
+                    try fileWriter.writeAll("    push rax\n");
+                },
             }
         }
         try fileWriter.print(".morth_addr_{d}:\n", .{program.len});

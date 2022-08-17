@@ -37,6 +37,7 @@ pub const Op = struct {
         Shl,
         Bor,
         Band,
+        Over,
     };
 
     const Self = @This();

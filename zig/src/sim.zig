@@ -87,7 +87,8 @@ pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocat
             },
             .Load => {
                 const addr = stack.pop();
-                try stack.append(mem[addr]);
+                const byte = mem[addr];
+                try stack.append(byte);
                 ip += 1;
             },
             .Store => {
@@ -174,6 +175,14 @@ pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocat
                 const b = stack.pop();
                 const a = stack.pop();
                 try stack.append(a & b);
+                ip += 1;
+            },
+            .Over => {
+                const b = stack.pop();
+                const a = stack.pop();
+                try stack.append(a);
+                try stack.append(b);
+                try stack.append(a);
                 ip += 1;
             },
         }

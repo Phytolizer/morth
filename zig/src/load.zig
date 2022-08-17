@@ -94,6 +94,9 @@ fn parseTokenAsOp(token: Token) !Op {
     if (std.mem.eql(u8, token.word, "band")) {
         return Op.init(token, .Band);
     }
+    if (std.mem.eql(u8, token.word, "over")) {
+        return Op.init(token, .Over);
+    }
 
     const value = std.fmt.parseInt(u64, token.word, 10) catch
         die("{s}:{d}:{d}: Invalid number '{s}'\n", .{ token.filePath, token.row, token.col, token.word });
