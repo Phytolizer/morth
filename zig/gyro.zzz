@@ -12,5 +12,5 @@ deps:
   args:
     git:
       url: "https://github.com/MasterQ32/zig-args.git"
-      ref: 21bdea5051dc92e7962e0eda1668942ed1448efc
+      ref: e053c11cebada010707dddde4194ad8e844e95ca
       root: args.zig
