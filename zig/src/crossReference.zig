@@ -1,15 +1,15 @@
 const std = @import("std");
 const Op = @import("op.zig").Op;
 const Token = @import("token.zig").Token;
+const die = @import("die.zig").die;
 
 const Allocator = std.mem.Allocator;
 
 fn reportError(token: Token, message: []const u8) noreturn {
-    std.debug.print(
+    die(
         "{s}:{d}:{d}: {s}\n",
         .{ token.filePath, token.row, token.col, message },
     );
-    std.process.exit(1);
 }
 
 pub fn crossReferenceBlocks(allocator: Allocator, program: []Op) !void {

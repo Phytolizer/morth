@@ -23,6 +23,8 @@ pub const Op = struct {
         Mem,
         Load,
         Store,
+        Syscall1,
+        Syscall3,
     };
 
     const Self = @This();

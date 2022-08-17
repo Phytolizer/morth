@@ -145,6 +145,18 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
                     try fileWriter.writeAll("    pop rax\n");
                     try fileWriter.writeAll("    mov [rax], bl\n");
                 },
+                .Syscall1 => {
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    pop rdi\n");
+                    try fileWriter.writeAll("    syscall\n");
+                },
+                .Syscall3 => {
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    pop rdi\n");
+                    try fileWriter.writeAll("    pop rsi\n");
+                    try fileWriter.writeAll("    pop rdx\n");
+                    try fileWriter.writeAll("    syscall\n");
+                },
             }
         }
         try fileWriter.print(".morth_addr_{d}:\n", .{program.len});

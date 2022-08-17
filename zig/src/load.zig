@@ -3,6 +3,7 @@ const Op = @import("op.zig").Op;
 const toAbsolute = @import("path.zig").toAbsolute;
 const Token = @import("token.zig").Token;
 const Program = @import("program.zig").Program;
+const die = @import("die.zig").die;
 
 const Allocator = std.mem.Allocator;
 
@@ -51,11 +52,16 @@ fn parseTokenAsOp(token: Token) !Op {
     if (std.mem.eql(u8, token.word, ",")) {
         return Op.init(token, .Load);
     }
+    if (std.mem.eql(u8, token.word, "syscall1")) {
+        return Op.init(token, .Syscall1);
+    }
+    if (std.mem.eql(u8, token.word, "syscall3")) {
+        return Op.init(token, .Syscall3);
+    }
 
-    const value = std.fmt.parseInt(u64, token.word, 10) catch {
-        std.debug.print("{s}:{d}:{d}: Invalid number '{s}'\n", .{ token.filePath, token.row, token.col, token.word });
-        std.process.exit(1);
-    };
+    const value = std.fmt.parseInt(u64, token.word, 10) catch
+        die("{s}:{d}:{d}: Invalid number '{s}'\n", .{ token.filePath, token.row, token.col, token.word });
+
     return Op.init(token, .{ .Push = value });
 }
 
