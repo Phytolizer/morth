@@ -141,6 +141,13 @@ pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocat
                 try stack.append(if (a < b) 1 else 0);
                 ip += 1;
             },
+            .Swap => {
+                const b = stack.pop();
+                const a = stack.pop();
+                try stack.append(b);
+                try stack.append(a);
+                ip += 1;
+            },
         }
     }
 }

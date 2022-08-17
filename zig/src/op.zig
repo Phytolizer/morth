@@ -31,6 +31,7 @@ pub const Op = struct {
         Syscall6,
         Dup2,
         Lt,
+        Swap,
     };
 
     const Self = @This();
