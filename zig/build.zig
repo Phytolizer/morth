@@ -49,7 +49,13 @@ fn generateTest(morthPath: []const u8, zigWriter: std.fs.File.Writer) !void {
     const morthName = std.fs.path.basename(morthPath);
     const morthPeriod = findLast(u8, morthName, '.') orelse morthName.len;
     const morthBase = morthName[0..morthPeriod];
-    try zigWriter.print(testTemplate, .{ morthBase, morthPath, morthName, morthPath, morthBase });
+    try zigWriter.print(testTemplate, .{
+        morthBase,
+        morthPath,
+        morthName,
+        morthPath,
+        morthBase,
+    });
 }
 
 pub fn build(b: *std.build.Builder) void {
