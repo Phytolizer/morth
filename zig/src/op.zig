@@ -33,6 +33,10 @@ pub const Op = struct {
         Lt,
         Swap,
         Drop,
+        Shr,
+        Shl,
+        Bor,
+        Band,
     };
 
     const Self = @This();

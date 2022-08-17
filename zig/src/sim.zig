@@ -152,6 +152,30 @@ pub fn simulateProgram(comptime Writer: type, writer: Writer, allocator: Allocat
                 _ = stack.pop();
                 ip += 1;
             },
+            .Shr => {
+                const b = stack.pop();
+                const a = stack.pop();
+                try stack.append(a >> @truncate(u6, std.math.clamp(b, 0, 63)));
+                ip += 1;
+            },
+            .Shl => {
+                const b = stack.pop();
+                const a = stack.pop();
+                try stack.append(a << @truncate(u6, std.math.clamp(b, 0, 63)));
+                ip += 1;
+            },
+            .Bor => {
+                const b = stack.pop();
+                const a = stack.pop();
+                try stack.append(a | b);
+                ip += 1;
+            },
+            .Band => {
+                const b = stack.pop();
+                const a = stack.pop();
+                try stack.append(a & b);
+                ip += 1;
+            },
         }
     }
 }

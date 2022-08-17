@@ -82,6 +82,18 @@ fn parseTokenAsOp(token: Token) !Op {
     if (std.mem.eql(u8, token.word, "drop")) {
         return Op.init(token, .Drop);
     }
+    if (std.mem.eql(u8, token.word, "shr")) {
+        return Op.init(token, .Shr);
+    }
+    if (std.mem.eql(u8, token.word, "shl")) {
+        return Op.init(token, .Shl);
+    }
+    if (std.mem.eql(u8, token.word, "bor")) {
+        return Op.init(token, .Bor);
+    }
+    if (std.mem.eql(u8, token.word, "band")) {
+        return Op.init(token, .Band);
+    }
 
     const value = std.fmt.parseInt(u64, token.word, 10) catch
         die("{s}:{d}:{d}: Invalid number '{s}'\n", .{ token.filePath, token.row, token.col, token.word });

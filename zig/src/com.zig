@@ -215,6 +215,30 @@ pub fn compileProgram(allocator: Allocator, program: []const Op, sourcePath: []c
                 .Drop => {
                     try fileWriter.writeAll("    pop rax\n");
                 },
+                .Shr => {
+                    try fileWriter.writeAll("    pop rcx\n");
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    shr rax, cl\n");
+                    try fileWriter.writeAll("    push rax\n");
+                },
+                .Shl => {
+                    try fileWriter.writeAll("    pop rcx\n");
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    shl rax, cl\n");
+                    try fileWriter.writeAll("    push rax\n");
+                },
+                .Bor => {
+                    try fileWriter.writeAll("    pop rdi\n");
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    or rax, rdi\n");
+                    try fileWriter.writeAll("    push rax\n");
+                },
+                .Band => {
+                    try fileWriter.writeAll("    pop rdi\n");
+                    try fileWriter.writeAll("    pop rax\n");
+                    try fileWriter.writeAll("    and rax, rdi\n");
+                    try fileWriter.writeAll("    push rax\n");
+                },
             }
         }
         try fileWriter.print(".morth_addr_{d}:\n", .{program.len});
