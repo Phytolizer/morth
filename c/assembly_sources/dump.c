@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <unistd.h>
 
 static inline void sys_write(int file, char* buffer, size_t size) {
     __asm__("movq $1, %%rax\n\t"
@@ -27,5 +26,5 @@ void dump(uint64_t x) {
         x /= 10;
     } while (x != 0);
 
-    sys_write(STDOUT_FILENO, buffer + cursor + 1, buffer_size);
+    sys_write(1, buffer + cursor + 1, buffer_size);
 }
