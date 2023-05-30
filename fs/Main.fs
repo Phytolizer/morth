@@ -3,6 +3,14 @@ module Morth.Main
 open System.IO
 open System.Diagnostics
 
+[<Struct>]
+type command_result =
+  {
+    exit_code : int
+    stdout : string
+    stderr : string
+  }
+
 let runCmd (cmd : string) (args : string array) =
   let args =
     args
@@ -19,12 +27,25 @@ let runCmd (cmd : string) (args : string array) =
   p.StartInfo <- info
   p.Start() |> ignore
   p.WaitForExit()
-  p.ExitCode, p.StandardOutput.ReadToEnd(), p.StandardError.ReadToEnd()
+
+  {
+    exit_code = p.ExitCode
+    stdout = p.StandardOutput.ReadToEnd()
+    stderr = p.StandardError.ReadToEnd()
+  }
 
 let check =
   function
-  | (0, _, _) -> ()
-  | (_, _, err) -> failwith <| sprintf "Command failed with stderr: %s" err
+  | {
+      exit_code = 0
+      stdout = _
+      stderr = _
+    } -> ()
+  | {
+      exit_code = _
+      stdout = _
+      stderr = err
+    } -> failwith <| sprintf "Command failed with stderr:\n%s" err
 
 let usage () =
   Array.iter
