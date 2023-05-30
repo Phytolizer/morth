@@ -63,8 +63,7 @@ let main (args : string array) =
   let args = args |> Array.toSeq in
 
   match Seq.unCons args with
-  | Some("help", _) ->
-    usage ()
+  | Some("help", _) -> usage ()
   | Some("sim", args) ->
     let file =
       (match Seq.unCons args with
@@ -84,25 +83,34 @@ let main (args : string array) =
          eprintfn "ERROR: expected arg to 'com'"
          exit 1) in
 
+    let asmFile = Path.ChangeExtension(file, ".asm") in
+
     File.WriteAllText(
-      "output.asm",
+      asmFile,
       File.ReadAllText file |> Parser.parse |> Com.compile
     )
+
+    let objFile = Path.ChangeExtension(file, ".o") in
 
     runCmd
       "nasm"
       [|
-        "-felf64"
-        "output.asm"
+        "-f"
+        "elf64"
+        asmFile
+        "-o"
+        objFile
       |]
     |> check
+
+    let exeFile = Path.ChangeExtension(file, null) in
 
     runCmd
       "ld"
       [|
+        objFile
         "-o"
-        "output"
-        "output.o"
+        exeFile
       |]
     |> check
   | _ ->
