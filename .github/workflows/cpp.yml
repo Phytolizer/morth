@@ -19,17 +19,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: Set up GCC
       uses: egor-tensin/setup-gcc@v1
       with:
         version: 11
         platform: x64
-  
+
     - name: Install VCPKG
       uses: friendlyanon/setup-vcpkg@v1
       with:
-        committish: e809a42f87565e803b2178a0c11263f462d1800a
+        committish: 1c5a340f6e10985e2d92af174a68dbd15c1fa4e1
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build/${{matrix.folder}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -S ${{matrix.folder}} -DCMAKE_TOOLCHAIN_FILE=${{env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake
