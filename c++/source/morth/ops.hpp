@@ -10,6 +10,7 @@ struct Op {
     enum class Code {
         PUSH,
         PLUS,
+        MINUS,
         DUMP,
     };
 
@@ -22,6 +23,10 @@ struct Op {
 
     static constexpr Op Plus() {
         return {Code::PLUS, 0};
+    }
+
+    static constexpr Op Minus() {
+        return {Code::MINUS, 0};
     }
 
     static constexpr Op Dump() {

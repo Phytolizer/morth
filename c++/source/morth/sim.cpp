@@ -27,6 +27,9 @@ void morth::SimulateProgram(std::span<const Op> program) {
             case Op::Code::PLUS:
                 bop(stack, [](U64 a, U64 b) { return a + b; });
                 break;
+            case Op::Code::MINUS:
+                bop(stack, [](U64 a, U64 b) { return a - b; });
+                break;
             case Op::Code::DUMP: {
                 U64 x = stack.pop();
                 fmt::print("{}\n", x);

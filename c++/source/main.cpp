@@ -14,6 +14,10 @@ int main(int argc, char** argv) {
         Op::Push(35),
         Op::Plus(),
         Op::Dump(),
+        Op::Push(500),
+        Op::Push(80),
+        Op::Minus(),
+        Op::Dump(),
     };
 
     morth::SimulateProgram(PROGRAM);
