@@ -63,6 +63,8 @@ let main (args : string array) =
   let args = args |> Array.toSeq in
 
   match Seq.unCons args with
+  | Some("help", _) ->
+    usage ()
   | Some("sim", args) ->
     let file =
       (match Seq.unCons args with
