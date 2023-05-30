@@ -40,3 +40,6 @@ indent_size = 2
 [*.ll]
 indent_size = 4
 
+[*.ml{,i}]
+indent_size = 2
+

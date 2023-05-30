@@ -4,6 +4,7 @@
 #include "morth/parse.hpp"
 #include "morth/shorter_types.hpp"
 
+#include <algorithm>
 #include <fmt/format.h>
 #include <fstream>
 #include <stdexcept>
