@@ -2,11 +2,16 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Morth.fs" />
+    <Compile Include="Op.fs" />
+    <Compile Include="Sim.fsi" />
+    <Compile Include="Sim.fs" />
+    <Compile Include="Com.fsi" />
+    <Compile Include="Com.fs" />
+    <Compile Include="Main.fs" />
   </ItemGroup>
 
 </Project>
