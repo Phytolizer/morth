@@ -20,6 +20,8 @@ let runCmd (cmd : string) (args : string array) =
     )
     |> String.concat " " in
 
+  printfn "[CMD] \"%s\" %s" cmd args
+
   let info = new ProcessStartInfo(cmd, args) in
   info.RedirectStandardError <- true
   info.RedirectStandardOutput <- true
