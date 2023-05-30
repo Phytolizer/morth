@@ -26,37 +26,44 @@ let check =
   | (0, _, _) -> ()
   | (_, _, err) -> failwith <| sprintf "Command failed with stderr: %s" err
 
+let usage () =
+  Array.iter
+    printfn
+    [|
+      "Usage: morth <SUBCOMMAND> [ARGS]"
+      "SUBCOMMANDS:"
+      "  sim <FILE>    Simulate a morth program"
+      "  com <FILE>    Compile a morth program"
+    |]
+
 [<EntryPoint>]
 let main (args : string array) =
-  let program =
-    [|
-      Op.Push 34
-      Op.Push 35
-      Op.Plus
-      Op.Dump
-      Op.Push 500
-      Op.Push 80
-      Op.Minus
-      Op.Dump
-    |] in
+  match args with
+  | [| "sim"; file |] -> File.ReadAllText file |> Parser.parse |> Sim.simulate
+  | [| "com"; file |] ->
+    File.WriteAllText(
+      "output.asm",
+      File.ReadAllText file |> Parser.parse |> Com.compile
+    )
 
-  File.WriteAllText("output.asm", Com.compile program)
+    runCmd
+      "nasm"
+      [|
+        "-felf64"
+        "output.asm"
+      |]
+    |> check
 
-  runCmd
-    "nasm"
-    [|
-      "-felf64"
-      "output.asm"
-    |]
-  |> check
-
-  runCmd
-    "ld"
-    [|
-      "-o"
-      "output"
-      "output.o"
-    |]
-  |> check
+    runCmd
+      "ld"
+      [|
+        "-o"
+        "output"
+        "output.o"
+      |]
+    |> check
+  | _ ->
+    usage ()
+    exit 1
 
   0

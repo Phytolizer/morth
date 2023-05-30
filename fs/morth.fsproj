@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <Compile Include="Op.fs" />
+    <Compile Include="Parser.fsi" />
+    <Compile Include="Parser.fs" />
     <Compile Include="Sim.fsi" />
     <Compile Include="Sim.fs" />
     <Compile Include="Com.fsi" />
