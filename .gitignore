@@ -7,7 +7,6 @@ cmake-build-*/
 *.ll
 !stack.ll
 *.bc
-morth
 output
 *.exe
 *.o

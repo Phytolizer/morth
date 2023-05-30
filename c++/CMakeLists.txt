@@ -17,8 +17,7 @@ configure_file("config.hpp.cin" "include/config.hpp")
 
 add_library(
     morth_lib OBJECT
-    "source/morth/op.cpp" "source/morth/parse.cpp" "source/morth/load.cpp"
-    "source/morth/cross_reference.cpp" "source/morth/simulate.cpp"
+    "source/morth/sim.cpp"
 )
 target_include_directories(
     morth_lib PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>"
