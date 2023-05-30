@@ -73,7 +73,7 @@ let main (args : string array) =
        | Some(file, _) -> file
        | None ->
          usage ()
-         eprintfn "ERROR: expected arg to 'sim'"
+         error "expected arg to 'sim'"
          exit 1) in
 
     File.ReadAllText file |> Parser.parse |> Sim.simulate
@@ -83,7 +83,7 @@ let main (args : string array) =
        | Some(file, _) -> file
        | None ->
          usage ()
-         eprintfn "ERROR: expected arg to 'com'"
+         error "expected arg to 'com'"
          exit 1) in
 
     let asmFile = Path.ChangeExtension(file, ".asm") in
