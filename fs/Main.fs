@@ -2,6 +2,7 @@ module Morth.Main
 
 open System.IO
 open System.Diagnostics
+open FSharpx.Collections
 
 [<Struct>]
 type command_result =
@@ -59,9 +60,28 @@ let usage () =
 
 [<EntryPoint>]
 let main (args : string array) =
-  match args with
-  | [| "sim"; file |] -> File.ReadAllText file |> Parser.parse |> Sim.simulate
-  | [| "com"; file |] ->
+  let args = args |> Array.toSeq in
+
+  match Seq.unCons args with
+  | Some("sim", args) ->
+    let file =
+      (match Seq.unCons args with
+       | Some(file, _) -> file
+       | None ->
+         usage ()
+         eprintfn "ERROR: expected arg to 'sim'"
+         exit 1) in
+
+    File.ReadAllText file |> Parser.parse |> Sim.simulate
+  | Some("com", args) ->
+    let file =
+      (match Seq.unCons args with
+       | Some(file, _) -> file
+       | None ->
+         usage ()
+         eprintfn "ERROR: expected arg to 'com'"
+         exit 1) in
+
     File.WriteAllText(
       "output.asm",
       File.ReadAllText file |> Parser.parse |> Com.compile
