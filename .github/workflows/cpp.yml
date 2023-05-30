@@ -31,8 +31,7 @@ jobs:
       with:
         committish: 1c5a340f6e10985e2d92af174a68dbd15c1fa4e1
         cache-key: vcpkg-Linux-20230530
-        cache-restore-keys:
-          - vcpkg-Linux-20230530
+        cache-restore-keys: vcpkg-Linux-20230530
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build/${{matrix.folder}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -S ${{matrix.folder}} -DCMAKE_TOOLCHAIN_FILE=${{env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake
