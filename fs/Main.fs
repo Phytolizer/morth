@@ -1,5 +1,6 @@
 module Morth.Main
 
+open Morth.Logger
 open System.IO
 open System.Diagnostics
 open FSharpx.Collections
@@ -12,17 +13,17 @@ type command_result =
     stderr : string
   }
 
-let runCmd (cmd : string) (args : string array) =
+let runCmd (command : string) (args : string array) =
   let args =
     args
     |> Array.map (
-      (fun arg -> arg.Replace("\"", "\\\"")) >> (fun arg -> "\"" + arg + "\"")
+      (fun arg -> arg.Replace("\"", @"\""")) >> (fun arg -> "\"" + arg + "\"")
     )
     |> String.concat " " in
 
-  printfn "[CMD] \"%s\" %s" cmd args
+  cmd $@" ""{command}"" {args}"
 
-  let info = new ProcessStartInfo(cmd, args) in
+  let info = new ProcessStartInfo(command, args) in
   info.RedirectStandardError <- true
   info.RedirectStandardOutput <- true
   info.UseShellExecute <- false
@@ -86,6 +87,8 @@ let main (args : string array) =
          exit 1) in
 
     let asmFile = Path.ChangeExtension(file, ".asm") in
+
+    info "Generating %s" asmFile
 
     File.WriteAllText(
       asmFile,
