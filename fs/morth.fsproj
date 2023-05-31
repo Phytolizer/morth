@@ -10,8 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Logger.fs" />
     <Compile Include="Token.fs" />
+    <Compile Include="Logger.fs" />
     <Compile Include="Op.fs" />
     <Compile Include="Lexer.fsi" />
     <Compile Include="Lexer.fs" />

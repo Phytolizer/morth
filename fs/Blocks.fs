@@ -1,6 +1,7 @@
 module Morth.Blocks
 
 open System.Collections.Generic
+open Logger
 
 let resolve (program : Op.t seq) =
   let program = Array.ofSeq program in
@@ -21,7 +22,9 @@ let resolve (program : Op.t seq) =
 
         match program.[ifIp].code with
         | Op.If _ -> program.[ifIp].code <- Op.If(ip + 1)
-        | _ -> failwith "unmatched else"
+        | _ ->
+          locError op.loc "This 'else' is unmatched."
+          exit 1
 
         stack.Push ip
         loop (ip + 1)
@@ -38,7 +41,9 @@ let resolve (program : Op.t seq) =
         | Op.Do dest ->
           program.[ip].code <- Op.End dest
           program.[blockIp].code <- Op.Do(ip + 1)
-        | _ -> failwith "unmatched end"
+        | _ ->
+          locError op.loc "This 'end' is unmatched."
+          exit 1
 
         loop (ip + 1)
       | Op.While ->
@@ -52,4 +57,10 @@ let resolve (program : Op.t seq) =
       | _ -> loop (ip + 1) in
 
   loop 0
+
+  if stack.Count > 0 then
+    let op = program.[stack.Pop()] in
+    locError op.loc "This block is unclosed."
+    exit 1
+
   program |> Seq.ofArray

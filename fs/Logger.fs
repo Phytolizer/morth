@@ -5,3 +5,6 @@ let cmd x = Printf.kprintf (printfn "[CMD] %s") x
 
 let error x =
   Printf.ksprintf (eprintfn "[ERROR] %s") x
+
+let locError (loc : Token.loc) x =
+  Printf.ksprintf (eprintfn "[ERROR] %s: %s" (loc.ToString())) x
