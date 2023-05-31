@@ -16,11 +16,21 @@ let resolve program =
       | Op.If _ ->
         stack.Push ip
         loop (ip + 1)
-      | Op.End ->
-        let dest = stack.Pop() in
+      | Op.Else _ ->
+        let ifIp = stack.Pop() in
 
-        match program.[dest] with
-        | Op.If _ -> program.[dest] <- Op.If ip
+        match program.[ifIp] with
+        | Op.If _ -> program.[ifIp] <- Op.If(ip + 1)
+        | _ -> failwith "unmatched else"
+
+        stack.Push ip
+        loop (ip + 1)
+      | Op.End ->
+        let blockIp = stack.Pop() in
+
+        match program.[blockIp] with
+        | Op.If _ -> program.[blockIp] <- Op.If ip
+        | Op.Else _ -> program.[blockIp] <- Op.Else ip
         | _ -> failwith "unmatched end"
 
         loop (ip + 1)

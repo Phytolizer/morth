@@ -30,6 +30,7 @@ let handle_op (stack : int Stack) ip =
     printfn "%d" top
     ip + 1
   | Op.If dest -> let top = stack.Pop() in if top = 0 then dest else ip + 1
+  | Op.Else dest -> dest
   | Op.End -> ip + 1
 
 let simulate ops =

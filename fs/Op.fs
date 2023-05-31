@@ -7,4 +7,5 @@ type t =
   | Eq
   | Dump
   | If of int
+  | Else of int
   | End

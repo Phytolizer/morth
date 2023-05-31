@@ -44,6 +44,7 @@ let compileOp ip op =
          "test rax, rax"
          sprintf "jz .L%d" dest
        |]
+     | Op.Else dest -> [| sprintf "jmp .L%d" dest |]
      | Op.End -> [||])
   |> Array.toSeq
   |> Seq.map indent
