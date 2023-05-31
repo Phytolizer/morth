@@ -1,4 +1,4 @@
-module Morth.Blocks
+module Morth.Language.Blocks
 
 open System.Collections.Generic
 open Logger

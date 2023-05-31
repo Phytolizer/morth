@@ -1,4 +1,4 @@
-module Morth.Token
+module Morth.Language.Token
 
 type loc =
   struct

@@ -1,4 +1,4 @@
-module Morth.Lexer
+module Morth.Language.Lexer
 
 open System
 open System.IO

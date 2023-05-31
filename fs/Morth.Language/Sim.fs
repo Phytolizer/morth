@@ -1,7 +1,8 @@
-module Morth.Sim
+module Morth.Language.Sim
 
 open System.Collections.Generic
 open FSharpx.Collections
+open System.IO
 
 let bop (stack : int Stack) op =
   let b = stack.Pop() in
@@ -11,7 +12,7 @@ let bop (stack : int Stack) op =
 let boolop (stack : int Stack) op =
   bop stack (fun a b -> if op a b then 1 else 0)
 
-let handle_op (stack : int Stack) ip (op : Op.t) =
+let handle_op (out : TextWriter) (stack : int Stack) ip (op : Op.t) =
   match op.code with
   | Op.Push n ->
     stack.Push n
@@ -34,7 +35,7 @@ let handle_op (stack : int Stack) ip (op : Op.t) =
     ip + 1
   | Op.Dump ->
     let top = stack.Pop() in
-    printfn "%d" top
+    fprintfn out "%d" top
     ip + 1
   | Op.If dest -> let top = stack.Pop() in if top = 0 then dest else ip + 1
   | Op.Else dest -> dest
@@ -42,7 +43,7 @@ let handle_op (stack : int Stack) ip (op : Op.t) =
   | Op.Do dest -> let top = stack.Pop() in if top = 0 then dest else ip + 1
   | Op.End dest -> dest
 
-let simulate ops =
+let simulate out ops =
   let program = ops |> Seq.toArray in
 
   let rec loop ip stack =
@@ -50,7 +51,7 @@ let simulate ops =
       ()
     else
       let op = program.[ip] in
-      let ip = handle_op stack ip op in
+      let ip = handle_op out stack ip op in
       loop ip stack in
 
   loop 0 (new Stack<int>())

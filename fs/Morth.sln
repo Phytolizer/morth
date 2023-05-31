@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Morth.Tests", "Morth.Tests\Morth.Tests.fsproj", "{FAF3DAE6-C2E0-4030-9F3E-B7004212D0FE}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Morth.Language", "Morth.Language\Morth.Language.fsproj", "{4A6FE3B1-5997-400E-B852-42CF1921956A}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Morth", "Morth.fsproj", "{FCF6C82A-6452-4119-BBB9-041473BF83F4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FAF3DAE6-C2E0-4030-9F3E-B7004212D0FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAF3DAE6-C2E0-4030-9F3E-B7004212D0FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAF3DAE6-C2E0-4030-9F3E-B7004212D0FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAF3DAE6-C2E0-4030-9F3E-B7004212D0FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A6FE3B1-5997-400E-B852-42CF1921956A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A6FE3B1-5997-400E-B852-42CF1921956A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A6FE3B1-5997-400E-B852-42CF1921956A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A6FE3B1-5997-400E-B852-42CF1921956A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCF6C82A-6452-4119-BBB9-041473BF83F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCF6C82A-6452-4119-BBB9-041473BF83F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCF6C82A-6452-4119-BBB9-041473BF83F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCF6C82A-6452-4119-BBB9-041473BF83F4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

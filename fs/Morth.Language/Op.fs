@@ -1,4 +1,4 @@
-module Morth.Op
+module Morth.Language.Op
 
 type code =
   | Push of int

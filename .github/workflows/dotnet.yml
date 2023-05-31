@@ -11,12 +11,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        folder: ['cs', 'fs']
+
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.0.x
     - name: Set up GCC
       uses: egor-tensin/setup-gcc@v1
       with:
@@ -25,11 +29,11 @@ jobs:
     - name: Get CMake
       uses: symbitic/install-cmake@master
     - name: Restore dependencies
-      working-directory: cs
+      working-directory: ${{matrix.folder}}
       run: dotnet restore
     - name: Build
-      working-directory: cs
+      working-directory: ${{matrix.folder}}
       run: dotnet build --no-restore
     - name: Test
-      working-directory: cs
+      working-directory: ${{matrix.folder}}
       run: dotnet test --no-build --verbosity normal

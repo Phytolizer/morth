@@ -1,7 +1,9 @@
-module Morth.Logger
+module Morth.Language.Logger
 
-let info x = Printf.kprintf (printfn "[INFO] %s") x
-let cmd x = Printf.kprintf (printfn "[CMD] %s") x
+let info x =
+  Printf.ksprintf (eprintfn "[INFO] %s") x
+
+let cmd x = Printf.ksprintf (eprintfn "[CMD] %s") x
 
 let error x =
   Printf.ksprintf (eprintfn "[ERROR] %s") x

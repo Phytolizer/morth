@@ -1,4 +1,4 @@
-module Morth.Parser
+module Morth.Language.Parser
 
 let parseWord (token : Token.t) =
   let code =

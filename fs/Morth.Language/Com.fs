@@ -1,4 +1,4 @@
-module Morth.Com
+module Morth.Language.Com
 
 let indent s = "    " + s
 
