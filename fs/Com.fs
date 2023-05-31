@@ -45,8 +45,8 @@ let compileOp ip op =
          sprintf "jz .L%d" dest
        |]
      | Op.End -> [||])
-  |> Array.map indent
   |> Array.toSeq
+  |> Seq.map indent
 
 let header =
   Array.toSeq
