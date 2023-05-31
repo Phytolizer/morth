@@ -30,4 +30,9 @@
     <ProjectReference Include="..\Morth.Language\Morth.Language.fsproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- add *.porth to watch list -->
+    <Watch Include="..\tests\*.porth" />
+  </ItemGroup>
+
 </Project>
