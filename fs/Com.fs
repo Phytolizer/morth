@@ -21,6 +21,15 @@ let compileOp op =
          "sub rax, rbx"
          "push rax"
        |]
+     | Op.Eq ->
+       [|
+         "pop rbx"
+         "pop rax"
+         "cmp rax, rbx"
+         "sete al"
+         "movzx rax, al"
+         "push rax"
+       |]
      | Op.Dump ->
        [|
          "pop rdi"

@@ -4,6 +4,7 @@ let parseWord (token : Token.t) =
   match token.word with
   | "+" -> Op.Plus
   | "-" -> Op.Minus
+  | "=" -> Op.Eq
   | "." -> Op.Dump
   | n ->
     try

@@ -21,7 +21,7 @@ let runCmd (command : string) (args : string array) =
     )
     |> String.concat " " in
 
-  cmd $@" ""{command}"" {args}"
+  cmd $@"""{command}"" {args}"
 
   let info = new ProcessStartInfo(command, args) in
   info.RedirectStandardError <- true
