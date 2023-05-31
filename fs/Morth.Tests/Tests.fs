@@ -8,6 +8,7 @@ open Morth.Language
 let loadTests () =
   let dir = __SOURCE_DIRECTORY__ in
   let dir = Path.Join(dir, "..", "tests") in
+  let dir = Path.GetFullPath(dir) in
 
   Directory.GetFiles(dir, "*.porth")
   |> Array.sort

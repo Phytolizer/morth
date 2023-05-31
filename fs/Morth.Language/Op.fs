@@ -13,6 +13,7 @@ type code =
   | While
   | Do of int
   | End of int
+  | Mem
 
 type t =
   struct

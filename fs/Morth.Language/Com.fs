@@ -67,7 +67,8 @@ let compileOp ip (op : Op.t) =
          "test rax, rax"
          sprintf "jz .L%d" dest
        ]
-     | Op.End dest -> if dest <> ip + 1 then [ sprintf "jmp .L%d" dest ] else [])
+     | Op.End dest -> if dest <> ip + 1 then [ sprintf "jmp .L%d" dest ] else []
+     | Op.Mem -> [ "push mem" ])
   |> List.toSeq
   |> Seq.map indent
 
@@ -118,6 +119,8 @@ let footer =
       "    mov rax, 60"
       "    mov rdi, 0"
       "    syscall"
+      "segment .bss"
+      sprintf "mem: resb %d" Config.MEM_CAPACITY
     ]
 
 let compile program =
