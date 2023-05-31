@@ -67,9 +67,26 @@ let usage () =
     [|
       "Usage: morth <SUBCOMMAND> [ARGS]"
       "SUBCOMMANDS:"
-      "  sim <FILE>    Simulate a morth program"
-      "  com <FILE>    Compile a morth program"
+      "  sim <FILE>             Simulate a morth program"
+      "  com <FILE>             Compile a morth program"
+      "    OPTIONS:"
+      "      -r                 Run the compiled program"
+      "      -o <FILE|DIR>      Output file or directory"
     |]
+
+let resolveOutPath (outPath : string) (inFile : string) =
+  if outPath = null then
+    inFile
+  else
+    try
+      let attrs = File.GetAttributes(outPath) in
+
+      if attrs.HasFlag(FileAttributes.Directory) then
+        Path.Combine(outPath, Path.GetFileNameWithoutExtension(inFile))
+      else
+        outPath
+    with _ ->
+      outPath
 
 [<EntryPoint>]
 let main (args : string array) =
@@ -88,25 +105,33 @@ let main (args : string array) =
 
     Parser.parse file |> Sim.simulate
   | Some("com", args) ->
-    let (run, file) =
-      (let rec loop args run =
+    let (run, outPath, file) =
+      (let rec loop run outPath args =
         (match Seq.unCons args with
-         | Some("-r", args) -> loop args true
-         | Some(file, _) -> run, file
+         | Some("-r", args) -> loop true outPath args
+         | Some("-o", args) ->
+           (match Seq.unCons args with
+            | Some(outPath, args) -> loop run outPath args
+            | None ->
+              usage ()
+              error "expected arg to '-o'"
+              exit 1)
+         | Some(file, _) -> run, outPath, file
          | None ->
            usage ()
            error "expected arg to 'com'"
            exit 1) in
 
-       loop args false)
+       loop false null args)
 
-    let asmFile = Path.ChangeExtension(file, ".asm") in
+    let outPath = resolveOutPath outPath file in
+    let asmFile = Path.ChangeExtension(outPath, ".asm") in
 
     info "Generating %s" asmFile
 
     File.WriteAllText(asmFile, Parser.parse file |> Com.compile)
 
-    let objFile = Path.ChangeExtension(file, ".o") in
+    let objFile = Path.ChangeExtension(outPath, ".o") in
 
     runCmd
       "nasm"
@@ -119,7 +144,7 @@ let main (args : string array) =
       |]
     |> check
 
-    let exeFile = Path.ChangeExtension(file, null) in
+    let exeFile = Path.ChangeExtension(outPath, null) in
 
     runCmd
       "ld"
