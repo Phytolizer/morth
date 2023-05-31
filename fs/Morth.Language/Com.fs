@@ -83,12 +83,49 @@ let handleOp ip =
       "pop rdi"
       "syscall"
     ]
+  | Op.Syscall2 ->
+    [
+      "pop rax"
+      "pop rdi"
+      "pop rsi"
+      "syscall"
+    ]
   | Op.Syscall3 ->
     [
       "pop rax"
       "pop rdi"
       "pop rsi"
       "pop rdx"
+      "syscall"
+    ]
+  | Op.Syscall4 ->
+    [
+      "pop rax"
+      "pop rdi"
+      "pop rsi"
+      "pop rdx"
+      "pop r10"
+      "syscall"
+    ]
+  | Op.Syscall5 ->
+    [
+      "pop rax"
+      "pop rdi"
+      "pop rsi"
+      "pop rdx"
+      "pop r10"
+      "pop r8"
+      "syscall"
+    ]
+  | Op.Syscall6 ->
+    [
+      "pop rax"
+      "pop rdi"
+      "pop rsi"
+      "pop rdx"
+      "pop r10"
+      "pop r8"
+      "pop r9"
       "syscall"
     ]
 

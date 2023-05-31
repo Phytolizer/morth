@@ -18,7 +18,11 @@ let parseWord (token : Token.t) =
      | "," -> Op.Load
      | "." -> Op.Store
      | "syscall1" -> Op.Syscall1
+     | "syscall2" -> Op.Syscall2
      | "syscall3" -> Op.Syscall3
+     | "syscall4" -> Op.Syscall4
+     | "syscall5" -> Op.Syscall5
+     | "syscall6" -> Op.Syscall6
      | n ->
        try
          Op.Push(int n)

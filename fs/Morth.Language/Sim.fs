@@ -61,7 +61,11 @@ let handle_op
     let addr = stack.Pop() in
     mem.[addr] <- byte value
     ip + 1
-  | Op.Syscall1 -> failwith "unimplemented"
+  | Op.Syscall1
+  | Op.Syscall2
+  | Op.Syscall4
+  | Op.Syscall5
+  | Op.Syscall6 -> failwith "unimplemented"
   | Op.Syscall3 ->
     let syscall = stack.Pop() in
     let arg1 = stack.Pop() in
