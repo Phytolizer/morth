@@ -25,14 +25,29 @@ let resolve program =
 
         stack.Push ip
         loop (ip + 1)
-      | Op.End ->
+      | Op.End _ ->
         let blockIp = stack.Pop() in
 
         match program.[blockIp] with
-        | Op.If _ -> program.[blockIp] <- Op.If ip
-        | Op.Else _ -> program.[blockIp] <- Op.Else ip
+        | Op.If _ ->
+          program.[blockIp] <- Op.If ip
+          program.[ip] <- Op.End(ip + 1)
+        | Op.Else _ ->
+          program.[blockIp] <- Op.Else ip
+          program.[ip] <- Op.End(ip + 1)
+        | Op.Do dest ->
+          program.[ip] <- Op.End dest
+          program.[blockIp] <- Op.Do(ip + 1)
         | _ -> failwith "unmatched end"
 
+        loop (ip + 1)
+      | Op.While ->
+        stack.Push ip
+        loop (ip + 1)
+      | Op.Do _ ->
+        let whileIp = stack.Pop() in
+        program.[ip] <- Op.Do whileIp
+        stack.Push ip
         loop (ip + 1)
       | _ -> loop (ip + 1) in
 

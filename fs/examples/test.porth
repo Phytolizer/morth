@@ -6,3 +6,7 @@
 12 dup + .
 10 20 > .
 20 10 > .
+10 while dup 0 > do
+    dup .
+    1 -
+end

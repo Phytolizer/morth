@@ -10,4 +10,6 @@ type t =
   | Dump
   | If of int
   | Else of int
-  | End
+  | While
+  | Do of int
+  | End of int

@@ -3,70 +3,77 @@ module Morth.Com
 let indent s = "    " + s
 
 let compileOp ip op =
-  Array.append
-    [|
+  List.append
+    [
       sprintf ".L%d:" ip
       sprintf ";; -- %A --" op
-    |]
+    ]
     (match op with
-     | Op.Push n -> [| sprintf "push %d" n |]
+     | Op.Push n -> [ sprintf "push %d" n ]
      | Op.Dup ->
-       [|
+       [
          "pop rax"
          "push rax"
          "push rax"
-       |]
+       ]
      | Op.Plus ->
-       [|
+       [
          "pop rbx"
          "pop rax"
          "add rax, rbx"
          "push rax"
-       |]
+       ]
      | Op.Minus ->
-       [|
+       [
          "pop rbx"
          "pop rax"
          "sub rax, rbx"
          "push rax"
-       |]
+       ]
      | Op.Eq ->
-       [|
+       [
          "pop rbx"
          "pop rax"
          "cmp rax, rbx"
          "sete al"
          "movzx rax, al"
          "push rax"
-       |]
+       ]
      | Op.Gt ->
-       [|
+       [
          "pop rbx"
          "pop rax"
          "cmp rax, rbx"
          "setg al"
          "movzx rax, al"
          "push rax"
-       |]
+       ]
      | Op.Dump ->
-       [|
+       [
          "pop rdi"
          "call dump"
-       |]
+       ]
      | Op.If dest ->
-       [|
+       [
          "pop rax"
          "test rax, rax"
          sprintf "jz .L%d" dest
-       |]
-     | Op.Else dest -> [| sprintf "jmp .L%d" dest |]
-     | Op.End -> [||])
-  |> Array.toSeq
+       ]
+     | Op.Else dest -> [ sprintf "jmp .L%d" dest ]
+     | Op.While -> []
+     | Op.Do dest ->
+       [
+         "pop rax"
+         "test rax, rax"
+         sprintf "jz .L%d" dest
+       ]
+     | Op.End dest -> if dest <> ip + 1 then [ sprintf "jmp .L%d" dest ] else [])
+  |> List.toSeq
   |> Seq.map indent
 
 let header =
-  Array.toSeq
-    [|
+  List.toSeq
+    [
       "segment .text"
       "dump:"
       "    mov     r9, -3689348814741910323"
@@ -103,23 +110,24 @@ let header =
       "    ret"
       "global _start"
       "_start:"
-    |]
+    ]
 
 let footer =
-  Array.toSeq
-    [|
+  List.toSeq
+    [
       "    mov rax, 60"
       "    mov rdi, 0"
       "    syscall"
-    |]
+    ]
 
 let compile program =
-  [|
+  [
     header
     Seq.mapi compileOp program |> Seq.concat
+    Seq.singleton (sprintf ".L%d:" (Seq.length program))
     footer
-  |]
-  |> Array.toSeq
+  ]
+  |> List.toSeq
   |> Seq.concat
   |> Seq.map (fun s -> s + "\n")
   |> String.concat ""

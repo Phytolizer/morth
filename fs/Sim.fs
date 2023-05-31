@@ -38,7 +38,9 @@ let handle_op (stack : int Stack) ip =
     ip + 1
   | Op.If dest -> let top = stack.Pop() in if top = 0 then dest else ip + 1
   | Op.Else dest -> dest
-  | Op.End -> ip + 1
+  | Op.While -> ip + 1
+  | Op.Do dest -> let top = stack.Pop() in if top = 0 then dest else ip + 1
+  | Op.End dest -> dest
 
 let simulate ops =
   let program = ops |> Seq.toArray in
