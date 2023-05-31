@@ -10,6 +10,12 @@ let compileOp ip op =
     |]
     (match op with
      | Op.Push n -> [| sprintf "push %d" n |]
+     | Op.Dup ->
+       [|
+         "pop rax"
+         "push rax"
+         "push rax"
+       |]
      | Op.Plus ->
        [|
          "pop rbx"

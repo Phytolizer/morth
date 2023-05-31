@@ -2,6 +2,7 @@ module Morth.Op
 
 type t =
   | Push of int
+  | Dup
   | Plus
   | Minus
   | Eq

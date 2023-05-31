@@ -9,6 +9,7 @@ let parseWord (token : Token.t) =
   | "if" -> Op.If 0
   | "else" -> Op.Else 0
   | "end" -> Op.End
+  | "dup" -> Op.Dup
   | n ->
     try
       Op.Push(int n)

@@ -16,6 +16,10 @@ let handle_op (stack : int Stack) ip =
   | Op.Push n ->
     stack.Push n
     ip + 1
+  | Op.Dup ->
+    let top = stack.Peek() in
+    stack.Push top
+    ip + 1
   | Op.Plus ->
     bop stack (+)
     ip + 1
