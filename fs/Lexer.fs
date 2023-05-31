@@ -32,6 +32,8 @@ let lexFile filePath =
   let rec loop lineNum =
     match f.ReadLine() with
     | null -> Seq.empty
-    | line -> Seq.append (lexLine filePath lineNum line) (loop (lineNum + 1)) in
+    | line ->
+      let line = line.Split("//").[0] in
+      Seq.append (lexLine filePath lineNum line) (loop (lineNum + 1)) in
 
   loop 1
