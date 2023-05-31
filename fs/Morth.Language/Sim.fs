@@ -42,7 +42,9 @@ let handle_op (out : TextWriter) (stack : int Stack) ip (op : Op.t) =
   | Op.While -> ip + 1
   | Op.Do dest -> let top = stack.Pop() in if top = 0 then dest else ip + 1
   | Op.End dest -> dest
-  | Op.Mem -> failwith "unimplemented"
+  | Op.Mem
+  | Op.Load
+  | Op.Store -> failwith "unimplemented"
 
 let simulate out ops =
   let program = ops |> Seq.toArray in

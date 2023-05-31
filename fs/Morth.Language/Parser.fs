@@ -14,6 +14,9 @@ let parseWord (token : Token.t) =
      | "do" -> Op.Do -1
      | "end" -> Op.End -1
      | "dup" -> Op.Dup
+     | "mem" -> Op.Mem
+     | "," -> Op.Load
+     | "." -> Op.Store
      | n ->
        try
          Op.Push(int n)

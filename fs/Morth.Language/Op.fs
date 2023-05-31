@@ -14,6 +14,8 @@ type code =
   | Do of int
   | End of int
   | Mem
+  | Load
+  | Store
 
 type t =
   struct

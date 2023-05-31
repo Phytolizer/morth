@@ -68,7 +68,20 @@ let compileOp ip (op : Op.t) =
          sprintf "jz .L%d" dest
        ]
      | Op.End dest -> if dest <> ip + 1 then [ sprintf "jmp .L%d" dest ] else []
-     | Op.Mem -> [ "push mem" ])
+     | Op.Mem -> [ "push mem" ]
+     | Op.Load ->
+       [
+         "pop rax"
+         "mov bl, [rax]"
+         "movzx rax, bl"
+         "push rax"
+       ]
+     | Op.Store ->
+       [
+         "pop rbx"
+         "pop rax"
+         "mov [rax], bl"
+       ])
   |> List.toSeq
   |> Seq.map indent
 
