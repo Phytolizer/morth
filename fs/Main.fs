@@ -38,6 +38,16 @@ let runCmd (command : string) (args : string array) =
     stderr = p.StandardError.ReadToEnd()
   }
 
+let showOutput
+  {
+    exit_code = _
+    stdout = out
+    stderr = err
+  }
+  =
+  eprintf "%s" err
+  printf "%s" out
+
 let check =
   function
   | {
@@ -78,13 +88,17 @@ let main (args : string array) =
 
     Parser.parse file |> Sim.simulate
   | Some("com", args) ->
-    let file =
-      (match Seq.unCons args with
-       | Some(file, _) -> file
-       | None ->
-         usage ()
-         error "expected arg to 'com'"
-         exit 1) in
+    let (run, file) =
+      (let rec loop args run =
+        (match Seq.unCons args with
+         | Some("-r", args) -> loop args true
+         | Some(file, _) -> run, file
+         | None ->
+           usage ()
+           error "expected arg to 'com'"
+           exit 1) in
+
+       loop args false)
 
     let asmFile = Path.ChangeExtension(file, ".asm") in
 
@@ -115,6 +129,15 @@ let main (args : string array) =
         exeFile
       |]
     |> check
+
+    if run then
+      runCmd
+        (if Path.IsPathRooted exeFile then
+           exeFile
+         else
+           "./" + exeFile)
+        [||]
+      |> showOutput
   | _ ->
     usage ()
     exit 1
