@@ -2,9 +2,12 @@ module Morth.Com
 
 let indent s = "    " + s
 
-let compileOp op =
+let compileOp ip op =
   Array.append
-    [| (sprintf ";; -- %A --" op) |]
+    [|
+      sprintf ".L%d:" ip
+      sprintf ";; -- %A --" op
+    |]
     (match op with
      | Op.Push n -> [| sprintf "push %d" n |]
      | Op.Plus ->
@@ -34,7 +37,14 @@ let compileOp op =
        [|
          "pop rdi"
          "call dump"
-       |])
+       |]
+     | Op.If dest ->
+       [|
+         "pop rax"
+         "test rax, rax"
+         sprintf "jz .L%d" dest
+       |]
+     | Op.End -> [||])
   |> Array.map indent
   |> Array.toSeq
 
@@ -90,7 +100,7 @@ let footer =
 let compile program =
   [|
     header
-    Seq.map compileOp program |> Seq.concat
+    Seq.mapi compileOp program |> Seq.concat
     footer
   |]
   |> Array.toSeq

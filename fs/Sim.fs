@@ -1,6 +1,7 @@
 module Morth.Sim
 
 open System.Collections.Generic
+open FSharpx.Collections
 
 let bop (stack : int Stack) op =
   let b = stack.Pop() in
@@ -10,12 +11,36 @@ let bop (stack : int Stack) op =
 let boolop (stack : int Stack) op =
   bop stack (fun a b -> if op a b then 1 else 0)
 
-let handle_op (stack : int Stack) =
+let handle_op (stack : int Stack) ip =
   function
-  | Op.Push n -> stack.Push n
-  | Op.Plus -> bop stack (+)
-  | Op.Minus -> bop stack (-)
-  | Op.Eq -> boolop stack (=)
-  | Op.Dump -> let top = stack.Pop() in printfn "%d" top
+  | Op.Push n ->
+    stack.Push n
+    ip + 1
+  | Op.Plus ->
+    bop stack (+)
+    ip + 1
+  | Op.Minus ->
+    bop stack (-)
+    ip + 1
+  | Op.Eq ->
+    boolop stack (=)
+    ip + 1
+  | Op.Dump ->
+    let top = stack.Pop() in
+    printfn "%d" top
+    ip + 1
+  | Op.If dest -> let top = stack.Pop() in if top = 0 then dest else ip + 1
+  | Op.End -> ip + 1
 
-let simulate (ops : Op.t seq) = Seq.iter (handle_op (Stack<int>())) ops
+let simulate ops =
+  let program = ops |> Seq.toArray in
+
+  let rec loop ip stack =
+    if ip >= program.Length then
+      ()
+    else
+      let op = program.[ip] in
+      let ip = handle_op stack ip op in
+      loop ip stack in
+
+  loop 0 (new Stack<int>())

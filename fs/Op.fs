@@ -6,3 +6,5 @@ type t =
   | Minus
   | Eq
   | Dump
+  | If of int
+  | End

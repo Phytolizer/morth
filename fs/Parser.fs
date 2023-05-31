@@ -6,6 +6,8 @@ let parseWord (token : Token.t) =
   | "-" -> Op.Minus
   | "=" -> Op.Eq
   | "." -> Op.Dump
+  | "if" -> Op.If 0
+  | "end" -> Op.End
   | n ->
     try
       Op.Push(int n)
@@ -14,4 +16,4 @@ let parseWord (token : Token.t) =
       exit 1
 
 let parse (filePath : string) =
-  Lexer.lexFile filePath |> Seq.map parseWord
+  Lexer.lexFile filePath |> Seq.map parseWord |> Blocks.resolve
