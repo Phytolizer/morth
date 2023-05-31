@@ -19,15 +19,23 @@ jobs:
     - uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
+      if: ${{matrix.folder}} == 'cs'
       with:
         dotnet-version: 7.0.x
     - name: Set up GCC
       uses: egor-tensin/setup-gcc@v1
+      if: ${{matrix.folder}} == 'cs'
       with:
         version: latest
         platform: x64
     - name: Get CMake
       uses: symbitic/install-cmake@master
+      if: ${{matrix.folder}} == 'cs'
+    - name: Get nasm
+      if: ${{matrix.folder}} == 'fs'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y nasm
     - name: Restore dependencies
       working-directory: ${{matrix.folder}}
       run: dotnet restore
