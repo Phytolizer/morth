@@ -39,15 +39,15 @@ let runCmd (command : string) (args : string array) =
   }
 
 let showOutput
-  out
+  outf
   {
     exit_code = _
-    stdout = sout
+    stdout = out
     stderr = err
   }
   =
   eprintf "%s" err
-  fprintf out "%s" sout
+  fprintf outf "%s" out
 
 let check =
   function

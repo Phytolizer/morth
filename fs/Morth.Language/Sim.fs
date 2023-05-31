@@ -57,9 +57,28 @@ let handle_op
     stack.Push(int b)
     ip + 1
   | Op.Store ->
-    let addr = stack.Pop() in
     let value = stack.Pop() in
+    let addr = stack.Pop() in
     mem.[addr] <- byte value
+    ip + 1
+  | Op.Syscall1 -> failwith "unimplemented"
+  | Op.Syscall3 ->
+    let syscall = stack.Pop() in
+    let arg1 = stack.Pop() in
+    let arg2 = stack.Pop() in
+    let arg3 = stack.Pop() in
+
+    (match syscall with
+     | 1 ->
+       let fd, buf, count = arg1, arg2, arg3 in
+       let s = Array.sub mem buf count |> System.Text.Encoding.UTF8.GetString in
+
+       (match fd with
+        | 1 -> fprintf out "%s" s
+        | 2 -> eprintf "%s" s
+        | _ -> failwithf "unknown fd: %d" fd)
+     | _ -> failwithf "unknown syscall %d" syscall)
+
     ip + 1
 
 let simulate out ops =
