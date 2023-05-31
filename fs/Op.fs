@@ -1,6 +1,6 @@
 module Morth.Op
 
-type t =
+type code =
   | Push of int
   | Dup
   | Plus
@@ -13,3 +13,11 @@ type t =
   | While
   | Do of int
   | End of int
+
+type t =
+  struct
+    val loc : Token.loc
+    val mutable code : code
+
+    new(loc : Token.loc, code : code) = { loc = loc; code = code }
+  end

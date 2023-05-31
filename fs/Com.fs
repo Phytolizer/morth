@@ -2,13 +2,13 @@ module Morth.Com
 
 let indent s = "    " + s
 
-let compileOp ip op =
+let compileOp ip (op : Op.t) =
   List.append
     [
       sprintf ".L%d:" ip
-      sprintf ";; -- %A --" op
+      sprintf ";; -- %A --" op.code
     ]
-    (match op with
+    (match op.code with
      | Op.Push n -> [ sprintf "push %d" n ]
      | Op.Dup ->
        [

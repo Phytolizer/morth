@@ -11,8 +11,8 @@ let bop (stack : int Stack) op =
 let boolop (stack : int Stack) op =
   bop stack (fun a b -> if op a b then 1 else 0)
 
-let handle_op (stack : int Stack) ip =
-  function
+let handle_op (stack : int Stack) ip (op : Op.t) =
+  match op.code with
   | Op.Push n ->
     stack.Push n
     ip + 1
