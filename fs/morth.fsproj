@@ -8,6 +8,9 @@
   <ItemGroup>
     <Compile Include="Logger.fs" />
     <Compile Include="Op.fs" />
+    <Compile Include="Token.fs" />
+    <Compile Include="Lexer.fsi" />
+    <Compile Include="Lexer.fs" />
     <Compile Include="Parser.fsi" />
     <Compile Include="Parser.fs" />
     <Compile Include="Sim.fsi" />

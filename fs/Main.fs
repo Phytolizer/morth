@@ -76,7 +76,7 @@ let main (args : string array) =
          error "expected arg to 'sim'"
          exit 1) in
 
-    File.ReadAllText file |> Parser.parse |> Sim.simulate
+    Parser.parse file |> Sim.simulate
   | Some("com", args) ->
     let file =
       (match Seq.unCons args with
@@ -90,10 +90,7 @@ let main (args : string array) =
 
     info "Generating %s" asmFile
 
-    File.WriteAllText(
-      asmFile,
-      File.ReadAllText file |> Parser.parse |> Com.compile
-    )
+    File.WriteAllText(asmFile, Parser.parse file |> Com.compile)
 
     let objFile = Path.ChangeExtension(file, ".o") in
 

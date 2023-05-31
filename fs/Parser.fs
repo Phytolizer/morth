@@ -1,11 +1,16 @@
 module Morth.Parser
 
-let parseWord =
-  function
+let parseWord (token : Token.t) =
+  match token.word with
   | "+" -> Op.Plus
   | "-" -> Op.Minus
   | "." -> Op.Dump
-  | n -> Op.Push(int n)
+  | n ->
+    try
+      Op.Push(int n)
+    with err ->
+      Printf.eprintfn "%s: %s" (token.loc.ToString()) err.Message
+      exit 1
 
-let parse (input : string) =
-  input.Split() |> Seq.filter (fun x -> x.Length > 0) |> Seq.map parseWord
+let parse (filePath : string) =
+  Lexer.lexFile filePath |> Seq.map parseWord

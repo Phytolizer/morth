@@ -1,3 +1,3 @@
 module Morth.Parser
 
-val parse : string -> Op.t seq
+val parse : filePath:string -> Op.t seq
