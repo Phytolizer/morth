@@ -12,7 +12,13 @@ let bop (stack : int Stack) op =
 let boolop (stack : int Stack) op =
   bop stack (fun a b -> if op a b then 1 else 0)
 
-let handle_op (out : TextWriter) (stack : int Stack) ip (op : Op.t) =
+let handle_op
+  (out : TextWriter)
+  (stack : int Stack)
+  (mem : byte array)
+  ip
+  (op : Op.t)
+  =
   match op.code with
   | Op.Push n ->
     stack.Push n
@@ -42,19 +48,30 @@ let handle_op (out : TextWriter) (stack : int Stack) ip (op : Op.t) =
   | Op.While -> ip + 1
   | Op.Do dest -> let top = stack.Pop() in if top = 0 then dest else ip + 1
   | Op.End dest -> dest
-  | Op.Mem
-  | Op.Load
-  | Op.Store -> failwith "unimplemented"
+  | Op.Mem ->
+    stack.Push 0
+    ip + 1
+  | Op.Load ->
+    let addr = stack.Pop() in
+    let b = mem.[addr] in
+    stack.Push(int b)
+    ip + 1
+  | Op.Store ->
+    let addr = stack.Pop() in
+    let value = stack.Pop() in
+    mem.[addr] <- byte value
+    ip + 1
 
 let simulate out ops =
   let program = ops |> Seq.toArray in
+  let mem = Array.create Config.MEM_CAPACITY (byte 0) in
 
   let rec loop ip stack =
     if ip >= program.Length then
       ()
     else
       let op = program.[ip] in
-      let ip = handle_op out stack ip op in
+      let ip = handle_op out stack mem ip op in
       loop ip stack in
 
   loop 0 (new Stack<int>())
