@@ -5,6 +5,7 @@ let parseWord (token : Token.t) =
   | "+" -> Op.Plus
   | "-" -> Op.Minus
   | "=" -> Op.Eq
+  | ">" -> Op.Gt
   | "." -> Op.Dump
   | "if" -> Op.If 0
   | "else" -> Op.Else 0

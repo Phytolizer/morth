@@ -6,6 +6,7 @@ type t =
   | Plus
   | Minus
   | Eq
+  | Gt
   | Dump
   | If of int
   | Else of int

@@ -39,6 +39,15 @@ let compileOp ip op =
          "movzx rax, al"
          "push rax"
        |]
+     | Op.Gt ->
+       [|
+         "pop rbx"
+         "pop rax"
+         "cmp rax, rbx"
+         "setg al"
+         "movzx rax, al"
+         "push rax"
+       |]
      | Op.Dump ->
        [|
          "pop rdi"

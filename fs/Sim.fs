@@ -29,6 +29,9 @@ let handle_op (stack : int Stack) ip =
   | Op.Eq ->
     boolop stack (=)
     ip + 1
+  | Op.Gt ->
+    boolop stack (>)
+    ip + 1
   | Op.Dump ->
     let top = stack.Pop() in
     printfn "%d" top
