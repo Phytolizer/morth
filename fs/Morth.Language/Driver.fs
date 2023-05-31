@@ -41,13 +41,14 @@ let runCmd (command : string) (args : string array) =
 let showOutput
   outf
   {
-    exit_code = _
+    exit_code = ec
     stdout = out
     stderr = err
   }
   =
   eprintf "%s" err
   fprintf outf "%s" out
+  ec
 
 let check =
   function
@@ -60,7 +61,7 @@ let check =
       exit_code = _
       stdout = _
       stderr = err
-    } -> failwith <| sprintf "Command failed with stderr:\n%s" err
+    } -> failwithf "Command failed with stderr:\n%s" err
 
 let usage () =
   Array.iter
@@ -89,11 +90,15 @@ let resolveOutPath (outPath : string) (inFile : string) =
     with _ ->
       outPath
 
+exception BadUsage
+
 let run (args : string array) (out : TextWriter) =
   let args = args |> Array.toSeq in
 
   match Seq.unCons args with
-  | Some("help", _) -> usage ()
+  | Some("help", _) ->
+    usage ()
+    0
   | Some("sim", args) ->
     let file =
       (match Seq.unCons args with
@@ -101,9 +106,10 @@ let run (args : string array) (out : TextWriter) =
        | None ->
          usage ()
          error "expected arg to 'sim'"
-         exit 1) in
+         raise BadUsage) in
 
     Parser.parse file |> Sim.simulate out
+    0
   | Some("com", args) ->
     let (run, outPath, file) =
       (let rec loop run outPath args =
@@ -115,12 +121,12 @@ let run (args : string array) (out : TextWriter) =
             | None ->
               usage ()
               error "expected arg to '-o'"
-              exit 1)
+              raise BadUsage)
          | Some(file, _) -> run, outPath, file
          | None ->
            usage ()
            error "expected arg to 'com'"
-           exit 1) in
+           raise BadUsage) in
 
        loop false null args)
 
@@ -163,8 +169,8 @@ let run (args : string array) (out : TextWriter) =
            "./" + exeFile)
         [||]
       |> showOutput out
+    else
+      0
   | _ ->
     usage ()
-    exit 1
-
-  0
+    raise BadUsage
