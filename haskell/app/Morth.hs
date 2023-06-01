@@ -23,6 +23,7 @@ usage () = do
     , "SUBCOMMANDS:"
     , "  sim <file>             Simulate a program"
     , "  com <file>             Compile a program"
+    , "  help                   Print this message"
     ]
 
 check :: ExitCode -> IO ()
@@ -65,6 +66,8 @@ main = do
       usage ()
       logErr "no file given for 'com'"
       exitFailure
+    "help" : [] -> do
+      usage ()
     [] -> do
       usage ()
       logErr "no subcommand given"
