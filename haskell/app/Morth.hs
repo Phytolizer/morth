@@ -5,7 +5,7 @@ import System.IO (stdout)
 
 main :: IO ()
 main =
-  (run stdout)
+  run stdout
     `catches` [ Handler (\CommandFailed -> exitFailure)
               , Handler (\BadUsage -> exitFailure)
               ]
