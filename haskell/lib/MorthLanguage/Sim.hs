@@ -1,7 +1,7 @@
 module MorthLanguage.Sim (simulateProgram) where
 
 import MorthLanguage.Op (Op (..))
-import System.IO (Handle, hPutStrLn)
+import System.IO (Handle, hPrint, hPutStrLn)
 
 bop :: (Int -> Int -> Int) -> [Int] -> [Int]
 bop f (y : x : stack) = f x y : stack
@@ -21,11 +21,11 @@ step h op stack = case op of
   OpDump -> case stack of
     [] -> error "stack underflow"
     x : stack' -> do
-      hPutStrLn h (show x)
+      hPrint h x
       return stack'
 
 loop :: Handle -> [Int] -> [Op] -> IO ()
-loop h stack ops = iter (step h) stack ops
+loop h = iter (step h)
 
 simulateProgram :: Handle -> [Op] -> IO ()
-simulateProgram h ops = loop h [] ops
+simulateProgram h = loop h []

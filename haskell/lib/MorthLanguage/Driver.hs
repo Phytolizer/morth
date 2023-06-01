@@ -47,14 +47,14 @@ run :: Handle -> IO ()
 run hOut = do
   args <- getArgs
   case args of
-    "sim" : path : [] -> do
+    ["sim", path] -> do
       raw <- readFile path
       simulateProgram hOut $ parseProgram raw
-    "sim" : [] -> do
+    ["sim"] -> do
       usage ()
       logErr "no file given for 'sim'"
       throw BadUsage
-    "com" : path : [] -> do
+    ["com", path] -> do
       raw <- readFile path
       let asmText = compileProgram $ parseProgram raw
           asmPath = "output.asm"
@@ -66,11 +66,11 @@ run hOut = do
             runCmd "nasm" ["-felf64", asmPath, "-o", objPath]
             runCmd "ld" ["-o", exePath, objPath]
             return ()
-    "com" : [] -> do
+    ["com"] -> do
       usage ()
       logErr "no file given for 'com'"
       throw BadUsage
-    "help" : [] -> do
+    ["help"] -> do
       usage ()
     [] -> do
       usage ()
