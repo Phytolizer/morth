@@ -18,7 +18,9 @@ library morth-language
                  , MorthLanguage.Sim
     default-language: Haskell2010
     build-depends: base >= 4.7 && < 5,
-                   process
+                   process,
+                   bytestring,
+                   shell-escape
 
 executable Morth
     hs-source-dirs: app

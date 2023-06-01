@@ -1,6 +1,7 @@
 module MorthLanguage.Driver (CommandFailError (..), BadUsage (..), run) where
 
 import Control.Exception (Exception, throw)
+import qualified Data.ByteString.Char8 as B
 import MorthLanguage.Com (compileProgram)
 import MorthLanguage.Logger (logCmd, logErr, logInfo)
 import MorthLanguage.Parser (parseProgram)
@@ -9,6 +10,7 @@ import System.Environment (getArgs, getProgName)
 import System.Exit (ExitCode (..))
 import System.IO (Handle, hPutStrLn, stderr)
 import System.Process (createProcess, proc, waitForProcess)
+import Text.ShellEscape (Bash, Escape (bytes, escape))
 
 data CommandFailError = CommandFailed deriving (Show)
 
@@ -38,7 +40,7 @@ check (ExitFailure n) = do
 
 runCmd :: String -> [String] -> IO ()
 runCmd cmd args = do
-  logCmd $ unwords (cmd : args)
+  logCmd $ unwords $ map (B.unpack . bytes . (escape :: B.ByteString -> Bash) . B.pack) (cmd : args)
   (_, _, _, p) <- createProcess (proc cmd args)
   ec <- waitForProcess p
   check ec
