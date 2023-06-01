@@ -8,10 +8,19 @@ maintainer: me@phytolizer.dev
 copyright: 2022 Kyle Coffey
 build-type: Simple
 
+library morth-language
+    hs-source-dirs: lib
+    exposed-modules: MorthLanguage.Com
+                   , MorthLanguage.Logger
+                   , MorthLanguage.Op
+                   , MorthLanguage.Sim
+    default-language: Haskell2010
+    build-depends: base >= 4.7 && < 5
+
 executable Morth
-    hs-source-dirs: .
+    hs-source-dirs: app
     main-is: Morth.hs
     default-language: Haskell2010
-    build-depends: base >= 4.7 && < 5,
+    build-depends: morth-language,
+                   base >= 4.7 && < 5,
                    process
-
