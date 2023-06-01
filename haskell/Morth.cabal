@@ -10,18 +10,19 @@ build-type: Simple
 
 library morth-language
     hs-source-dirs: lib
-    exposed-modules: MorthLanguage.Com
-                   , MorthLanguage.Logger
-                   , MorthLanguage.Op
-                   , MorthLanguage.Parser
-                   , MorthLanguage.Sim
+    exposed-modules: MorthLanguage.Driver
+    other-modules: MorthLanguage.Com
+                 , MorthLanguage.Logger
+                 , MorthLanguage.Op
+                 , MorthLanguage.Parser
+                 , MorthLanguage.Sim
     default-language: Haskell2010
-    build-depends: base >= 4.7 && < 5
+    build-depends: base >= 4.7 && < 5,
+                   process
 
 executable Morth
     hs-source-dirs: app
     main-is: Morth.hs
     default-language: Haskell2010
     build-depends: morth-language,
-                   base >= 4.7 && < 5,
-                   process
+                   base >= 4.7 && < 5
