@@ -1,6 +1,7 @@
 import MorthLanguage.Com (compileProgram)
 import MorthLanguage.Logger (logCmd, logErr, logInfo)
 import MorthLanguage.Op (Op (..))
+import MorthLanguage.Parser (parseProgram)
 import MorthLanguage.Sim (simulateProgram)
 import System.Environment (getArgs, getProgName)
 import System.Exit (ExitCode (..), exitFailure)
@@ -13,18 +14,6 @@ import System.Process (
  )
 import Text.Printf (hPrintf)
 
-program :: [Op]
-program =
-  [ OpPush 34
-  , OpPush 12
-  , OpPlus
-  , OpDump
-  , OpPush 78
-  , OpPush 56
-  , OpMinus
-  , OpDump
-  ]
-
 usage :: () -> IO ()
 usage () = do
   progName <- getProgName
@@ -32,8 +21,8 @@ usage () = do
     (hPutStrLn stderr)
     [ "Usage: " ++ progName ++ " <SUBCOMMAND> [ARGS]"
     , "SUBCOMMANDS:"
-    , "  sim            Simulate a program"
-    , "  com            Compile a program"
+    , "  sim <file>             Simulate a program"
+    , "  com <file>             Compile a program"
     ]
 
 check :: ExitCode -> IO ()
@@ -53,25 +42,33 @@ main :: IO ()
 main = do
   args <- getArgs
   case args of
-    [] -> do
-      usage ()
-      logErr "no subcommand given"
-      exitFailure
+    "sim" : path : [] -> do
+      raw <- readFile path
+      simulateProgram stdout $ parseProgram raw
     "sim" : [] -> do
-      simulateProgram stdout program
-    "com" : [] ->
-      let asmText = compileProgram program
+      usage ()
+      logErr "no file given for 'sim'"
+      exitFailure
+    "com" : path : [] -> do
+      raw <- readFile path
+      let asmText = compileProgram $ parseProgram raw
           asmPath = "output.asm"
           objPath = "output.o"
           exePath = "output"
        in do
             logInfo "writing assembly to '%s'" asmPath
-            hOut <- openFile asmPath WriteMode
-            hPutStrLn hOut asmText
-            hClose hOut
+            writeFile asmPath asmText
             run "nasm" ["-felf64", asmPath, "-o", objPath]
             run "ld" ["-o", exePath, objPath]
             return ()
+    "com" : [] -> do
+      usage ()
+      logErr "no file given for 'com'"
+      exitFailure
+    [] -> do
+      usage ()
+      logErr "no subcommand given"
+      exitFailure
     cmd : _ -> do
       usage ()
       logErr "unknown subcommand '%s'" cmd

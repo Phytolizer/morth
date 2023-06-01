@@ -13,6 +13,7 @@ library morth-language
     exposed-modules: MorthLanguage.Com
                    , MorthLanguage.Logger
                    , MorthLanguage.Op
+                   , MorthLanguage.Parser
                    , MorthLanguage.Sim
     default-language: Haskell2010
     build-depends: base >= 4.7 && < 5
