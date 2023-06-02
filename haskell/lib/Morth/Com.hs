@@ -1,7 +1,9 @@
-module MorthLanguage.Com (compileProgram) where
+module Morth.Com (compileProgram) where
 
+import Data.Foldable (toList)
+import Data.Primitive (Array)
 import qualified Data.Text.Lazy as TL
-import MorthLanguage.Op (Op (..))
+import Morth.Op (Op (..))
 
 header :: [TL.Text]
 header =
@@ -43,16 +45,19 @@ header =
   , "_start:"
   ]
 
-footer :: [TL.Text]
-footer =
-  [ "    mov rax, 60"
+footer :: Int -> [TL.Text]
+footer len =
+  [ ".L" <> TL.pack (show len) <> ":"
+  , "    mov rax, 60"
   , "    mov rdi, 0"
   , "    syscall"
   ]
 
-step :: Op -> [TL.Text]
-step op =
-  ["    ;; -- " <> TL.pack (show op) <> " --"]
+step :: (Int, Op) -> [TL.Text]
+step (ip, op) =
+  [ ".L" <> TL.pack (show ip) <> ":"
+  , "    ;; -- " <> TL.pack (show op) <> " --"
+  ]
     <> case op of
       OpPush x -> [TL.concat ["    push " <> TL.pack (show x)]]
       OpPlus ->
@@ -79,6 +84,18 @@ step op =
         [ "    pop rdi"
         , "    call dump"
         ]
+      OpIf (-1) -> error "invalid jump target"
+      OpIf dest ->
+        [ "    pop rax"
+        , "    cmp rax, 0"
+        , "    je .L" <> TL.pack (show dest)
+        ]
+      OpEnd -> []
 
-compileProgram :: [Op] -> TL.Text
-compileProgram ops = TL.unlines (header ++ concatMap step ops ++ footer)
+compileProgram :: Array Op -> TL.Text
+compileProgram ops =
+  TL.unlines
+    ( header
+        ++ concatMap step (zip [0 ..] (toList ops))
+        ++ footer (length ops)
+    )

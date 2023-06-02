@@ -1,4 +1,4 @@
-module MorthLanguage.Logger (
+module Morth.Logger (
   logCmd,
   logInfo,
   logErr,
@@ -8,7 +8,7 @@ module MorthLanguage.Logger (
 import Data.Text.Lazy.Builder (Builder)
 import qualified Data.Text.Lazy.IO as TLIO
 import Formatting (Format, bformat, formatted, later, prefixed, (%))
-import MorthLanguage.Token (Location (..), fmtLoc)
+import Morth.Token (Location (..), fmtLoc)
 import System.IO (stderr)
 
 out :: Format (IO ()) a -> a

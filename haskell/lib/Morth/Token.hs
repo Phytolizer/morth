@@ -1,4 +1,4 @@
-module MorthLanguage.Token (Location (..), Token (..), fmtLoc) where
+module Morth.Token (Location (..), Token (..), fmtLoc) where
 
 import qualified Data.Text as T
 import Formatting (Format, bformat, int, later, stext, (%))

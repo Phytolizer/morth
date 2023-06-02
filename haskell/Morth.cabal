@@ -10,20 +10,23 @@ build-type: Simple
 
 library morth-language
     hs-source-dirs: lib
-    exposed-modules: MorthLanguage.Driver
-    other-modules: MorthLanguage.Com
-                 , MorthLanguage.Lexer
-                 , MorthLanguage.Logger
-                 , MorthLanguage.Op
-                 , MorthLanguage.Parser
-                 , MorthLanguage.Sim
-                 , MorthLanguage.Token
+    exposed-modules: Morth.Driver
+                   , Morth.Errors
+    other-modules: Morth.Blocks
+                 , Morth.Com
+                 , Morth.Lexer
+                 , Morth.Logger
+                 , Morth.Op
+                 , Morth.Parser
+                 , Morth.Sim
+                 , Morth.Token
     default-language: Haskell2010
     default-extensions: OverloadedStrings
     ghc-options: -Wall -Werror=incomplete-patterns
     build-depends: base >= 4.7 && < 5,
                    bytestring,
                    formatting,
+                   primitive,
                    process,
                    shell-escape,
                    text

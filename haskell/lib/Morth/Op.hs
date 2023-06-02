@@ -1,4 +1,4 @@
-module MorthLanguage.Op (Op (..)) where
+module Morth.Op (Op (..)) where
 
 data Op
   = OpPush Int
@@ -6,4 +6,6 @@ data Op
   | OpMinus
   | OpEq
   | OpDump
+  | OpIf Int
+  | OpEnd
   deriving (Eq, Show)

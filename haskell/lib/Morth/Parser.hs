@@ -1,18 +1,15 @@
-module MorthLanguage.Parser (parseProgram) where
+module Morth.Parser (parseProgram) where
 
-import Control.Exception (Exception, throw)
+import Control.Exception (throw)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import Formatting (string, (%))
-import MorthLanguage.Lexer (lexFile)
-import MorthLanguage.Logger (logErrLoc)
-import MorthLanguage.Op (Op (..))
-import MorthLanguage.Token (Token (..))
+import Morth.Errors (ParseError (..))
+import Morth.Lexer (lexFile)
+import Morth.Logger (logErrLoc)
+import Morth.Op (Op (..))
+import Morth.Token (Token (..))
 import Text.Read (readEither)
-
-data ParseError = ParseError deriving (Show)
-
-instance Exception ParseError
 
 parseWord :: Token -> IO Op
 parseWord token = case value token of
@@ -20,6 +17,8 @@ parseWord token = case value token of
   "-" -> return OpMinus
   "=" -> return OpEq
   "." -> return OpDump
+  "if" -> return $ OpIf (-1)
+  "end" -> return OpEnd
   nt -> do
     n <- case readEither (T.unpack nt) of
       Right n -> return n

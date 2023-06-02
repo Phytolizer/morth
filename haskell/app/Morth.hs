@@ -1,5 +1,6 @@
 import Control.Exception (Handler (Handler), catches)
-import MorthLanguage.Driver (BadUsage (..), CommandFailError (..), run)
+import Morth.Driver (run)
+import Morth.Errors (BadUsage (..), CommandFailError (..), ParseError (..))
 import System.Exit (exitFailure)
 import System.IO (stdout)
 
@@ -8,4 +9,5 @@ main =
   run stdout
     `catches` [ Handler (\CommandFailed -> exitFailure)
               , Handler (\BadUsage -> exitFailure)
+              , Handler (\ParseError -> exitFailure)
               ]

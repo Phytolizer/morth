@@ -1,9 +1,9 @@
-module MorthLanguage.Lexer (lexFile) where
+module Morth.Lexer (lexFile) where
 
 import Data.Function ((&))
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
-import MorthLanguage.Token (Location (..), Token (..))
+import Morth.Token (Location (..), Token (..))
 
 lexLine :: T.Text -> Int -> TL.Text -> [Token]
 lexLine fp ln = loop 0

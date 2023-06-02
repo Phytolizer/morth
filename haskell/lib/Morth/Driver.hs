@@ -1,27 +1,23 @@
-module MorthLanguage.Driver (CommandFailError (..), BadUsage (..), run) where
+module Morth.Driver (run) where
 
-import Control.Exception (Exception, throw)
+import Control.Exception (throw)
 import qualified Data.ByteString.Char8 as B
+import Data.Functor ((<&>))
+import Data.Primitive (arrayFromList, unsafeThawArray)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.IO as TLIO
 import Formatting (int, string, text, (%))
-import MorthLanguage.Com (compileProgram)
-import MorthLanguage.Logger (logCmd, logErr, logInfo)
-import MorthLanguage.Parser (parseProgram)
-import MorthLanguage.Sim (simulateProgram)
+import Morth.Blocks (resolveBlocks)
+import Morth.Com (compileProgram)
+import Morth.Errors (BadUsage (BadUsage), CommandFailError (..))
+import Morth.Logger (logCmd, logErr, logInfo)
+import Morth.Parser (parseProgram)
+import Morth.Sim (simulateProgram)
 import System.Environment (getArgs, getProgName)
 import System.Exit (ExitCode (..))
 import System.IO (Handle, hPutStrLn, stderr)
 import System.Process (createProcess, proc, waitForProcess)
 import Text.ShellEscape (Bash, Escape (bytes, escape))
-
-data CommandFailError = CommandFailed deriving (Show)
-
-instance Exception CommandFailError
-
-data BadUsage = BadUsage deriving (Show)
-
-instance Exception BadUsage
 
 usage :: () -> IO ()
 usage () = do
@@ -63,7 +59,11 @@ run hOut = do
   case map TL.pack args of
     ["sim", path] -> do
       raw <- TLIO.readFile $ TL.unpack path
-      program <- parseProgram (TL.toStrict path) raw
+      program <-
+        parseProgram (TL.toStrict path) raw
+          >>= unsafeThawArray . arrayFromList
+          >>= resolveBlocks
+
       simulateProgram hOut program
     ["sim"] -> do
       usage ()
@@ -71,9 +71,12 @@ run hOut = do
       throw BadUsage
     ["com", path] -> do
       raw <- TLIO.readFile $ TL.unpack path
-      program <- parseProgram (TL.toStrict path) raw
-      let asmText = compileProgram program
-          asmPath = "output.asm"
+      asmText <-
+        parseProgram (TL.toStrict path) raw
+          >>= unsafeThawArray . arrayFromList
+          >>= resolveBlocks
+          <&> compileProgram
+      let asmPath = "output.asm"
           objPath = "output.o"
           exePath = "output"
        in do
