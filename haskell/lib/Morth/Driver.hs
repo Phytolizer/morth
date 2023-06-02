@@ -38,7 +38,7 @@ usage () = do
     , "  com [OPTIONS] <file>         Compile a program"
     , "    OPTIONS:"
     , "      -r                       Run the compiled program"
-    , "      -o <file|dir>            Output file or directory"
+    , "      -o <file>                Output file"
     , "  help                         Print this message"
     ]
 
