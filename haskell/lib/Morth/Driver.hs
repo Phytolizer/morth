@@ -16,7 +16,7 @@ import Morth.Parser (parseProgram)
 import Morth.Sim (simulateProgram)
 import System.Environment (getProgName)
 import System.Exit (ExitCode (..))
-import System.FilePath (isAbsolute, (-<.>), (</>))
+import System.FilePath (isAbsolute, (-<.>), (<.>), (</>))
 import System.IO (Handle, hPutStrLn, stderr, stdout)
 import System.Process (
   CreateProcess (std_out),
@@ -35,7 +35,10 @@ usage () = do
     [ "Usage: " ++ progName ++ " <SUBCOMMAND> [ARGS]"
     , "SUBCOMMANDS:"
     , "  sim <file>                   Simulate a program"
-    , "  com [-r] <file>              Compile a program"
+    , "  com [OPTIONS] <file>         Compile a program"
+    , "    OPTIONS:"
+    , "      -r                       Run the compiled program"
+    , "      -o <file|dir>            Output file or directory"
     , "  help                         Print this message"
     ]
 
@@ -64,16 +67,24 @@ captureCmd hOut cmd args = do
 runCmd :: String -> [String] -> IO ()
 runCmd = captureCmd stdout
 
-parseComArgs :: [TL.Text] -> IO (Bool, TL.Text)
-parseComArgs args = loop args False
+data ComArgs = ComArgs
+  { comShouldRun :: Bool
+  , comOutPath :: Maybe TL.Text
+  , comInput :: TL.Text
+  }
+
+parseComArgs :: [TL.Text] -> IO ComArgs
+parseComArgs args = loop args False Nothing
  where
-  loop [] _ = do
+  loop :: [TL.Text] -> Bool -> Maybe TL.Text -> IO ComArgs
+  loop [] _ _ = do
     usage ()
     logErr "no file given for 'com'"
     throw BadUsage
-  loop (arg : args') shouldRun = case arg of
-    "-r" -> loop args' True
-    path -> return (shouldRun, path)
+  loop rest sr op = case rest of
+    ("-r" : args') -> loop args' True op
+    ("-o" : outPath : args') -> loop args' sr (Just outPath)
+    (path : _) -> return $ ComArgs sr op path
 
 toRelative :: FilePath -> FilePath
 toRelative path
@@ -96,16 +107,22 @@ run hOut args = do
       logErr text "no file given for 'sim'"
       throw BadUsage
     ("com" : comArgs) -> do
-      (shouldRun, path) <- parseComArgs comArgs
-      raw <- TLIO.readFile $ TL.unpack path
+      ComArgs
+        { comShouldRun = shouldRun
+        , comOutPath = outPath
+        , comInput = input
+        } <-
+        parseComArgs comArgs
+      raw <- TLIO.readFile $ TL.unpack input
       asmText <-
-        parseProgram (TL.toStrict path) raw
+        parseProgram (TL.toStrict input) raw
           >>= unsafeThawArray . arrayFromList
           >>= resolveBlocks
           <&> compileProgram
-      let asmPath = TL.unpack path -<.> "asm"
-          objPath = TL.unpack path -<.> "o"
-          exePath = TL.unpack path -<.> ""
+      let outPath' = maybe (TL.unpack input -<.> "") TL.unpack outPath
+          asmPath = outPath' <.> "asm"
+          objPath = outPath' <.> "o"
+          exePath = outPath'
        in do
             logInfo ("writing assembly to '" % string % "'") asmPath
             TLIO.writeFile asmPath asmText
