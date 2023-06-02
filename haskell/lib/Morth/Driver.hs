@@ -16,7 +16,7 @@ import Morth.Parser (parseProgram)
 import Morth.Sim (simulateProgram)
 import System.Environment (getProgName)
 import System.Exit (ExitCode (..))
-import System.FilePath (isAbsolute, (</>))
+import System.FilePath (isAbsolute, (-<.>), (</>))
 import System.IO (Handle, hPutStrLn, stderr, stdout)
 import System.Process (
   CreateProcess (std_out),
@@ -103,9 +103,9 @@ run hOut args = do
           >>= unsafeThawArray . arrayFromList
           >>= resolveBlocks
           <&> compileProgram
-      let asmPath = "output.asm"
-          objPath = "output.o"
-          exePath = "output"
+      let asmPath = TL.unpack path -<.> "asm"
+          objPath = TL.unpack path -<.> "o"
+          exePath = TL.unpack path -<.> ""
        in do
             logInfo ("writing assembly to '" % string % "'") asmPath
             TLIO.writeFile asmPath asmText
