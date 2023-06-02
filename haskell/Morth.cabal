@@ -38,3 +38,13 @@ executable Morth
     default-language: Haskell2010
     build-depends: morth-language,
                    base >= 4.7 && < 5
+
+test-suite morth-test
+    type: detailed-0.9
+    hs-source-dirs: test
+    test-module: Morth.Test
+    default-language: Haskell2010
+    build-depends: morth-language,
+                   base >= 4.7 && < 5,
+                   HUnit,
+                   Cabal >= 3.8 && < 4
