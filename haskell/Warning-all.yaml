@@ -1,0 +1,299 @@
+# HLint configuration file
+# https://github.com/ndmitchell/hlint
+##########################
+
+# This file contains a template configuration file, which is typically
+# placed as .hlint.yaml in the root of your project
+
+# All built-in hints
+
+# All LHS/RHS hints
+- Warning: {name: "Alternative law, left identity"}
+- Warning: {name: "Alternative law, right identity"}
+- Warning: {name: "Avoid reverse"}
+- Warning: {name: "Drop on a non-positive"}
+- Warning: {name: "Evaluate"}
+- Warning: {name: "Functor law"}
+- Warning: {name: "Fuse concatMap/map"}
+- Warning: {name: "Fuse foldMap/fmap"}
+- Warning: {name: "Fuse foldMap/map"}
+- Warning: {name: "Fuse foldr/map"}
+- Warning: {name: "Fuse mapM/map"}
+- Warning: {name: "Fuse mapM_/map"}
+- Warning: {name: "Fuse mapMaybe/map"}
+- Warning: {name: "Fuse on/on"}
+- Warning: {name: "Fuse traverse/map"}
+- Warning: {name: "Fuse traverse_/map"}
+- Warning: {name: "Hoist not"}
+- Warning: {name: "Length always non-negative"}
+- Warning: {name: "Monad law, left identity"}
+- Warning: {name: "Monad law, right identity"}
+- Warning: {name: "Monoid law, left identity"}
+- Warning: {name: "Monoid law, right identity"}
+- Warning: {name: "Move flip"}
+- Warning: {name: "Move nub out"}
+- Warning: {name: "Move nubOrd out"}
+- Warning: {name: "Move reverse out"}
+- Warning: {name: "Move sort out"}
+- Warning: {name: "Redundant $"}
+- Warning: {name: "Redundant $!"}
+- Warning: {name: "Redundant &"}
+- Warning: {name: "Redundant /="}
+- Warning: {name: "Redundant <$>"}
+- Warning: {name: "Redundant <&>"}
+- Warning: {name: "Redundant <*"}
+- Warning: {name: "Redundant =="}
+- Warning: {name: "Redundant >>"}
+- Warning: {name: "Redundant ^."}
+- Warning: {name: "Redundant at"}
+- Warning: {name: "Redundant bimap"}
+- Warning: {name: "Redundant castPtr"}
+- Warning: {name: "Redundant compare"}
+- Warning: {name: "Redundant curry"}
+- Warning: {name: "Redundant evaluate"}
+- Warning: {name: "Redundant first"}
+- Warning: {name: "Redundant flip"}
+- Warning: {name: "Redundant fmap"}
+- Warning: {name: "Redundant fromInteger"}
+- Warning: {name: "Redundant fromIntegral"}
+- Warning: {name: "Redundant id"}
+- Warning: {name: "Redundant if"}
+- Warning: {name: "Redundant list comprehension"}
+- Warning: {name: "Redundant map"}
+- Warning: {name: "Redundant maybe"}
+- Warning: {name: "Redundant multi-way if"}
+- Warning: {name: "Redundant negate"}
+- Warning: {name: "Redundant not"}
+- Warning: {name: "Redundant pair"}
+- Warning: {name: "Redundant pure"}
+- Warning: {name: "Redundant return"}
+- Warning: {name: "Redundant second"}
+- Warning: {name: "Redundant seq"}
+- Warning: {name: "Redundant take"}
+- Warning: {name: "Redundant uncurry"}
+- Warning: {name: "Redundant void"}
+- Warning: {name: "Replace case with fromMaybe"}
+- Warning: {name: "Replace case with maybe"}
+- Warning: {name: "Take on a non-positive"}
+- Warning: {name: "Traversable law"}
+- Warning: {name: "Use !!"}
+- Warning: {name: "Use $"}
+- Warning: {name: "Use $>"}
+- Warning: {name: "Use &&"}
+- Warning: {name: "Use &&&"}
+- Warning: {name: "Use (,)"}
+- Warning: {name: "Use (,,)"}
+- Warning: {name: "Use ++"}
+- Warning: {name: "Use -"}
+- Warning: {name: "Use /="}
+- Warning: {name: "Use 1"}
+- Warning: {name: "Use :"}
+- Warning: {name: "Use <"}
+- Warning: {name: "Use <$"}
+- Warning: {name: "Use <$>"}
+- Warning: {name: "Use <&>"}
+- Warning: {name: "Use <**>"}
+- Warning: {name: "Use <="}
+- Warning: {name: "Use <=<"}
+- Warning: {name: "Use <|>"}
+- Warning: {name: "Use =<<"}
+- Warning: {name: "Use =="}
+- Warning: {name: "Use >"}
+- Warning: {name: "Use >="}
+- Warning: {name: "Use >=>"}
+- Warning: {name: "Use >>"}
+- Warning: {name: "Use >>="}
+- Warning: {name: "Use ?~"}
+- Warning: {name: "Use False"}
+- Warning: {name: "Use Just"}
+- Warning: {name: "Use True"}
+- Warning: {name: "Use ^?!"}
+- Warning: {name: "Use all"}
+- Warning: {name: "Use and"}
+- Warning: {name: "Use any"}
+- Warning: {name: "Use ap"}
+- Warning: {name: "Use appendFile"}
+- Warning: {name: "Use asks"}
+- Warning: {name: "Use asum"}
+- Warning: {name: "Use bimap"}
+- Warning: {name: "Use bracket_"}
+- Warning: {name: "Use break"}
+- Warning: {name: "Use catMaybes"}
+- Warning: {name: "Use catch"}
+- Warning: {name: "Use catchJust"}
+- Warning: {name: "Use concat"}
+- Warning: {name: "Use concatMap"}
+- Warning: {name: "Use const"}
+- Warning: {name: "Use curry"}
+- Warning: {name: "Use delete"}
+- Warning: {name: "Use drop"}
+- Warning: {name: "Use dropWhile"}
+- Warning: {name: "Use either"}
+- Warning: {name: "Use elem"}
+- Warning: {name: "Use elemIndex"}
+- Warning: {name: "Use elemIndices"}
+- Warning: {name: "Use empty"}
+- Warning: {name: "Use error"}
+- Warning: {name: "Use evalState"}
+- Warning: {name: "Use even"}
+- Warning: {name: "Use execState"}
+- Warning: {name: "Use exitSuccess"}
+- Warning: {name: "Use find"}
+- Warning: {name: "Use first"}
+- Warning: {name: "Use floor"}
+- Warning: {name: "Use fmap"}
+- Warning: {name: "Use fold"}
+- Warning: {name: "Use foldMap"}
+- Warning: {name: "Use foldl"}
+- Warning: {name: "Use foldl1"}
+- Warning: {name: "Use foldr"}
+- Warning: {name: "Use foldr1"}
+- Warning: {name: "Use for"}
+- Warning: {name: "Use forM"}
+- Warning: {name: "Use forM_"}
+- Warning: {name: "Use for_"}
+- Warning: {name: "Use fromLeft"}
+- Warning: {name: "Use fromMaybe"}
+- Warning: {name: "Use fromRight"}
+- Warning: {name: "Use fst"}
+- Warning: {name: "Use getChar"}
+- Warning: {name: "Use getContents"}
+- Warning: {name: "Use getLine"}
+- Warning: {name: "Use gets"}
+- Warning: {name: "Use group"}
+- Warning: {name: "Use hPrint"}
+- Warning: {name: "Use hReady"}
+- Warning: {name: "Use handle"}
+- Warning: {name: "Use handleJust"}
+- Warning: {name: "Use head"}
+- Warning: {name: "Use id"}
+- Warning: {name: "Use if"}
+- Warning: {name: "Use infix"}
+- Warning: {name: "Use init"}
+- Warning: {name: "Use insert"}
+- Warning: {name: "Use intercalate"}
+- Warning: {name: "Use intersect"}
+- Warning: {name: "Use isAlpha"}
+- Warning: {name: "Use isAsciiLower"}
+- Warning: {name: "Use isAsciiUpper"}
+- Warning: {name: "Use isDigit"}
+- Warning: {name: "Use isEOF"}
+- Warning: {name: "Use isJust"}
+- Warning: {name: "Use isNothing"}
+- Warning: {name: "Use isOctDigit"}
+- Warning: {name: "Use isSuffixOf"}
+- Warning: {name: "Use iterate"}
+- Warning: {name: "Use ix"}
+- Warning: {name: "Use join"}
+- Warning: {name: "Use last"}
+- Warning: {name: "Use lefts"}
+- Warning: {name: "Use list comprehension"}
+- Warning: {name: "Use logBase"}
+- Warning: {name: "Use map"}
+- Warning: {name: "Use map once"}
+- Warning: {name: "Use mapAndUnzipM"}
+- Warning: {name: "Use mapM"}
+- Warning: {name: "Use mapM_"}
+- Warning: {name: "Use mapMaybe"}
+- Warning: {name: "Use max"}
+- Warning: {name: "Use maximum"}
+- Warning: {name: "Use maximumBy"}
+- Warning: {name: "Use maybe"}
+- Warning: {name: "Use maybeToList"}
+- Warning: {name: "Use min"}
+- Warning: {name: "Use minimum"}
+- Warning: {name: "Use minimumBy"}
+- Warning: {name: "Use mkWeakPair"}
+- Warning: {name: "Use mkWeakPtr"}
+- Warning: {name: "Use msum"}
+- Warning: {name: "Use negate"}
+- Warning: {name: "Use nestedAtomically"}
+- Warning: {name: "Use newEmptyTMVarIO"}
+- Warning: {name: "Use newTMVarIO"}
+- Warning: {name: "Use newTVarIO"}
+- Warning: {name: "Use nonTermination"}
+- Warning: {name: "Use notElem"}
+- Warning: {name: "Use nub"}
+- Warning: {name: "Use null"}
+- Warning: {name: "Use odd"}
+- Warning: {name: "Use oneof"}
+- Warning: {name: "Use optional"}
+- Warning: {name: "Use or"}
+- Warning: {name: "Use print"}
+- Warning: {name: "Use product"}
+- Warning: {name: "Use putChar"}
+- Warning: {name: "Use putStr"}
+- Warning: {name: "Use putStrLn"}
+- Warning: {name: "Use readTVarIO"}
+- Warning: {name: "Use reads"}
+- Warning: {name: "Use repeat"}
+- Warning: {name: "Use replicate"}
+- Warning: {name: "Use replicateM"}
+- Warning: {name: "Use replicateM_"}
+- Warning: {name: "Use return"}
+- Warning: {name: "Use rights"}
+- Warning: {name: "Use second"}
+- Warning: {name: "Use sequence"}
+- Warning: {name: "Use sequenceA"}
+- Warning: {name: "Use sequenceA_"}
+- Warning: {name: "Use sequence_"}
+- Warning: {name: "Use show"}
+- Warning: {name: "Use showHex"}
+- Warning: {name: "Use showOct"}
+- Warning: {name: "Use shows"}
+- Warning: {name: "Use snd"}
+- Warning: {name: "Use sort"}
+- Warning: {name: "Use sortOn"}
+- Warning: {name: "Use span"}
+- Warning: {name: "Use splitAt"}
+- Warning: {name: "Use sqrt"}
+- Warning: {name: "Use sum"}
+- Warning: {name: "Use tail"}
+- Warning: {name: "Use take"}
+- Warning: {name: "Use takeWhile"}
+- Warning: {name: "Use tan"}
+- Warning: {name: "Use traverse"}
+- Warning: {name: "Use traverse_"}
+- Warning: {name: "Use tuple-section"}
+- Warning: {name: "Use typeRep"}
+- Warning: {name: "Use uncurry"}
+- Warning: {name: "Use union"}
+- Warning: {name: "Use unless"}
+- Warning: {name: "Use unlines"}
+- Warning: {name: "Use unwords"}
+- Warning: {name: "Use unzip"}
+- Warning: {name: "Use view"}
+- Warning: {name: "Use void"}
+- Warning: {name: "Use when"}
+- Warning: {name: "Use withBinaryFile"}
+- Warning: {name: "Use withFile"}
+- Warning: {name: "Use writeFile"}
+- Warning: {name: "Use writeIORef"}
+- Warning: {name: "Use writeList2Chan"}
+- Warning: {name: "Use zip"}
+- Warning: {name: "Use zip3"}
+- Warning: {name: "Use zipWith"}
+- Warning: {name: "Use zipWithM"}
+- Warning: {name: "Use zipWithM_"}
+- Warning: {name: "Use ||"}
+- Warning: {name: "Using all on tuple"}
+- Warning: {name: "Using and on tuple"}
+- Warning: {name: "Using any on tuple"}
+- Warning: {name: "Using concat on tuple"}
+- Warning: {name: "Using elem on tuple"}
+- Warning: {name: "Using fold on tuple"}
+- Warning: {name: "Using foldMap on tuple"}
+- Warning: {name: "Using foldl on tuple"}
+- Warning: {name: "Using foldl' on tuple"}
+- Warning: {name: "Using foldl1 on tuple"}
+- Warning: {name: "Using foldr on tuple"}
+- Warning: {name: "Using foldr' on tuple"}
+- Warning: {name: "Using foldr1 on tuple"}
+- Warning: {name: "Using length on tuple"}
+- Warning: {name: "Using maximum on tuple"}
+- Warning: {name: "Using minimum on tuple"}
+- Warning: {name: "Using null on tuple"}
+- Warning: {name: "Using or on tuple"}
+- Warning: {name: "Using product on tuple"}
+- Warning: {name: "Using sum on tuple"}
+- Warning: {name: "Using toList on tuple"}

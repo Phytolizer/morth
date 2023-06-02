@@ -1,8 +1,9 @@
 module MorthLanguage.Com (compileProgram) where
 
+import qualified Data.Text.Lazy as TL
 import MorthLanguage.Op (Op (..))
 
-header :: [String]
+header :: [TL.Text]
 header =
   [ "segment .text"
   , "dump:"
@@ -42,31 +43,34 @@ header =
   , "_start:"
   ]
 
-footer :: [String]
+footer :: [TL.Text]
 footer =
   [ "    mov rax, 60"
   , "    mov rdi, 0"
   , "    syscall"
   ]
 
-step :: Op -> [String]
-step (OpPush x) = ["    push " ++ show x]
-step OpPlus =
-  [ "    pop rbx"
-  , "    pop rax"
-  , "    add rax, rbx"
-  , "    push rax"
-  ]
-step OpMinus =
-  [ "    pop rbx"
-  , "    pop rax"
-  , "    sub rax, rbx"
-  , "    push rax"
-  ]
-step OpDump =
-  [ "    pop rdi"
-  , "    call dump"
-  ]
+step :: Op -> [TL.Text]
+step op =
+  ["    ;; -- " <> TL.pack (show op) <> " --"]
+    <> case op of
+      OpPush x -> [TL.concat ["    push " <> TL.pack (show x)]]
+      OpPlus ->
+        [ "    pop rbx"
+        , "    pop rax"
+        , "    add rax, rbx"
+        , "    push rax"
+        ]
+      OpMinus ->
+        [ "    pop rbx"
+        , "    pop rax"
+        , "    sub rax, rbx"
+        , "    push rax"
+        ]
+      OpDump ->
+        [ "    pop rdi"
+        , "    call dump"
+        ]
 
-compileProgram :: [Op] -> String
-compileProgram ops = unlines (header ++ concatMap step ops ++ footer)
+compileProgram :: [Op] -> TL.Text
+compileProgram ops = TL.unlines (header ++ concatMap step ops ++ footer)

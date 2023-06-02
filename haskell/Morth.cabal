@@ -12,15 +12,20 @@ library morth-language
     hs-source-dirs: lib
     exposed-modules: MorthLanguage.Driver
     other-modules: MorthLanguage.Com
+                 , MorthLanguage.Lexer
                  , MorthLanguage.Logger
                  , MorthLanguage.Op
                  , MorthLanguage.Parser
                  , MorthLanguage.Sim
+                 , MorthLanguage.Token
     default-language: Haskell2010
+    default-extensions: OverloadedStrings
     build-depends: base >= 4.7 && < 5,
-                   process,
                    bytestring,
-                   shell-escape
+                   formatting,
+                   process,
+                   shell-escape,
+                   text
 
 executable Morth
     hs-source-dirs: app
