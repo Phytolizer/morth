@@ -62,6 +62,11 @@ step (ip, op) =
       OpPush x ->
         [ TL.concat ["    push " <> TL.pack (show x)]
         ]
+      OpDup ->
+        [ "    pop rax"
+        , "    push rax"
+        , "    push rax"
+        ]
       OpPlus ->
         [ "    pop rbx"
         , "    pop rax"

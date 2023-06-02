@@ -28,6 +28,9 @@ iter f ip stack ops
 step :: Handle -> Int -> Op -> Stack -> IO (Int, Stack)
 step h ip op stack = case op of
   OpPush x -> return (ip + 1, x : stack)
+  OpDup -> case stack of
+    [] -> error "stack underflow"
+    x : stack' -> return (ip + 1, x : x : stack')
   OpPlus -> return (ip + 1, bop (+) stack)
   OpMinus -> return (ip + 1, bop (-) stack)
   OpEq -> return (ip + 1, bop (==) stack)
