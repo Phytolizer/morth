@@ -6,6 +6,7 @@ data Op
   | OpPlus
   | OpMinus
   | OpEq
+  | OpGt
   | OpDump
   | OpIf Int
   | OpElse Int

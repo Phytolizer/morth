@@ -87,6 +87,14 @@ step (ip, op) =
         , "    movzx rax, al"
         , "    push rax"
         ]
+      OpGt ->
+        [ "    pop rbx"
+        , "    pop rax"
+        , "    cmp rax, rbx"
+        , "    setg al"
+        , "    movzx rax, al"
+        , "    push rax"
+        ]
       OpDump ->
         [ "    pop rdi"
         , "    call dump"

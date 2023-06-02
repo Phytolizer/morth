@@ -34,6 +34,7 @@ step h ip op stack = case op of
   OpPlus -> return (ip + 1, bop (+) stack)
   OpMinus -> return (ip + 1, bop (-) stack)
   OpEq -> return (ip + 1, bop (==) stack)
+  OpGt -> return (ip + 1, bop (>) stack)
   OpDump -> case stack of
     [] -> error "stack underflow"
     x : stack' -> do

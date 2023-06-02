@@ -16,6 +16,7 @@ parseWord token = case value token of
   "+" -> return OpPlus
   "-" -> return OpMinus
   "=" -> return OpEq
+  ">" -> return OpGt
   "." -> return OpDump
   "if" -> return $ OpIf (-1)
   "else" -> return $ OpElse (-1)
