@@ -25,6 +25,7 @@ library morth-language
     ghc-options: -Wall -Werror=incomplete-patterns
     build-depends: base >= 4.7 && < 5,
                    bytestring,
+                   filepath,
                    formatting,
                    primitive,
                    process,

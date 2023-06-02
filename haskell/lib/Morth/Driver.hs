@@ -1,6 +1,7 @@
 module Morth.Driver (run) where
 
 import Control.Exception (throw)
+import Control.Monad (when)
 import qualified Data.ByteString.Char8 as B
 import Data.Functor ((<&>))
 import Data.Primitive (arrayFromList, unsafeThawArray)
@@ -15,8 +16,15 @@ import Morth.Parser (parseProgram)
 import Morth.Sim (simulateProgram)
 import System.Environment (getProgName)
 import System.Exit (ExitCode (..))
-import System.IO (Handle, hPutStrLn, stderr)
-import System.Process (createProcess, proc, waitForProcess)
+import System.FilePath (isAbsolute, (</>))
+import System.IO (Handle, hPutStrLn, stderr, stdout)
+import System.Process (
+  CreateProcess (std_out),
+  StdStream (UseHandle),
+  createProcess,
+  proc,
+  waitForProcess,
+ )
 import Text.ShellEscape (Bash, Escape (bytes, escape))
 
 usage :: () -> IO ()
@@ -26,9 +34,9 @@ usage () = do
     (hPutStrLn stderr)
     [ "Usage: " ++ progName ++ " <SUBCOMMAND> [ARGS]"
     , "SUBCOMMANDS:"
-    , "  sim <file>             Simulate a program"
-    , "  com <file>             Compile a program"
-    , "  help                   Print this message"
+    , "  sim <file>                   Simulate a program"
+    , "  com [-r] <file>              Compile a program"
+    , "  help                         Print this message"
     ]
 
 check :: ExitCode -> IO ()
@@ -37,8 +45,8 @@ check (ExitFailure n) = do
   logErr ("exit code " % int) n
   throw CommandFailed
 
-runCmd :: String -> [String] -> IO ()
-runCmd cmd args = do
+captureCmd :: Handle -> String -> [String] -> IO ()
+captureCmd hOut cmd args = do
   logCmd text $
     TL.unwords $
       map
@@ -49,9 +57,28 @@ runCmd cmd args = do
             . B.pack
         )
         (cmd : args)
-  (_, _, _, p) <- createProcess (proc cmd args)
+  (_, _, _, p) <- createProcess (proc cmd args){std_out = UseHandle hOut}
   ec <- waitForProcess p
   check ec
+
+runCmd :: String -> [String] -> IO ()
+runCmd = captureCmd stdout
+
+parseComArgs :: [TL.Text] -> IO (Bool, TL.Text)
+parseComArgs args = loop args False
+ where
+  loop [] _ = do
+    usage ()
+    logErr "no file given for 'com'"
+    throw BadUsage
+  loop (arg : args') shouldRun = case arg of
+    "-r" -> loop args' True
+    path -> return (shouldRun, path)
+
+toRelative :: FilePath -> FilePath
+toRelative path
+  | isAbsolute path = path
+  | otherwise = "." </> path
 
 run :: Handle -> [String] -> IO ()
 run hOut args = do
@@ -68,7 +95,8 @@ run hOut args = do
       usage ()
       logErr text "no file given for 'sim'"
       throw BadUsage
-    ["com", path] -> do
+    ("com" : comArgs) -> do
+      (shouldRun, path) <- parseComArgs comArgs
       raw <- TLIO.readFile $ TL.unpack path
       asmText <-
         parseProgram (TL.toStrict path) raw
@@ -83,11 +111,8 @@ run hOut args = do
             TLIO.writeFile asmPath asmText
             runCmd "nasm" ["-felf64", asmPath, "-o", objPath]
             runCmd "ld" ["-o", exePath, objPath]
-            return ()
-    ["com"] -> do
-      usage ()
-      logErr "no file given for 'com'"
-      throw BadUsage
+            when shouldRun $
+              captureCmd hOut (toRelative exePath) []
     ["help"] -> do
       usage ()
     [] -> do
