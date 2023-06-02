@@ -10,7 +10,7 @@ import qualified Data.Text.Lazy.IO as TLIO
 import Formatting (int, string, text, (%))
 import Morth.Blocks (resolveBlocks)
 import Morth.Com (compileProgram)
-import Morth.Errors (BadUsage (BadUsage), CommandFailError (..))
+import Morth.Errors (MorthError (BadUsage, CommandFailed))
 import Morth.Logger (logCmd, logErr, logInfo)
 import Morth.Parser (parseProgram)
 import Morth.Sim (simulateProgram)

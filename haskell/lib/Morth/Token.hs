@@ -1,7 +1,8 @@
 module Morth.Token (Location (..), Token (..), fmtLoc) where
 
 import qualified Data.Text as T
-import Formatting (Format, bformat, int, later, stext, (%))
+import Data.Text.Lazy.Builder (Builder)
+import Formatting (bformat, int, stext, (%))
 
 data Location = Location
   { filePath :: T.Text
@@ -16,11 +17,10 @@ data Token = Token
   }
   deriving (Show)
 
-fmtLoc :: Format r (Location -> r)
-fmtLoc =
-  later $ \loc ->
-    bformat
-      (stext % ":" % int % ":" % int)
-      (filePath loc)
-      (line loc)
-      (column loc)
+fmtLoc :: Location -> Builder
+fmtLoc loc =
+  bformat
+    (stext % ":" % int % ":" % int)
+    (filePath loc)
+    (line loc)
+    (column loc)

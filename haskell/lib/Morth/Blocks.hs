@@ -1,8 +1,11 @@
 module Morth.Blocks (resolveBlocks) where
 
+import Control.Exception (throw)
 import Control.Monad.ST (RealWorld)
 import Data.List (uncons)
 import Data.Primitive (Array, MutableArray, readArray, sizeofMutableArray, unsafeFreezeArray, writeArray)
+import Morth.Errors (MorthError (BlockError))
+import Morth.Logger (logErrLoc)
 import Morth.Op (Op (..), OpCode (..))
 
 resolveBlocks :: MutableArray RealWorld Op -> IO (Array Op)
@@ -11,7 +14,13 @@ resolveBlocks = loop 0 []
   loop :: Int -> [Int] -> MutableArray RealWorld Op -> IO (Array Op)
   loop ip stack ops =
     if ip >= sizeofMutableArray ops
-      then unsafeFreezeArray ops
+      then do
+        case stack of
+          [] -> unsafeFreezeArray ops
+          (top : _) -> do
+            topOp <- readArray ops top
+            logErrLoc (opLocation topOp) "unclosed block"
+            throw BlockError
       else do
         op <- readArray ops ip
         handle ip stack ops op
@@ -27,7 +36,9 @@ resolveBlocks = loop 0 []
             OpIf _ -> do
               writeArray ops ifIp ifOp{opCode = OpIf (ip + 1)}
               loop (ip + 1) (ip : stack') ops
-            _ -> error "expected if"
+            _ -> do
+              logErrLoc (opLocation op) "expected if"
+              throw BlockError
       OpWhile -> loop (ip + 1) (ip : stack) ops
       OpDo _ -> case uncons stack of
         Nothing -> error "stack underflow"
@@ -51,5 +62,7 @@ resolveBlocks = loop 0 []
               writeArray ops ip op{opCode = OpEnd dest}
               writeArray ops blockIp blockOp{opCode = OpDo (ip + 1)}
               loop (ip + 1) stack' ops
-            _ -> error "expected if"
+            _ -> do
+              logErrLoc (opLocation op) "mismatched 'end': expected if, else, or do"
+              throw BlockError
       _ -> loop (ip + 1) stack ops

@@ -4,7 +4,7 @@ import Control.Exception (throw)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import Formatting (string, (%))
-import Morth.Errors (ParseError (..))
+import Morth.Errors (MorthError (ParseError))
 import Morth.Lexer (lexFile)
 import Morth.Logger (logErrLoc)
 import Morth.Op (Op (..), OpCode (..))

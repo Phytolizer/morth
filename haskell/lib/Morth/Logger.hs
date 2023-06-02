@@ -6,8 +6,9 @@ module Morth.Logger (
 ) where
 
 import Data.Text.Lazy.Builder (Builder)
+import qualified Data.Text.Lazy.Builder as TLB
 import qualified Data.Text.Lazy.IO as TLIO
-import Formatting (Format, bformat, formatted, later, prefixed, (%))
+import Formatting (Format, formatted, prefixed)
 import Morth.Token (Location (..), fmtLoc)
 import System.IO (stderr)
 
@@ -26,6 +27,11 @@ logInfo = prefix "[INFO] "
 logErr :: Format (IO ()) a -> a
 logErr = prefix "[ERROR] "
 
-logErrLoc :: Location -> Format Builder (a -> Builder) -> a -> IO ()
-logErrLoc loc x =
-  logErr $ later $ bformat (fmtLoc % ": " % x) loc
+logErrLoc :: Location -> Format (IO ()) a -> a
+logErrLoc loc =
+  prefix
+    ( foldr
+        mappend
+        (TLB.fromText "")
+        ["[ERROR] ", fmtLoc loc, ": "]
+    )

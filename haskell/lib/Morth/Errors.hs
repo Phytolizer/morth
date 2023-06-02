@@ -2,14 +2,11 @@ module Morth.Errors where
 
 import Control.Exception (Exception)
 
-data CommandFailError = CommandFailed deriving (Show)
+data MorthError
+  = CommandFailed
+  | BadUsage
+  | ParseError
+  | BlockError
+  deriving (Show)
 
-instance Exception CommandFailError
-
-data BadUsage = BadUsage deriving (Show)
-
-instance Exception BadUsage
-
-data ParseError = ParseError deriving (Show)
-
-instance Exception ParseError
+instance Exception MorthError
