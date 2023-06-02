@@ -31,4 +31,6 @@ lexFile fp s = loop 0 (TL.lines s)
  where
   loop :: Int -> [TL.Text] -> [Token]
   loop _ [] = []
-  loop ln (l : ls) = lexLine fp ln l ++ loop (ln + 1) ls
+  loop ln (l : ls) =
+    lexLine fp ln (head $ TL.splitOn "//" l)
+      ++ loop (ln + 1) ls
