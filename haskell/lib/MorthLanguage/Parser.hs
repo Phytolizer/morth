@@ -18,6 +18,7 @@ parseWord :: Token -> IO Op
 parseWord token = case value token of
   "+" -> return OpPlus
   "-" -> return OpMinus
+  "=" -> return OpEq
   "." -> return OpDump
   nt -> do
     n <- case readEither (T.unpack nt) of

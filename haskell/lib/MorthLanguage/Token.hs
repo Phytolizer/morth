@@ -1,9 +1,6 @@
 module MorthLanguage.Token (Location (..), Token (..), fmtLoc) where
 
 import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
-import Data.Text.Lazy.Builder (Builder)
-import qualified Data.Text.Lazy.Builder as TLB
 import Formatting (Format, bformat, int, later, stext, (%))
 
 data Location = Location

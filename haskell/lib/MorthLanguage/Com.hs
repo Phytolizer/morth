@@ -67,6 +67,14 @@ step op =
         , "    sub rax, rbx"
         , "    push rax"
         ]
+      OpEq ->
+        [ "    pop rbx"
+        , "    pop rax"
+        , "    cmp rax, rbx"
+        , "    sete al"
+        , "    movzx rax, al"
+        , "    push rax"
+        ]
       OpDump ->
         [ "    pop rdi"
         , "    call dump"

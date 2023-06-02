@@ -1,13 +1,12 @@
 module MorthLanguage.Lexer (lexFile) where
 
 import Data.Function ((&))
-import Data.List (findIndex)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import MorthLanguage.Token (Location (..), Token (..))
 
 lexLine :: T.Text -> Int -> TL.Text -> [Token]
-lexLine fp ln s = loop 0 s
+lexLine fp ln = loop 0
  where
   loop :: Int -> TL.Text -> [Token]
   loop col s =

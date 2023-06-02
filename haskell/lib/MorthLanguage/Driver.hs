@@ -3,9 +3,8 @@ module MorthLanguage.Driver (CommandFailError (..), BadUsage (..), run) where
 import Control.Exception (Exception, throw)
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Text.Lazy as TL
-import qualified Data.Text.Lazy.Builder as TLB
 import qualified Data.Text.Lazy.IO as TLIO
-import Formatting (int, later, now, string, text, (%))
+import Formatting (int, string, text, (%))
 import MorthLanguage.Com (compileProgram)
 import MorthLanguage.Logger (logCmd, logErr, logInfo)
 import MorthLanguage.Parser (parseProgram)

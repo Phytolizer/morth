@@ -5,15 +5,11 @@ module MorthLanguage.Logger (
   logErrLoc,
 ) where
 
-import Control.Monad.IO.Class (MonadIO)
-import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
 import Data.Text.Lazy.Builder (Builder)
-import Data.Text.Lazy.IO (hPutStrLn)
 import qualified Data.Text.Lazy.IO as TLIO
-import Formatting (Format (runFormat), bformat, formatted, hprintLn, int, later, prefixed, text, (%))
+import Formatting (Format, bformat, formatted, later, prefixed, (%))
 import MorthLanguage.Token (Location (..), fmtLoc)
-import System.IO (Handle, stderr)
+import System.IO (stderr)
 
 out :: Format (IO ()) a -> a
 out = formatted (TLIO.hPutStrLn stderr)
