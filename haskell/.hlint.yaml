@@ -1,0 +1,299 @@
+# HLint configuration file
+# https://github.com/ndmitchell/hlint
+##########################
+
+# This file contains a template configuration file, which is typically
+# placed as .hlint.yaml in the root of your project
+
+# All built-in hints
+
+# All LHS/RHS hints
+- warn: {name: "Alternative law, left identity"}
+- warn: {name: "Alternative law, right identity"}
+- warn: {name: "Avoid reverse"}
+- warn: {name: "Drop on a non-positive"}
+- warn: {name: "Evaluate"}
+- warn: {name: "Functor law"}
+- warn: {name: "Fuse concatMap/map"}
+- warn: {name: "Fuse foldMap/fmap"}
+- warn: {name: "Fuse foldMap/map"}
+- warn: {name: "Fuse foldr/map"}
+- warn: {name: "Fuse mapM/map"}
+- warn: {name: "Fuse mapM_/map"}
+- warn: {name: "Fuse mapMaybe/map"}
+- warn: {name: "Fuse on/on"}
+- warn: {name: "Fuse traverse/map"}
+- warn: {name: "Fuse traverse_/map"}
+- warn: {name: "Hoist not"}
+- warn: {name: "Length always non-negative"}
+- warn: {name: "Monad law, left identity"}
+- warn: {name: "Monad law, right identity"}
+- warn: {name: "Monoid law, left identity"}
+- warn: {name: "Monoid law, right identity"}
+- warn: {name: "Move flip"}
+- warn: {name: "Move nub out"}
+- warn: {name: "Move nubOrd out"}
+- warn: {name: "Move reverse out"}
+- warn: {name: "Move sort out"}
+- warn: {name: "Redundant $"}
+- warn: {name: "Redundant $!"}
+- warn: {name: "Redundant &"}
+- warn: {name: "Redundant /="}
+- warn: {name: "Redundant <$>"}
+- warn: {name: "Redundant <&>"}
+- warn: {name: "Redundant <*"}
+- warn: {name: "Redundant =="}
+- warn: {name: "Redundant >>"}
+- warn: {name: "Redundant ^."}
+- warn: {name: "Redundant at"}
+- warn: {name: "Redundant bimap"}
+- warn: {name: "Redundant castPtr"}
+- warn: {name: "Redundant compare"}
+- warn: {name: "Redundant curry"}
+- warn: {name: "Redundant evaluate"}
+- warn: {name: "Redundant first"}
+- warn: {name: "Redundant flip"}
+- warn: {name: "Redundant fmap"}
+- warn: {name: "Redundant fromInteger"}
+- warn: {name: "Redundant fromIntegral"}
+- warn: {name: "Redundant id"}
+- warn: {name: "Redundant if"}
+- warn: {name: "Redundant list comprehension"}
+- warn: {name: "Redundant map"}
+- warn: {name: "Redundant maybe"}
+- warn: {name: "Redundant multi-way if"}
+- warn: {name: "Redundant negate"}
+- warn: {name: "Redundant not"}
+- warn: {name: "Redundant pair"}
+- warn: {name: "Redundant pure"}
+- warn: {name: "Redundant return"}
+- warn: {name: "Redundant second"}
+- warn: {name: "Redundant seq"}
+- warn: {name: "Redundant take"}
+- warn: {name: "Redundant uncurry"}
+- warn: {name: "Redundant void"}
+- warn: {name: "Replace case with fromMaybe"}
+- warn: {name: "Replace case with maybe"}
+- warn: {name: "Take on a non-positive"}
+- warn: {name: "Traversable law"}
+- warn: {name: "Use !!"}
+- warn: {name: "Use $"}
+- warn: {name: "Use $>"}
+- warn: {name: "Use &&"}
+- warn: {name: "Use &&&"}
+- warn: {name: "Use (,)"}
+- warn: {name: "Use (,,)"}
+- warn: {name: "Use ++"}
+- warn: {name: "Use -"}
+- warn: {name: "Use /="}
+- warn: {name: "Use 1"}
+- warn: {name: "Use :"}
+- warn: {name: "Use <"}
+- warn: {name: "Use <$"}
+- warn: {name: "Use <$>"}
+- warn: {name: "Use <&>"}
+- warn: {name: "Use <**>"}
+- warn: {name: "Use <="}
+- warn: {name: "Use <=<"}
+- warn: {name: "Use <|>"}
+- warn: {name: "Use =<<"}
+- warn: {name: "Use =="}
+- warn: {name: "Use >"}
+- warn: {name: "Use >="}
+- warn: {name: "Use >=>"}
+- warn: {name: "Use >>"}
+- warn: {name: "Use >>="}
+- warn: {name: "Use ?~"}
+- warn: {name: "Use False"}
+- warn: {name: "Use Just"}
+- warn: {name: "Use True"}
+- warn: {name: "Use ^?!"}
+- warn: {name: "Use all"}
+- warn: {name: "Use and"}
+- warn: {name: "Use any"}
+- warn: {name: "Use ap"}
+- warn: {name: "Use appendFile"}
+- warn: {name: "Use asks"}
+- warn: {name: "Use asum"}
+- warn: {name: "Use bimap"}
+- warn: {name: "Use bracket_"}
+- warn: {name: "Use break"}
+- warn: {name: "Use catMaybes"}
+- warn: {name: "Use catch"}
+- warn: {name: "Use catchJust"}
+- warn: {name: "Use concat"}
+- warn: {name: "Use concatMap"}
+- warn: {name: "Use const"}
+- warn: {name: "Use curry"}
+- warn: {name: "Use delete"}
+- warn: {name: "Use drop"}
+- warn: {name: "Use dropWhile"}
+- warn: {name: "Use either"}
+- warn: {name: "Use elem"}
+- warn: {name: "Use elemIndex"}
+- warn: {name: "Use elemIndices"}
+- warn: {name: "Use empty"}
+- warn: {name: "Use error"}
+- warn: {name: "Use evalState"}
+- warn: {name: "Use even"}
+- warn: {name: "Use execState"}
+- warn: {name: "Use exitSuccess"}
+- warn: {name: "Use find"}
+- warn: {name: "Use first"}
+- warn: {name: "Use floor"}
+- warn: {name: "Use fmap"}
+- warn: {name: "Use fold"}
+- warn: {name: "Use foldMap"}
+- warn: {name: "Use foldl"}
+- warn: {name: "Use foldl1"}
+- warn: {name: "Use foldr"}
+- warn: {name: "Use foldr1"}
+- warn: {name: "Use for"}
+- warn: {name: "Use forM"}
+- warn: {name: "Use forM_"}
+- warn: {name: "Use for_"}
+- warn: {name: "Use fromLeft"}
+- warn: {name: "Use fromMaybe"}
+- warn: {name: "Use fromRight"}
+- warn: {name: "Use fst"}
+- warn: {name: "Use getChar"}
+- warn: {name: "Use getContents"}
+- warn: {name: "Use getLine"}
+- warn: {name: "Use gets"}
+- warn: {name: "Use group"}
+- warn: {name: "Use hPrint"}
+- warn: {name: "Use hReady"}
+- warn: {name: "Use handle"}
+- warn: {name: "Use handleJust"}
+- warn: {name: "Use head"}
+- warn: {name: "Use id"}
+- warn: {name: "Use if"}
+- warn: {name: "Use infix"}
+- warn: {name: "Use init"}
+- warn: {name: "Use insert"}
+- warn: {name: "Use intercalate"}
+- warn: {name: "Use intersect"}
+- warn: {name: "Use isAlpha"}
+- warn: {name: "Use isAsciiLower"}
+- warn: {name: "Use isAsciiUpper"}
+- warn: {name: "Use isDigit"}
+- warn: {name: "Use isEOF"}
+- warn: {name: "Use isJust"}
+- warn: {name: "Use isNothing"}
+- warn: {name: "Use isOctDigit"}
+- warn: {name: "Use isSuffixOf"}
+- warn: {name: "Use iterate"}
+- warn: {name: "Use ix"}
+- warn: {name: "Use join"}
+- warn: {name: "Use last"}
+- warn: {name: "Use lefts"}
+- warn: {name: "Use list comprehension"}
+- warn: {name: "Use logBase"}
+- warn: {name: "Use map"}
+- warn: {name: "Use map once"}
+- warn: {name: "Use mapAndUnzipM"}
+- warn: {name: "Use mapM"}
+- warn: {name: "Use mapM_"}
+- warn: {name: "Use mapMaybe"}
+- warn: {name: "Use max"}
+- warn: {name: "Use maximum"}
+- warn: {name: "Use maximumBy"}
+- warn: {name: "Use maybe"}
+- warn: {name: "Use maybeToList"}
+- warn: {name: "Use min"}
+- warn: {name: "Use minimum"}
+- warn: {name: "Use minimumBy"}
+- warn: {name: "Use mkWeakPair"}
+- warn: {name: "Use mkWeakPtr"}
+- warn: {name: "Use msum"}
+- warn: {name: "Use negate"}
+- warn: {name: "Use nestedAtomically"}
+- warn: {name: "Use newEmptyTMVarIO"}
+- warn: {name: "Use newTMVarIO"}
+- warn: {name: "Use newTVarIO"}
+- warn: {name: "Use nonTermination"}
+- warn: {name: "Use notElem"}
+- warn: {name: "Use nub"}
+- warn: {name: "Use null"}
+- warn: {name: "Use odd"}
+- warn: {name: "Use oneof"}
+- warn: {name: "Use optional"}
+- warn: {name: "Use or"}
+- warn: {name: "Use print"}
+- warn: {name: "Use product"}
+- warn: {name: "Use putChar"}
+- warn: {name: "Use putStr"}
+- warn: {name: "Use putStrLn"}
+- warn: {name: "Use readTVarIO"}
+- warn: {name: "Use reads"}
+- warn: {name: "Use repeat"}
+- warn: {name: "Use replicate"}
+- warn: {name: "Use replicateM"}
+- warn: {name: "Use replicateM_"}
+- warn: {name: "Use return"}
+- warn: {name: "Use rights"}
+- warn: {name: "Use second"}
+- warn: {name: "Use sequence"}
+- warn: {name: "Use sequenceA"}
+- warn: {name: "Use sequenceA_"}
+- warn: {name: "Use sequence_"}
+- warn: {name: "Use show"}
+- warn: {name: "Use showHex"}
+- warn: {name: "Use showOct"}
+- warn: {name: "Use shows"}
+- warn: {name: "Use snd"}
+- warn: {name: "Use sort"}
+- warn: {name: "Use sortOn"}
+- warn: {name: "Use span"}
+- warn: {name: "Use splitAt"}
+- warn: {name: "Use sqrt"}
+- warn: {name: "Use sum"}
+- warn: {name: "Use tail"}
+- warn: {name: "Use take"}
+- warn: {name: "Use takeWhile"}
+- warn: {name: "Use tan"}
+- warn: {name: "Use traverse"}
+- warn: {name: "Use traverse_"}
+- warn: {name: "Use tuple-section"}
+- warn: {name: "Use typeRep"}
+- warn: {name: "Use uncurry"}
+- warn: {name: "Use union"}
+- warn: {name: "Use unless"}
+- warn: {name: "Use unlines"}
+- warn: {name: "Use unwords"}
+- warn: {name: "Use unzip"}
+- warn: {name: "Use view"}
+- warn: {name: "Use void"}
+- warn: {name: "Use when"}
+- warn: {name: "Use withBinaryFile"}
+- warn: {name: "Use withFile"}
+- warn: {name: "Use writeFile"}
+- warn: {name: "Use writeIORef"}
+- warn: {name: "Use writeList2Chan"}
+- warn: {name: "Use zip"}
+- warn: {name: "Use zip3"}
+- warn: {name: "Use zipWith"}
+- warn: {name: "Use zipWithM"}
+- warn: {name: "Use zipWithM_"}
+- warn: {name: "Use ||"}
+- warn: {name: "Using all on tuple"}
+- warn: {name: "Using and on tuple"}
+- warn: {name: "Using any on tuple"}
+- warn: {name: "Using concat on tuple"}
+- warn: {name: "Using elem on tuple"}
+- warn: {name: "Using fold on tuple"}
+- warn: {name: "Using foldMap on tuple"}
+- warn: {name: "Using foldl on tuple"}
+- warn: {name: "Using foldl' on tuple"}
+- warn: {name: "Using foldl1 on tuple"}
+- warn: {name: "Using foldr on tuple"}
+- warn: {name: "Using foldr' on tuple"}
+- warn: {name: "Using foldr1 on tuple"}
+- warn: {name: "Using length on tuple"}
+- warn: {name: "Using maximum on tuple"}
+- warn: {name: "Using minimum on tuple"}
+- warn: {name: "Using null on tuple"}
+- warn: {name: "Using or on tuple"}
+- warn: {name: "Using product on tuple"}
+- warn: {name: "Using sum on tuple"}
+- warn: {name: "Using toList on tuple"}
