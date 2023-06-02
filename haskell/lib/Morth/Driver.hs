@@ -13,7 +13,7 @@ import Morth.Errors (BadUsage (BadUsage), CommandFailError (..))
 import Morth.Logger (logCmd, logErr, logInfo)
 import Morth.Parser (parseProgram)
 import Morth.Sim (simulateProgram)
-import System.Environment (getArgs, getProgName)
+import System.Environment (getProgName)
 import System.Exit (ExitCode (..))
 import System.IO (Handle, hPutStrLn, stderr)
 import System.Process (createProcess, proc, waitForProcess)
@@ -53,9 +53,8 @@ runCmd cmd args = do
   ec <- waitForProcess p
   check ec
 
-run :: Handle -> IO ()
-run hOut = do
-  args <- getArgs
+run :: Handle -> [String] -> IO ()
+run hOut args = do
   case map TL.pack args of
     ["sim", path] -> do
       raw <- TLIO.readFile $ TL.unpack path
