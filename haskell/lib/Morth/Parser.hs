@@ -7,30 +7,32 @@ import Formatting (string, (%))
 import Morth.Errors (ParseError (..))
 import Morth.Lexer (lexFile)
 import Morth.Logger (logErrLoc)
-import Morth.Op (Op (..))
+import Morth.Op (Op (..), OpCode (..))
 import Morth.Token (Token (..))
 import Text.Read (readEither)
 
 parseWord :: Token -> IO Op
-parseWord token = case value token of
-  "+" -> return OpPlus
-  "-" -> return OpMinus
-  "=" -> return OpEq
-  ">" -> return OpGt
-  "." -> return OpDump
-  "if" -> return $ OpIf (-1)
-  "else" -> return $ OpElse (-1)
-  "while" -> return OpWhile
-  "do" -> return $ OpDo (-1)
-  "end" -> return $ OpEnd (-1)
-  "dup" -> return OpDup
-  nt -> do
-    n <- case readEither (T.unpack nt) of
-      Right n -> return n
-      Left err -> do
-        logErrLoc (location token) ("Invalid number: " % string) err
-        throw ParseError
-    return $ OpPush n
+parseWord token =
+  let loc = location token
+   in case value token of
+        "+" -> return $ Op OpPlus loc
+        "-" -> return $ Op OpMinus loc
+        "=" -> return $ Op OpEq loc
+        ">" -> return $ Op OpGt loc
+        "." -> return $ Op OpDump loc
+        "if" -> return $ Op (OpIf (-1)) loc
+        "else" -> return $ Op (OpElse (-1)) loc
+        "while" -> return $ Op OpWhile loc
+        "do" -> return $ Op (OpDo (-1)) loc
+        "end" -> return $ Op (OpEnd (-1)) loc
+        "dup" -> return $ Op OpDup loc
+        ntext -> do
+          n <- case readEither (T.unpack ntext) of
+            Right n -> return n
+            Left err -> do
+              logErrLoc loc ("Invalid number: " % string) err
+              throw ParseError
+          return $ Op (OpPush n) loc
 
 parseProgram :: T.Text -> TL.Text -> IO [Op]
 parseProgram fp s = mapM parseWord $ lexFile fp s

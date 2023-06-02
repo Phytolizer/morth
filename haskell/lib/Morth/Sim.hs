@@ -1,7 +1,7 @@
 module Morth.Sim (simulateProgram) where
 
 import Data.Primitive (Array, indexArray, sizeofArray)
-import Morth.Op (Op (..))
+import Morth.Op (Op (..), OpCode (..))
 import System.IO (Handle, hPrint)
 
 type Stack = [Int]
@@ -26,7 +26,7 @@ iter f ip stack ops
       iter f ip' stack' ops
 
 step :: Handle -> Int -> Op -> Stack -> IO (Int, Stack)
-step h ip op stack = case op of
+step h ip op stack = case opCode op of
   OpPush x -> return (ip + 1, x : stack)
   OpDup -> case stack of
     [] -> error "stack underflow"

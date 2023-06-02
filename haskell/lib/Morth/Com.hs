@@ -3,7 +3,7 @@ module Morth.Com (compileProgram) where
 import Data.Foldable (toList)
 import Data.Primitive (Array)
 import qualified Data.Text.Lazy as TL
-import Morth.Op (Op (..))
+import Morth.Op (Op (..), OpCode (..))
 
 header :: [TL.Text]
 header =
@@ -56,9 +56,9 @@ footer len =
 step :: (Int, Op) -> [TL.Text]
 step (ip, op) =
   [ ".L" <> TL.pack (show ip) <> ":"
-  , "    ;; -- " <> TL.pack (show op) <> " --"
+  , "    ;; -- " <> TL.pack (show $ opCode op) <> " --"
   ]
-    <> case op of
+    <> case opCode op of
       OpPush x ->
         [ TL.concat ["    push " <> TL.pack (show x)]
         ]

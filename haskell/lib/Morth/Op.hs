@@ -1,6 +1,8 @@
-module Morth.Op (Op (..)) where
+module Morth.Op (OpCode (..), Op (..)) where
 
-data Op
+import Morth.Token (Location)
+
+data OpCode
   = OpPush Int
   | OpDup
   | OpPlus
@@ -14,3 +16,8 @@ data Op
   | OpDo Int
   | OpEnd Int
   deriving (Eq, Show)
+
+data Op = Op
+  { opCode :: OpCode
+  , opLocation :: Location
+  }
