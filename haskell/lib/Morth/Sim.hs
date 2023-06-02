@@ -52,7 +52,19 @@ step h ip op stack = case op of
         )
   OpElse (-1) -> error "invalid jump target"
   OpElse dest -> return (dest, stack)
-  OpEnd -> return (ip + 1, stack)
+  OpWhile -> return (ip + 1, stack)
+  OpDo (-1) -> error "invalid jump target"
+  OpDo dest -> case stack of
+    [] -> error "stack underflow"
+    x : stack' ->
+      return
+        ( if x == 0
+            then dest
+            else ip + 1
+        , stack'
+        )
+  OpEnd (-1) -> error "invalid jump target"
+  OpEnd dest -> return (dest, stack)
 
 loop :: Handle -> Stack -> Array Op -> IO ()
 loop h = iter (step h) 0

@@ -10,5 +10,7 @@ data Op
   | OpDump
   | OpIf Int
   | OpElse Int
-  | OpEnd
+  | OpWhile
+  | OpDo Int
+  | OpEnd Int
   deriving (Eq, Show)

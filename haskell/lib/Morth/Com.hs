@@ -109,7 +109,17 @@ step (ip, op) =
       OpElse dest ->
         [ "    jmp .L" <> TL.pack (show dest)
         ]
-      OpEnd -> []
+      OpWhile -> []
+      OpDo (-1) -> error "invalid jump target"
+      OpDo dest ->
+        [ "    pop rax"
+        , "    cmp rax, 0"
+        , "    je .L" <> TL.pack (show dest)
+        ]
+      OpEnd (-1) -> error "invalid jump target"
+      OpEnd dest ->
+        [ "    jmp .L" <> TL.pack (show dest) | dest /= (ip + 1)
+        ]
 
 compileProgram :: Array Op -> TL.Text
 compileProgram ops =
