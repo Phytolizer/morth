@@ -18,6 +18,7 @@ parseWord token = case value token of
   "=" -> return OpEq
   "." -> return OpDump
   "if" -> return $ OpIf (-1)
+  "else" -> return $ OpElse (-1)
   "end" -> return OpEnd
   nt -> do
     n <- case readEither (T.unpack nt) of

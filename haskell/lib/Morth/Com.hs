@@ -59,7 +59,9 @@ step (ip, op) =
   , "    ;; -- " <> TL.pack (show op) <> " --"
   ]
     <> case op of
-      OpPush x -> [TL.concat ["    push " <> TL.pack (show x)]]
+      OpPush x ->
+        [ TL.concat ["    push " <> TL.pack (show x)]
+        ]
       OpPlus ->
         [ "    pop rbx"
         , "    pop rax"
@@ -89,6 +91,10 @@ step (ip, op) =
         [ "    pop rax"
         , "    cmp rax, 0"
         , "    je .L" <> TL.pack (show dest)
+        ]
+      OpElse (-1) -> error "invalid jump target"
+      OpElse dest ->
+        [ "    jmp .L" <> TL.pack (show dest)
         ]
       OpEnd -> []
 

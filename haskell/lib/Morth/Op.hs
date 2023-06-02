@@ -7,5 +7,6 @@ data Op
   | OpEq
   | OpDump
   | OpIf Int
+  | OpElse Int
   | OpEnd
   deriving (Eq, Show)

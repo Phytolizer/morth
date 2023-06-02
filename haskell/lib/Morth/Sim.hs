@@ -46,6 +46,8 @@ step h ip op stack = case op of
             else ip + 1
         , stack'
         )
+  OpElse (-1) -> error "invalid jump target"
+  OpElse dest -> return (dest, stack)
   OpEnd -> return (ip + 1, stack)
 
 loop :: Handle -> Stack -> Array Op -> IO ()
