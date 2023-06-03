@@ -3,6 +3,10 @@ name: .NET
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'cs/**'
+      - 'fs/**'
+      - '.github/workflows/dotnet.yml'
   pull_request:
     branches: [ main ]
 

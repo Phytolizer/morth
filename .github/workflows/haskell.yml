@@ -3,8 +3,14 @@ name: Haskell
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'haskell/**'
+      - '.github/workflows/haskell.yml'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'haskell/**'
+      - '.github/workflows/haskell.yml'
 
 permissions:
     contents: read

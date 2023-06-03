@@ -3,17 +3,23 @@ name: c-pure
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'c-pure/**'
+      - '.github/workflows/c-pure.yml'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'c-pure/**'
+      - '.github/workflows/c-pure.yml'
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
-    
+
     defaults:
       run:
-       working-directory: c-pure 
+       working-directory: c-pure
 
     steps:
     - uses: actions/checkout@v3

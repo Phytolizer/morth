@@ -3,6 +3,11 @@ name: CMake
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'c++/**'
+      - 'c/**'
+      - 'c-to-c/**'
+      - '.github/workflows/cpp.yml'
   pull_request:
     branches: [ main ]
 
