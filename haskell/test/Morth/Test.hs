@@ -11,8 +11,8 @@ import Test.HUnit (
 testFile :: FilePath -> Test
 testFile path =
   let path' = path
-   in path' ~:
-        do
+   in path'
+        ~: do
           simOutput <- capture_ $ run ["sim", path']
           comOutput <- capture_ $ run ["com", "-r", path']
           simOutput @=? comOutput
