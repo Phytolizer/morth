@@ -20,7 +20,7 @@ parseWord token =
         "-" -> return $ Op OpMinus loc
         "=" -> return $ Op OpEq loc
         ">" -> return $ Op OpGt loc
-        "." -> return $ Op OpDump loc
+        "dump" -> return $ Op OpDump loc
         "if" -> return $ Op (OpIf (-1)) loc
         "else" -> return $ Op (OpElse (-1)) loc
         "while" -> return $ Op OpWhile loc
