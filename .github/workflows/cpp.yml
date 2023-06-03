@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'c++/**'
+      - 'c\+\+/**'
       - 'c/**'
       - 'c-to-c/**'
       - '.github/workflows/cpp.yml'
