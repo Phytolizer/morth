@@ -91,8 +91,8 @@ toRelative path
   | isAbsolute path = path
   | otherwise = "." </> path
 
-run :: Handle -> [String] -> IO ()
-run hOut args = do
+run :: [String] -> IO ()
+run args = do
   case map TL.pack args of
     ["sim", path] -> do
       raw <- TLIO.readFile $ TL.unpack path
@@ -101,7 +101,7 @@ run hOut args = do
           >>= unsafeThawArray . arrayFromList
           >>= resolveBlocks
 
-      simulateProgram hOut program
+      simulateProgram stdout program
     ["sim"] -> do
       usage ()
       logErr text "no file given for 'sim'"
@@ -129,7 +129,7 @@ run hOut args = do
             runCmd "nasm" ["-felf64", asmPath, "-o", objPath]
             runCmd "ld" ["-o", exePath, objPath]
             when shouldRun $
-              captureCmd hOut (toRelative exePath) []
+              captureCmd stdout (toRelative exePath) []
     ["help"] -> do
       usage ()
     [] -> do

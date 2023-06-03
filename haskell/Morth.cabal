@@ -36,15 +36,20 @@ executable Morth
     hs-source-dirs: app
     main-is: Morth.hs
     default-language: Haskell2010
+    ghc-options: -Wall -Werror=incomplete-patterns
     build-depends: morth-language,
                    base >= 4.7 && < 5
 
 test-suite morth-test
-    type: detailed-0.9
+    type: exitcode-stdio-1.0
     hs-source-dirs: test
-    test-module: Morth.Test
+    main-is: Main.hs
+    other-modules: Morth.Test
     default-language: Haskell2010
+    ghc-options: -Wall -Werror=incomplete-patterns
     build-depends: morth-language,
                    base >= 4.7 && < 5,
+                   directory,
+                   filepath,
                    HUnit,
-                   Cabal >= 3.8 && < 4
+                   silently
