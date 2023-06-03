@@ -7,6 +7,11 @@ author: Kyle Coffey
 maintainer: me@phytolizer.dev
 copyright: 2022 Kyle Coffey
 build-type: Simple
+category: development
+synopsis: A simple, stack-based, concatenative programming language.
+description:
+    A simple, stack-based, concatenative programming language.
+    A reinvention of Tsoding's Porth language in Haskell.
 
 library morth-language
     hs-source-dirs: lib
@@ -24,13 +29,13 @@ library morth-language
     default-extensions: OverloadedStrings
     ghc-options: -Wall -Werror=incomplete-patterns
     build-depends: base >= 4.7 && < 5,
-                   bytestring,
-                   filepath,
-                   formatting,
-                   primitive,
-                   process,
-                   shell-escape,
-                   text
+                   bytestring >= 0.11.4 && < 0.12,
+                   filepath >= 1.4.2 && < 1.5,
+                   formatting >= 7.2.0 && < 7.3,
+                   primitive >= 0.8.0 && < 0.9,
+                   process >= 1.6.16 && < 1.7,
+                   shell-escape >= 0.2.0 && < 0.3,
+                   text >= 2.0.2 && < 2.1
 
 executable Morth
     hs-source-dirs: app
@@ -49,7 +54,7 @@ test-suite morth-test
     ghc-options: -Wall -Werror=incomplete-patterns
     build-depends: morth-language,
                    base >= 4.7 && < 5,
-                   directory,
-                   filepath,
-                   HUnit,
-                   silently
+                   directory >= 1.3.8 && < 1.4,
+                   filepath >= 1.4.2 && < 1.5,
+                   HUnit >= 1.6.2 && < 1.7,
+                   silently >= 1.2.5 && < 1.3

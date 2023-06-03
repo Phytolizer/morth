@@ -3,3 +3,4 @@
 *.o
 *.asm
 output
+cabal.project.local
