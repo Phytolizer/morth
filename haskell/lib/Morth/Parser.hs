@@ -15,6 +15,7 @@ parseWord :: Token -> IO Op
 parseWord token =
   let loc = location token
    in case value token of
+        "mem" -> return $ Op OpMem loc
         "+" -> return $ Op OpPlus loc
         "-" -> return $ Op OpMinus loc
         "=" -> return $ Op OpEq loc
