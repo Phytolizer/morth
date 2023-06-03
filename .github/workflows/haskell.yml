@@ -70,7 +70,7 @@ jobs:
 
     - name: Save cache
       uses: actions/cache/save@v3
-      if: steps.cache.outputs.cache-primary-key != steps.cache.outputs.cache-matched-key
+      if: steps.cache.outputs.cache-hit != 'true'
       with:
         path: ${{ steps.setup.outputs.cabal-store }}
         key: ${{ steps.cache.outputs.cache-primary-key }}
