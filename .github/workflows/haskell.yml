@@ -16,6 +16,23 @@ permissions:
     contents: read
 
 jobs:
+  lint:
+    defaults:
+      run:
+        working-directory: haskell
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up HLint
+      uses: haskell/actions/hlint-setup@v2
+
+    - name: Run HLint
+      uses: haskell/actions/hlint-run@v2
+      with:
+        path: '[app/, lib/, test/]'
+        fail-on: warning
+
   build:
     runs-on: ubuntu-latest
 
