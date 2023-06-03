@@ -5,6 +5,7 @@ import Morth.Token (Location)
 data OpCode
   = OpPush Int
   | OpDup
+  | OpMem
   | OpPlus
   | OpMinus
   | OpEq

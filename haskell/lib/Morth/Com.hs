@@ -5,6 +5,9 @@ import Data.Primitive (Array)
 import qualified Data.Text.Lazy as TL
 import Morth.Op (Op (..), OpCode (..))
 
+indent :: TL.Text -> TL.Text
+indent line = TL.concat ["    ", line]
+
 header :: [TL.Text]
 header =
   [ "segment .text"
@@ -53,73 +56,81 @@ footer len =
   , "    syscall"
   ]
 
-step :: (Int, Op) -> [TL.Text]
-step (ip, op) =
+instHeader :: Int -> Op -> [TL.Text]
+instHeader ip op =
   [ ".L" <> TL.pack (show ip) <> ":"
-  , "    ;; -- " <> TL.pack (show $ opCode op) <> " --"
+  , indent $ ";; -- " <> TL.pack (show $ opCode op) <> " --"
   ]
-    <> case opCode op of
-      OpPush x ->
-        [ TL.concat ["    push " <> TL.pack (show x)]
-        ]
-      OpDup ->
-        [ "    pop rax"
-        , "    push rax"
-        , "    push rax"
-        ]
-      OpPlus ->
-        [ "    pop rbx"
-        , "    pop rax"
-        , "    add rax, rbx"
-        , "    push rax"
-        ]
-      OpMinus ->
-        [ "    pop rbx"
-        , "    pop rax"
-        , "    sub rax, rbx"
-        , "    push rax"
-        ]
-      OpEq ->
-        [ "    pop rbx"
-        , "    pop rax"
-        , "    cmp rax, rbx"
-        , "    sete al"
-        , "    movzx rax, al"
-        , "    push rax"
-        ]
-      OpGt ->
-        [ "    pop rbx"
-        , "    pop rax"
-        , "    cmp rax, rbx"
-        , "    setg al"
-        , "    movzx rax, al"
-        , "    push rax"
-        ]
-      OpDump ->
-        [ "    pop rdi"
-        , "    call dump"
-        ]
-      OpIf (-1) -> error "invalid jump target"
-      OpIf dest ->
-        [ "    pop rax"
-        , "    cmp rax, 0"
-        , "    je .L" <> TL.pack (show dest)
-        ]
-      OpElse (-1) -> error "invalid jump target"
-      OpElse dest ->
-        [ "    jmp .L" <> TL.pack (show dest)
-        ]
-      OpWhile -> []
-      OpDo (-1) -> error "invalid jump target"
-      OpDo dest ->
-        [ "    pop rax"
-        , "    cmp rax, 0"
-        , "    je .L" <> TL.pack (show dest)
-        ]
-      OpEnd (-1) -> error "invalid jump target"
-      OpEnd dest ->
-        [ "    jmp .L" <> TL.pack (show dest) | dest /= (ip + 1)
-        ]
+
+genInst :: Int -> Op -> [TL.Text]
+genInst ip op = case opCode op of
+  OpPush x ->
+    [ TL.concat ["push " <> TL.pack (show x)]
+    ]
+  OpDup ->
+    [ "pop rax"
+    , "push rax"
+    , "push rax"
+    ]
+  OpMem ->
+    [ "push mem"
+    ]
+  OpPlus ->
+    [ "pop rbx"
+    , "pop rax"
+    , "add rax, rbx"
+    , "push rax"
+    ]
+  OpMinus ->
+    [ "pop rbx"
+    , "pop rax"
+    , "sub rax, rbx"
+    , "push rax"
+    ]
+  OpEq ->
+    [ "pop rbx"
+    , "pop rax"
+    , "cmp rax, rbx"
+    , "sete al"
+    , "movzx rax, al"
+    , "push rax"
+    ]
+  OpGt ->
+    [ "pop rbx"
+    , "pop rax"
+    , "cmp rax, rbx"
+    , "setg al"
+    , "movzx rax, al"
+    , "push rax"
+    ]
+  OpDump ->
+    [ "pop rdi"
+    , "call dump"
+    ]
+  OpIf (-1) -> error "invalid jump target"
+  OpIf dest ->
+    [ "pop rax"
+    , "cmp rax, 0"
+    , "je .L" <> TL.pack (show dest)
+    ]
+  OpElse (-1) -> error "invalid jump target"
+  OpElse dest ->
+    [ "jmp .L" <> TL.pack (show dest)
+    ]
+  OpWhile -> []
+  OpDo (-1) -> error "invalid jump target"
+  OpDo dest ->
+    [ "pop rax"
+    , "cmp rax, 0"
+    , "je .L" <> TL.pack (show dest)
+    ]
+  OpEnd (-1) -> error "invalid jump target"
+  OpEnd dest ->
+    [ "jmp .L" <> TL.pack (show dest) | dest /= (ip + 1)
+    ]
+
+step :: (Int, Op) -> [TL.Text]
+step (ip, op) = instHeader ip op <> map indent (genInst ip op)
 
 compileProgram :: Array Op -> TL.Text
 compileProgram ops =

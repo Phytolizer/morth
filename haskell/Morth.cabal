@@ -19,6 +19,7 @@ library morth-language
                    , Morth.Errors
     other-modules: Morth.Blocks
                  , Morth.Com
+                 , Morth.Config
                  , Morth.Lexer
                  , Morth.Logger
                  , Morth.Op
