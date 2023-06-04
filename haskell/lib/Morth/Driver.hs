@@ -71,10 +71,10 @@ data ComArgs = ComArgs
   , comInput :: TL.Text
   }
 
-parseComArgs :: [TL.Text] -> IO ComArgs
+parseComArgs :: [TL.Text] -> IO ([TL.Text], ComArgs)
 parseComArgs args = loop args False Nothing
  where
-  loop :: [TL.Text] -> Bool -> Maybe TL.Text -> IO ComArgs
+  loop :: [TL.Text] -> Bool -> Maybe TL.Text -> IO ([TL.Text], ComArgs)
   loop [] _ _ = do
     usage ()
     logErr "no file given for 'com'"
@@ -82,7 +82,7 @@ parseComArgs args = loop args False Nothing
   loop rest sr op = case rest of
     ("-r" : args') -> loop args' True op
     ("-o" : outPath : args') -> loop args' sr (Just outPath)
-    (path : _) -> return $ ComArgs sr op path
+    (path : passthroughArgs) -> return (passthroughArgs, ComArgs sr op path)
 
 toRelative :: FilePath -> FilePath
 toRelative path
@@ -106,11 +106,13 @@ run args = do
       logErr text "no file given for 'sim'"
       throw BadUsage
     ("com" : comArgs) -> do
-      ComArgs
-        { comShouldRun = shouldRun
-        , comOutPath = outPath
-        , comInput = input
-        } <-
+      ( passthroughArgs
+        , ComArgs
+            { comShouldRun = shouldRun
+            , comOutPath = outPath
+            , comInput = input
+            }
+        ) <-
         parseComArgs comArgs
       raw <- TLIO.readFile $ TL.unpack input
       asmText <-
@@ -128,7 +130,7 @@ run args = do
             runCmd "nasm" ["-felf64", asmPath, "-o", objPath]
             runCmd "ld" ["-o", exePath, objPath]
             if shouldRun
-              then captureCmd stdout (toRelative exePath) []
+              then captureCmd stdout (toRelative exePath) (map TL.unpack passthroughArgs)
               else return ExitSuccess
     ["help"] -> do
       usage ()
