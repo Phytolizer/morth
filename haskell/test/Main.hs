@@ -2,11 +2,12 @@
 
 module Main (main) where
 
+import Data.Functor ((<&>))
 import Morth.Test (recordTest, testFile)
 import System.Directory (getDirectoryContents, makeAbsolute)
 import System.Environment (getArgs)
 import System.FilePath (takeDirectory, takeExtension, (</>))
-import Test.HUnit (Testable (..), runTestTTAndExit)
+import Test.HUnit (Test, Testable (..), runTestTTAndExit)
 
 myPath :: String
 myPath = (takeDirectory . takeDirectory) __FILE__
@@ -14,23 +15,28 @@ myPath = (takeDirectory . takeDirectory) __FILE__
 main :: IO ()
 main = do
   args <- getArgs
-  case args of
-    [] -> runTests
-    ["test"] -> runTests
-    ["record"] -> recordTests
+  ts <- case args of
+    [] -> tests Nothing <&> Just
+    ["test"] -> tests Nothing <&> Just
+    ["test", root] -> tests (Just root) <&> Just
+    ["record"] -> recordTests Nothing >> return Nothing
+    ["record", root] -> recordTests (Just root) >> return Nothing
     _ -> error "invalid arguments"
+  mapM_ (runTestTTAndExit . test) ts
 
-(.>) :: (a -> b) -> (b -> c) -> a -> c
-(.>) = flip (.)
+tests :: Maybe FilePath -> IO [Test]
+tests (Just root) = testPaths root <&> map testFile
+tests Nothing = concat <$> mapM (tests . Just) testRoots
 
-runTests :: IO ()
-runTests = testPaths >>= map testFile .> (test .> runTestTTAndExit)
+recordTests :: Maybe FilePath -> IO ()
+recordTests (Just root) = testPaths root >>= mapM_ recordTest
+recordTests Nothing = mapM_ (recordTests . Just) testRoots
 
-recordTests :: IO ()
-recordTests = testPaths >>= mapM_ recordTest
-
-testPaths :: IO [FilePath]
-testPaths =
-  mapM (\p -> makeAbsolute (myPath </> "tests" </> p))
+testPaths :: FilePath -> IO [FilePath]
+testPaths root =
+  mapM (\p -> makeAbsolute (myPath </> root </> p))
     . filter (\p -> takeExtension p == ".porth")
-    =<< getDirectoryContents (myPath </> "tests")
+    =<< getDirectoryContents (myPath </> root)
+
+testRoots :: [FilePath]
+testRoots = ["tests", "examples"]
