@@ -50,6 +50,9 @@ step h ip op mem stack = case opCode op of
   OpDrop -> case stack of
     (_ : stack') -> return (ip + 1, stack', mem)
     _ -> error "stack underflow"
+  OpOver -> case stack of
+    (y : x : stack') -> return (ip + 1, x : y : x : stack', mem)
+    _ -> error "stack underflow"
   OpMem -> return (ip + 1, 0 : stack, mem)
   OpLoad -> case stack of
     [] -> error "stack underflow"
