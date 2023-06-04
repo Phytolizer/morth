@@ -27,6 +27,7 @@ parseWord token =
         "syscall6" -> return $ Op OpSyscall6 loc
         "+" -> return $ Op OpPlus loc
         "-" -> return $ Op OpMinus loc
+        "mod" -> return $ Op OpMod loc
         "=" -> return $ Op OpEq loc
         ">" -> return $ Op OpGt loc
         "<" -> return $ Op OpLt loc

@@ -102,6 +102,7 @@ step h ip op mem stack = case opCode op of
   OpSyscall6 -> error "unimplemented"
   OpPlus -> return (ip + 1, bop (+) stack, mem)
   OpMinus -> return (ip + 1, bop (-) stack, mem)
+  OpMod -> return (ip + 1, bop mod stack, mem)
   OpEq -> return (ip + 1, bop (==) stack, mem)
   OpGt -> return (ip + 1, bop (>) stack, mem)
   OpLt -> return (ip + 1, bop (<) stack, mem)

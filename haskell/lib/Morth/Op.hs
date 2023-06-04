@@ -21,6 +21,7 @@ data OpCode
   | OpSyscall6
   | OpPlus
   | OpMinus
+  | OpMod
   | OpEq
   | OpGt
   | OpLt

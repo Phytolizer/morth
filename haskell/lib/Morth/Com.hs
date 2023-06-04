@@ -174,6 +174,13 @@ genInst ip op = case opCode op of
     , "sub rax, rbx"
     , "push rax"
     ]
+  OpMod ->
+    [ "pop rbx"
+    , "pop rax"
+    , "xor rdx, rdx"
+    , "div rbx"
+    , "push rdx"
+    ]
   OpEq ->
     [ "pop rbx"
     , "pop rax"
