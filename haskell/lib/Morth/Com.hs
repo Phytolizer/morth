@@ -117,17 +117,20 @@ genInst ip op = case opCode op of
   OpSyscall0 ->
     [ "pop rax"
     , "syscall"
+    , "push rax"
     ]
   OpSyscall1 ->
     [ "pop rax"
     , "pop rdi"
     , "syscall"
+    , "push rax"
     ]
   OpSyscall2 ->
     [ "pop rax"
     , "pop rdi"
     , "pop rsi"
     , "syscall"
+    , "push rax"
     ]
   OpSyscall3 ->
     [ "pop rax"
@@ -135,6 +138,7 @@ genInst ip op = case opCode op of
     , "pop rsi"
     , "pop rdx"
     , "syscall"
+    , "push rax"
     ]
   OpSyscall4 ->
     [ "pop rax"
@@ -143,6 +147,7 @@ genInst ip op = case opCode op of
     , "pop rdx"
     , "pop r10"
     , "syscall"
+    , "push rax"
     ]
   OpSyscall5 ->
     [ "pop rax"
@@ -152,6 +157,7 @@ genInst ip op = case opCode op of
     , "pop r10"
     , "pop r8"
     , "syscall"
+    , "push rax"
     ]
   OpSyscall6 ->
     [ "pop rax"
@@ -162,6 +168,7 @@ genInst ip op = case opCode op of
     , "pop r8"
     , "pop r9"
     , "syscall"
+    , "push rax"
     ]
   OpPlus ->
     [ "pop rbx"

@@ -92,7 +92,7 @@ step h ip op mem stack = case opCode op of
                   _ -> do
                     printf "unimplemented fd: %d\n" fd
                     error "unimplemented"
-                return (ip + 1, stack', mem)
+                return (ip + 1, count : stack', mem)
         _ -> do
           printf "unimplemented syscall: %d\n" syscall
           error "unimplemented"
