@@ -1,6 +1,7 @@
-module Morth.Test (testFile) where
+module Morth.Test (testFile, recordTest) where
 
 import Morth.Driver (run)
+import System.FilePath ((-<.>))
 import System.IO.Silently (capture_)
 import Test.HUnit (
   Test,
@@ -10,9 +11,17 @@ import Test.HUnit (
 
 testFile :: FilePath -> Test
 testFile path =
-  let path' = path
-   in path'
+  let txtPath = path -<.> "txt"
+   in path
         ~: do
-          simOutput <- capture_ $ run ["sim", path']
-          comOutput <- capture_ $ run ["com", "-r", path']
-          simOutput @=? comOutput
+          expectedOutput <- readFile txtPath
+          simOutput <- capture_ $ run ["sim", path]
+          simOutput @=? expectedOutput
+          comOutput <- capture_ $ run ["com", "-r", path]
+          comOutput @=? expectedOutput
+
+recordTest :: FilePath -> IO ()
+recordTest path =
+  let txtPath = path -<.> "txt"
+   in capture_ (run ["sim", path])
+        >>= writeFile txtPath
