@@ -8,3 +8,9 @@
 
 // 2dup
 80 300 2dup dump dump dump dump
+
+// swap
+80 300 swap dump dump
+
+// drop
+80 300 drop dump

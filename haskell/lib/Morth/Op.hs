@@ -7,6 +7,7 @@ data OpCode
   | OpDup
   | Op2Dup
   | OpSwap
+  | OpDrop
   | OpMem
   | OpLoad
   | OpStore
