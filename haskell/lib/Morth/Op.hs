@@ -23,6 +23,10 @@ data OpCode
   | OpEq
   | OpGt
   | OpLt
+  | OpShl
+  | OpShr
+  | OpBand
+  | OpBor
   | OpDump
   | OpIf Int
   | OpElse Int

@@ -1,5 +1,6 @@
 module Morth.Sim (simulateProgram) where
 
+import Data.Bits (shiftL, shiftR, (.&.), (.|.))
 import qualified Data.ByteString.Lazy as BL
 import Data.Function ((&))
 import Data.Primitive (Array, indexArray, sizeofArray)
@@ -101,6 +102,10 @@ step h ip op mem stack = case opCode op of
   OpEq -> return (ip + 1, bop (==) stack, mem)
   OpGt -> return (ip + 1, bop (>) stack, mem)
   OpLt -> return (ip + 1, bop (<) stack, mem)
+  OpShr -> return (ip + 1, bop shiftR stack, mem)
+  OpShl -> return (ip + 1, bop shiftL stack, mem)
+  OpBor -> return (ip + 1, bop (.|.) stack, mem)
+  OpBand -> return (ip + 1, bop (.&.) stack, mem)
   OpDump -> case stack of
     [] -> error "stack underflow"
     x : stack' -> do

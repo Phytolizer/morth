@@ -191,6 +191,30 @@ genInst ip op = case opCode op of
     , "movzx rax, al"
     , "push rax"
     ]
+  OpShl ->
+    [ "pop rcx"
+    , "pop rax"
+    , "shl rax, cl"
+    , "push rax"
+    ]
+  OpShr ->
+    [ "pop rcx"
+    , "pop rax"
+    , "shr rax, cl"
+    , "push rax"
+    ]
+  OpBand ->
+    [ "pop rbx"
+    , "pop rax"
+    , "and rax, rbx"
+    , "push rax"
+    ]
+  OpBor ->
+    [ "pop rbx"
+    , "pop rax"
+    , "or rax, rbx"
+    , "push rax"
+    ]
   OpDump ->
     [ "pop rdi"
     , "call dump"

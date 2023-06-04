@@ -30,6 +30,10 @@ parseWord token =
         "=" -> return $ Op OpEq loc
         ">" -> return $ Op OpGt loc
         "<" -> return $ Op OpLt loc
+        "shl" -> return $ Op OpShl loc
+        "shr" -> return $ Op OpShr loc
+        "band" -> return $ Op OpBand loc
+        "bor" -> return $ Op OpBor loc
         "dump" -> return $ Op OpDump loc
         "if" -> return $ Op (OpIf (-1)) loc
         "else" -> return $ Op (OpElse (-1)) loc
