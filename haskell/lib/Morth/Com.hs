@@ -3,6 +3,7 @@ module Morth.Com (compileProgram) where
 import Data.Foldable (toList)
 import Data.Primitive (Array)
 import qualified Data.Text.Lazy as TL
+import Morth.Config (memCapacity)
 import Morth.Op (Op (..), OpCode (..))
 
 indent :: TL.Text -> TL.Text
@@ -54,6 +55,8 @@ footer len =
   , "    mov rax, 60"
   , "    mov rdi, 0"
   , "    syscall"
+  , "segment .bss"
+  , "mem: resb " <> TL.pack (show memCapacity)
   ]
 
 instHeader :: Int -> Op -> [TL.Text]

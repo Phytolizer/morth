@@ -1,10 +1,15 @@
 module Morth.Sim (simulateProgram) where
 
-import Data.Primitive (Array, indexArray, sizeofArray)
+import Control.Monad.ST (RealWorld)
+import Data.Bits ((.&.))
+import Data.Primitive (Array, MutableArray, indexArray, newArray, readArray, sizeofArray, writeArray)
+import Morth.Config (memCapacity)
 import Morth.Op (Op (..), OpCode (..))
 import System.IO (Handle, hPrint)
 
 type Stack = [Int]
+
+type Mem = MutableArray RealWorld Int
 
 bop :: (Enum a) => (Int -> Int -> a) -> Stack -> Stack
 bop f (y : x : stack) = fromEnum (f x y) : stack
@@ -12,28 +17,37 @@ bop _ _ = error "stack underflow"
 
 iter ::
   (Monad m) =>
-  (Int -> Op -> Stack -> m (Int, Stack)) ->
+  (Int -> Op -> Mem -> Stack -> m (Int, Stack)) ->
   Int ->
+  Mem ->
   Stack ->
   Array Op ->
   m ()
-iter f ip stack ops
+iter f ip mem stack ops
   | sizeofArray ops == 0 = return ()
   | ip >= sizeofArray ops = return ()
   | otherwise = do
       let op = indexArray ops ip
-      (ip', stack') <- f ip op stack
-      iter f ip' stack' ops
+      (ip', stack') <- f ip op mem stack
+      iter f ip' mem stack' ops
 
-step :: Handle -> Int -> Op -> Stack -> IO (Int, Stack)
-step h ip op stack = case opCode op of
+step :: Handle -> Int -> Op -> Mem -> Stack -> IO (Int, Stack)
+step h ip op mem stack = case opCode op of
   OpPush x -> return (ip + 1, x : stack)
   OpDup -> case stack of
     [] -> error "stack underflow"
     x : stack' -> return (ip + 1, x : x : stack')
-  OpMem -> error "unimplemented"
-  OpLoad -> error "unimplemented"
-  OpStore -> error "unimplemented"
+  OpMem -> return (ip + 1, 0 : stack)
+  OpLoad -> case stack of
+    [] -> error "stack underflow"
+    x : stack' -> do
+      y <- readArray mem x
+      return (ip + 1, y : stack')
+  OpStore -> case stack of
+    (value : addr : stack') -> do
+      writeArray mem addr (value .&. 0xff)
+      return (ip + 1, stack')
+    _ -> error "stack underflow"
   OpPlus -> return (ip + 1, bop (+) stack)
   OpMinus -> return (ip + 1, bop (-) stack)
   OpEq -> return (ip + 1, bop (==) stack)
@@ -70,7 +84,9 @@ step h ip op stack = case opCode op of
   OpEnd dest -> return (dest, stack)
 
 loop :: Handle -> Stack -> Array Op -> IO ()
-loop h = iter (step h) 0
+loop h stack ops = do
+  arr <- newArray memCapacity 0
+  iter (step h) 0 arr stack ops
 
 simulateProgram :: Handle -> Array Op -> IO ()
 simulateProgram h = loop h []
