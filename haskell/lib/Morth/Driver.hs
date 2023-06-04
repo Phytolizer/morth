@@ -1,7 +1,6 @@
 module Morth.Driver (run) where
 
 import Control.Exception (throw)
-import Control.Monad (when)
 import qualified Data.ByteString.Char8 as B
 import Data.Functor ((<&>))
 import Data.Primitive (arrayFromList, unsafeThawArray)
@@ -48,7 +47,7 @@ check (ExitFailure n) = do
   logErr ("exit code " % int) n
   throw CommandFailed
 
-captureCmd :: Handle -> String -> [String] -> IO ()
+captureCmd :: Handle -> String -> [String] -> IO ExitCode
 captureCmd hOut cmd args = do
   logCmd text $
     TL.unwords $
@@ -61,11 +60,10 @@ captureCmd hOut cmd args = do
         )
         (cmd : args)
   (_, _, _, p) <- createProcess (proc cmd args){std_out = UseHandle hOut}
-  ec <- waitForProcess p
-  check ec
+  waitForProcess p
 
 runCmd :: String -> [String] -> IO ()
-runCmd = captureCmd stdout
+runCmd cmd args = captureCmd stdout cmd args >>= check
 
 data ComArgs = ComArgs
   { comShouldRun :: Bool
@@ -91,7 +89,7 @@ toRelative path
   | isAbsolute path = path
   | otherwise = "." </> path
 
-run :: [String] -> IO ()
+run :: [String] -> IO ExitCode
 run args = do
   case map TL.pack args of
     ["sim", path] -> do
@@ -102,6 +100,7 @@ run args = do
           >>= resolveBlocks
 
       simulateProgram stdout program
+      return ExitSuccess
     ["sim"] -> do
       usage ()
       logErr text "no file given for 'sim'"
@@ -128,10 +127,12 @@ run args = do
             TLIO.writeFile asmPath asmText
             runCmd "nasm" ["-felf64", asmPath, "-o", objPath]
             runCmd "ld" ["-o", exePath, objPath]
-            when shouldRun $
-              captureCmd stdout (toRelative exePath) []
+            if shouldRun
+              then captureCmd stdout (toRelative exePath) []
+              else return ExitSuccess
     ["help"] -> do
       usage ()
+      return ExitSuccess
     [] -> do
       usage ()
       logErr "no subcommand given"
