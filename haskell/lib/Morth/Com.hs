@@ -68,7 +68,8 @@ instHeader ip op =
 genInst :: Int -> Op -> [TL.Text]
 genInst ip op = case opCode op of
   OpPush x ->
-    [ TL.concat ["push " <> TL.pack (show x)]
+    [ TL.concat ["mov rax, " <> TL.pack (show x)]
+    , "push rax"
     ]
   OpDup ->
     [ "pop rax"
