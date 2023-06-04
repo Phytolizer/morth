@@ -1,25 +1,25 @@
 // =
-100 200 = dump
-100 100 = dump
+100 200 = print
+100 100 = print
 
 // >
-200 100 > dump
-100 200 > dump
+200 100 > print
+100 200 > print
 
 // <
-200 100 < dump
-100 200 < dump
+200 100 < print
+100 200 < print
 
 // !=
-100 200 != dump
-100 100 != dump
+100 200 != print
+100 100 != print
 
 // <=
-100 200 <= dump
-100 100 <= dump
-200 100 <= dump
+100 200 <= print
+100 100 <= print
+200 100 <= print
 
 // >=
-100 200 >= dump
-100 100 >= dump
-200 100 >= dump
+100 200 >= print
+100 100 >= print
+200 100 >= print

@@ -12,7 +12,7 @@ indent line = TL.concat ["    ", line]
 header :: [TL.Text]
 header =
   [ "segment .text"
-  , "dump:"
+  , "print:"
   , "    mov     r9, -3689348814741910323"
   , "    sub     rsp, 40"
   , "    mov     BYTE [rsp+31], 10"
@@ -261,9 +261,9 @@ genInst ip op = case opCode op of
     , "or rax, rbx"
     , "push rax"
     ]
-  OpDump ->
+  OpPrint ->
     [ "pop rdi"
-    , "call dump"
+    , "call print"
     ]
   OpIf (-1) -> error "invalid jump target"
   OpIf dest ->

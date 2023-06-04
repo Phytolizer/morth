@@ -1,9 +1,9 @@
 // if-else
-20 40 + 60 = if 80 else 100 end dump
-20 40 + 59 = if 80 else 100 end dump
+20 40 + 60 = if 80 else 100 end print
+20 40 + 59 = if 80 else 100 end print
 
 // while
 10 while dup 0 > do
-  dup dump
+  dup print
   1 -
 end

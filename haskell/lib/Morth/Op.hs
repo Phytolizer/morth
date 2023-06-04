@@ -32,7 +32,7 @@ data OpCode
   | OpShr
   | OpBand
   | OpBor
-  | OpDump
+  | OpPrint
   | OpIf Int
   | OpElse Int
   | OpWhile

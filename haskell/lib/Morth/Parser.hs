@@ -38,7 +38,7 @@ parseWord token =
         "shr" -> return $ Op OpShr loc
         "band" -> return $ Op OpBand loc
         "bor" -> return $ Op OpBor loc
-        "dump" -> return $ Op OpDump loc
+        "print" -> return $ Op OpPrint loc
         "if" -> return $ Op (OpIf (-1)) loc
         "else" -> return $ Op (OpElse (-1)) loc
         "while" -> return $ Op OpWhile loc

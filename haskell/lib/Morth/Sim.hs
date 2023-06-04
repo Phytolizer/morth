@@ -123,7 +123,7 @@ step h ip op mem stack = case opCode op of
   OpShl -> return (ip + 1, bop shiftL stack, mem)
   OpBor -> return (ip + 1, bop (.|.) stack, mem)
   OpBand -> return (ip + 1, bop (.&.) stack, mem)
-  OpDump -> case stack of
+  OpPrint -> case stack of
     [] -> error "stack underflow"
     x : stack' -> do
       hPrint h x

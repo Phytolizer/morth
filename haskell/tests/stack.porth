@@ -1,19 +1,19 @@
 // push
-10 20 30 dump dump dump
-10 dump 20 dump 30 dump
+10 20 30 print print print
+10 print 20 print 30 print
 
 // dup
-300 dup dup dump dump dump
-80 dup dump dup dump dump
+300 dup dup print print print
+80 dup print dup print print
 
 // 2dup
-80 300 2dup dump dump dump dump
+80 300 2dup print print print print
 
 // swap
-80 300 swap dump dump
+80 300 swap print print
 
 // drop
-80 300 drop dump
+80 300 drop print
 
 // big number
-1234567890987654321 dump
+1234567890987654321 print
