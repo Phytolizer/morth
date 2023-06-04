@@ -23,8 +23,11 @@ data OpCode
   | OpMinus
   | OpMod
   | OpEq
+  | OpNe
   | OpGt
   | OpLt
+  | OpGe
+  | OpLe
   | OpShl
   | OpShr
   | OpBand

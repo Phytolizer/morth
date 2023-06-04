@@ -189,6 +189,14 @@ genInst ip op = case opCode op of
     , "movzx rax, al"
     , "push rax"
     ]
+  OpNe ->
+    [ "pop rbx"
+    , "pop rax"
+    , "cmp rax, rbx"
+    , "setne al"
+    , "movzx rax, al"
+    , "push rax"
+    ]
   OpGt ->
     [ "pop rbx"
     , "pop rax"
@@ -202,6 +210,22 @@ genInst ip op = case opCode op of
     , "pop rax"
     , "cmp rax, rbx"
     , "setl al"
+    , "movzx rax, al"
+    , "push rax"
+    ]
+  OpGe ->
+    [ "pop rbx"
+    , "pop rax"
+    , "cmp rax, rbx"
+    , "setge al"
+    , "movzx rax, al"
+    , "push rax"
+    ]
+  OpLe ->
+    [ "pop rbx"
+    , "pop rax"
+    , "cmp rax, rbx"
+    , "setle al"
     , "movzx rax, al"
     , "push rax"
     ]

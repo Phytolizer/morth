@@ -29,8 +29,11 @@ parseWord token =
         "-" -> return $ Op OpMinus loc
         "mod" -> return $ Op OpMod loc
         "=" -> return $ Op OpEq loc
+        "!=" -> return $ Op OpNe loc
         ">" -> return $ Op OpGt loc
         "<" -> return $ Op OpLt loc
+        ">=" -> return $ Op OpGe loc
+        "<=" -> return $ Op OpLe loc
         "shl" -> return $ Op OpShl loc
         "shr" -> return $ Op OpShr loc
         "band" -> return $ Op OpBand loc
