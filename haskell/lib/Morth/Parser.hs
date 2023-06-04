@@ -29,6 +29,7 @@ parseWord token =
         "-" -> return $ Op OpMinus loc
         "=" -> return $ Op OpEq loc
         ">" -> return $ Op OpGt loc
+        "<" -> return $ Op OpLt loc
         "dump" -> return $ Op OpDump loc
         "if" -> return $ Op (OpIf (-1)) loc
         "else" -> return $ Op (OpElse (-1)) loc
@@ -36,6 +37,7 @@ parseWord token =
         "do" -> return $ Op (OpDo (-1)) loc
         "end" -> return $ Op (OpEnd (-1)) loc
         "dup" -> return $ Op OpDup loc
+        "2dup" -> return $ Op Op2Dup loc
         ntext -> do
           n <- case readEither (T.unpack ntext) of
             Right n -> return n

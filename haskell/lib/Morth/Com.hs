@@ -75,6 +75,14 @@ genInst ip op = case opCode op of
     , "push rax"
     , "push rax"
     ]
+  Op2Dup ->
+    [ "pop rbx"
+    , "pop rax"
+    , "push rax"
+    , "push rbx"
+    , "push rax"
+    , "push rbx"
+    ]
   OpMem ->
     [ "push mem"
     ]
@@ -163,6 +171,14 @@ genInst ip op = case opCode op of
     , "pop rax"
     , "cmp rax, rbx"
     , "setg al"
+    , "movzx rax, al"
+    , "push rax"
+    ]
+  OpLt ->
+    [ "pop rbx"
+    , "pop rax"
+    , "cmp rax, rbx"
+    , "setl al"
     , "movzx rax, al"
     , "push rax"
     ]
