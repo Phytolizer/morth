@@ -9,7 +9,8 @@ import qualified Data.Text.Lazy.IO as TLIO
 import Morth.Config (memCapacity)
 import Morth.Op (Op (..), OpCode (..))
 import System.IO (Handle, hPrint, stderr)
-import Text.Printf (printf)
+import System.Process (getCurrentPid)
+import Text.Printf (hPrintf)
 
 type Stack = [Int]
 
@@ -70,7 +71,16 @@ step h ip op mem stack = case opCode op of
             , BL.append lhs $ BL.cons (fromIntegral value) rhs
             )
     _ -> error "stack underflow"
-  OpSyscall0 -> error "unimplemented"
+  OpSyscall0 -> case stack of
+    (syscall : stack') -> do
+      case syscall of
+        39 -> do
+          pid <- fromIntegral <$> getCurrentPid
+          return (ip + 1, pid : stack', mem)
+        _ -> do
+          hPrintf stderr "unimplemented syscall: %d\n" syscall
+          error "unimplemented"
+    _ -> error "stack underflow"
   OpSyscall1 -> error "unimplemented"
   OpSyscall2 -> error "unimplemented"
   OpSyscall3 -> case stack of
@@ -90,11 +100,11 @@ step h ip op mem stack = case opCode op of
                   1 -> TLIO.hPutStr h s
                   2 -> TLIO.hPutStr stderr s
                   _ -> do
-                    printf "unimplemented fd: %d\n" fd
+                    hPrintf stderr "unimplemented fd: %d\n" fd
                     error "unimplemented"
                 return (ip + 1, count : stack', mem)
         _ -> do
-          printf "unimplemented syscall: %d\n" syscall
+          hPrintf stderr "unimplemented syscall: %d\n" syscall
           error "unimplemented"
     _ -> error "stack underflow"
   OpSyscall4 -> error "unimplemented"
