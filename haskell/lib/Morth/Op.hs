@@ -6,6 +6,8 @@ data OpCode
   = OpPush Int
   | OpDup
   | OpMem
+  | OpLoad
+  | OpStore
   | OpPlus
   | OpMinus
   | OpEq

@@ -75,6 +75,17 @@ genInst ip op = case opCode op of
   OpMem ->
     [ "push mem"
     ]
+  OpLoad ->
+    [ "pop rax"
+    , "xor rbx, rbx"
+    , "mov bl, [rax]"
+    , "push rbx"
+    ]
+  OpStore ->
+    [ "pop rbx"
+    , "pop rax"
+    , "mov [rax], bl"
+    ]
   OpPlus ->
     [ "pop rbx"
     , "pop rax"

@@ -31,7 +31,9 @@ step h ip op stack = case opCode op of
   OpDup -> case stack of
     [] -> error "stack underflow"
     x : stack' -> return (ip + 1, x : x : stack')
-  OpMem -> undefined
+  OpMem -> error "unimplemented"
+  OpLoad -> error "unimplemented"
+  OpStore -> error "unimplemented"
   OpPlus -> return (ip + 1, bop (+) stack)
   OpMinus -> return (ip + 1, bop (-) stack)
   OpEq -> return (ip + 1, bop (==) stack)
