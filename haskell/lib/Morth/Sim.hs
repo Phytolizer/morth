@@ -1,15 +1,18 @@
 module Morth.Sim (simulateProgram) where
 
-import Control.Monad.ST (RealWorld)
-import Data.Bits ((.&.))
-import Data.Primitive (Array, MutableArray, indexArray, newArray, readArray, sizeofArray, writeArray)
+import qualified Data.ByteString.Lazy as BL
+import Data.Function ((&))
+import Data.Primitive (Array, indexArray, sizeofArray)
+import Data.Text.Lazy.Encoding (decodeUtf8)
+import qualified Data.Text.Lazy.IO as TLIO
 import Morth.Config (memCapacity)
 import Morth.Op (Op (..), OpCode (..))
-import System.IO (Handle, hPrint)
+import System.IO (Handle, hPrint, stderr)
+import Text.Printf (printf)
 
 type Stack = [Int]
 
-type Mem = MutableArray RealWorld Int
+type Mem = BL.ByteString
 
 bop :: (Enum a) => (Int -> Int -> a) -> Stack -> Stack
 bop f (y : x : stack) = fromEnum (f x y) : stack
@@ -17,7 +20,7 @@ bop _ _ = error "stack underflow"
 
 iter ::
   (Monad m) =>
-  (Int -> Op -> Mem -> Stack -> m (Int, Stack)) ->
+  (Int -> Op -> Mem -> Stack -> m (Int, Stack, Mem)) ->
   Int ->
   Mem ->
   Stack ->
@@ -28,35 +31,71 @@ iter f ip mem stack ops
   | ip >= sizeofArray ops = return ()
   | otherwise = do
       let op = indexArray ops ip
-      (ip', stack') <- f ip op mem stack
-      iter f ip' mem stack' ops
+      (ip', stack', mem') <- f ip op mem stack
+      iter f ip' mem' stack' ops
 
-step :: Handle -> Int -> Op -> Mem -> Stack -> IO (Int, Stack)
+step :: Handle -> Int -> Op -> Mem -> Stack -> IO (Int, Stack, Mem)
 step h ip op mem stack = case opCode op of
-  OpPush x -> return (ip + 1, x : stack)
+  OpPush x -> return (ip + 1, x : stack, mem)
   OpDup -> case stack of
     [] -> error "stack underflow"
-    x : stack' -> return (ip + 1, x : x : stack')
-  OpMem -> return (ip + 1, 0 : stack)
+    x : stack' -> return (ip + 1, x : x : stack', mem)
+  OpMem -> return (ip + 1, 0 : stack, mem)
   OpLoad -> case stack of
     [] -> error "stack underflow"
-    x : stack' -> do
-      y <- readArray mem x
-      return (ip + 1, y : stack')
+    x : stack' ->
+      let y = fromIntegral $ BL.index mem (toEnum x)
+       in return (ip + 1, y : stack', mem)
   OpStore -> case stack of
-    (value : addr : stack') -> do
-      writeArray mem addr (value .&. 0xff)
-      return (ip + 1, stack')
+    (value : addr : stack') ->
+      let addr' = toEnum addr
+          lhs = BL.take addr' mem
+          rhs = BL.drop (addr' + 1) mem
+       in return
+            ( ip + 1
+            , stack'
+            , BL.append lhs $ BL.cons (fromIntegral value) rhs
+            )
     _ -> error "stack underflow"
-  OpPlus -> return (ip + 1, bop (+) stack)
-  OpMinus -> return (ip + 1, bop (-) stack)
-  OpEq -> return (ip + 1, bop (==) stack)
-  OpGt -> return (ip + 1, bop (>) stack)
+  OpSyscall0 -> error "unimplemented"
+  OpSyscall1 -> error "unimplemented"
+  OpSyscall2 -> error "unimplemented"
+  OpSyscall3 -> case stack of
+    (syscall : arg1 : arg2 : arg3 : stack') -> do
+      case syscall of
+        1 ->
+          let fd = arg1
+              buf = arg2
+              count = arg3
+              s =
+                mem
+                  & BL.drop (toEnum buf)
+                  & BL.take (toEnum count)
+                  & decodeUtf8
+           in do
+                case fd of
+                  1 -> TLIO.hPutStr h s
+                  2 -> TLIO.hPutStr stderr s
+                  _ -> do
+                    printf "unimplemented fd: %d\n" fd
+                    error "unimplemented"
+                return (ip + 1, stack', mem)
+        _ -> do
+          printf "unimplemented syscall: %d\n" syscall
+          error "unimplemented"
+    _ -> error "stack underflow"
+  OpSyscall4 -> error "unimplemented"
+  OpSyscall5 -> error "unimplemented"
+  OpSyscall6 -> error "unimplemented"
+  OpPlus -> return (ip + 1, bop (+) stack, mem)
+  OpMinus -> return (ip + 1, bop (-) stack, mem)
+  OpEq -> return (ip + 1, bop (==) stack, mem)
+  OpGt -> return (ip + 1, bop (>) stack, mem)
   OpDump -> case stack of
     [] -> error "stack underflow"
     x : stack' -> do
       hPrint h x
-      return (ip + 1, stack')
+      return (ip + 1, stack', mem)
   OpIf (-1) -> error "invalid jump target"
   OpIf dest -> case stack of
     [] -> error "stack underflow"
@@ -66,10 +105,11 @@ step h ip op mem stack = case opCode op of
             then dest
             else ip + 1
         , stack'
+        , mem
         )
   OpElse (-1) -> error "invalid jump target"
-  OpElse dest -> return (dest, stack)
-  OpWhile -> return (ip + 1, stack)
+  OpElse dest -> return (dest, stack, mem)
+  OpWhile -> return (ip + 1, stack, mem)
   OpDo (-1) -> error "invalid jump target"
   OpDo dest -> case stack of
     [] -> error "stack underflow"
@@ -79,14 +119,14 @@ step h ip op mem stack = case opCode op of
             then dest
             else ip + 1
         , stack'
+        , mem
         )
   OpEnd (-1) -> error "invalid jump target"
-  OpEnd dest -> return (dest, stack)
+  OpEnd dest -> return (dest, stack, mem)
 
 loop :: Handle -> Stack -> Array Op -> IO ()
 loop h stack ops = do
-  arr <- newArray memCapacity 0
-  iter (step h) 0 arr stack ops
+  iter (step h) 0 (BL.replicate (fromIntegral memCapacity) 0) stack ops
 
 simulateProgram :: Handle -> Array Op -> IO ()
 simulateProgram h = loop h []

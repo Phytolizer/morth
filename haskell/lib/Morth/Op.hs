@@ -8,6 +8,13 @@ data OpCode
   | OpMem
   | OpLoad
   | OpStore
+  | OpSyscall0
+  | OpSyscall1
+  | OpSyscall2
+  | OpSyscall3
+  | OpSyscall4
+  | OpSyscall5
+  | OpSyscall6
   | OpPlus
   | OpMinus
   | OpEq

@@ -18,6 +18,13 @@ parseWord token =
         "mem" -> return $ Op OpMem loc
         "." -> return $ Op OpStore loc
         "," -> return $ Op OpLoad loc
+        "syscall0" -> return $ Op OpSyscall0 loc
+        "syscall1" -> return $ Op OpSyscall1 loc
+        "syscall2" -> return $ Op OpSyscall2 loc
+        "syscall3" -> return $ Op OpSyscall3 loc
+        "syscall4" -> return $ Op OpSyscall4 loc
+        "syscall5" -> return $ Op OpSyscall5 loc
+        "syscall6" -> return $ Op OpSyscall6 loc
         "+" -> return $ Op OpPlus loc
         "-" -> return $ Op OpMinus loc
         "=" -> return $ Op OpEq loc

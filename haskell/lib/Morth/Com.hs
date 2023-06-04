@@ -89,6 +89,55 @@ genInst ip op = case opCode op of
     , "pop rax"
     , "mov [rax], bl"
     ]
+  OpSyscall0 ->
+    [ "pop rax"
+    , "syscall"
+    ]
+  OpSyscall1 ->
+    [ "pop rax"
+    , "pop rdi"
+    , "syscall"
+    ]
+  OpSyscall2 ->
+    [ "pop rax"
+    , "pop rdi"
+    , "pop rsi"
+    , "syscall"
+    ]
+  OpSyscall3 ->
+    [ "pop rax"
+    , "pop rdi"
+    , "pop rsi"
+    , "pop rdx"
+    , "syscall"
+    ]
+  OpSyscall4 ->
+    [ "pop rax"
+    , "pop rdi"
+    , "pop rsi"
+    , "pop rdx"
+    , "pop r10"
+    , "syscall"
+    ]
+  OpSyscall5 ->
+    [ "pop rax"
+    , "pop rdi"
+    , "pop rsi"
+    , "pop rdx"
+    , "pop r10"
+    , "pop r8"
+    , "syscall"
+    ]
+  OpSyscall6 ->
+    [ "pop rax"
+    , "pop rdi"
+    , "pop rsi"
+    , "pop rdx"
+    , "pop r10"
+    , "pop r8"
+    , "pop r9"
+    , "syscall"
+    ]
   OpPlus ->
     [ "pop rbx"
     , "pop rax"
