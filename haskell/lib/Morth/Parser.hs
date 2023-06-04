@@ -38,6 +38,7 @@ parseWord token =
         "end" -> return $ Op (OpEnd (-1)) loc
         "dup" -> return $ Op OpDup loc
         "2dup" -> return $ Op Op2Dup loc
+        "swap" -> return $ Op OpSwap loc
         ntext -> do
           n <- case readEither (T.unpack ntext) of
             Right n -> return n

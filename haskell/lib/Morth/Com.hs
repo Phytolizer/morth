@@ -83,6 +83,12 @@ genInst ip op = case opCode op of
     , "push rax"
     , "push rbx"
     ]
+  OpSwap ->
+    [ "pop rbx"
+    , "pop rax"
+    , "push rbx"
+    , "push rax"
+    ]
   OpMem ->
     [ "push mem"
     ]
