@@ -44,4 +44,5 @@ unicode: never
 respectful: false
 
 # Fixity information for operators
-fixities: []
+fixities:
+  - infixl 9 .>
