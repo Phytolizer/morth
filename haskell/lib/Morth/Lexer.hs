@@ -78,19 +78,19 @@ upperUEsc :: PL.Parser Int
 upperUEsc = P.string "\\U" >> parseHex 8
 
 esc :: PL.Parser [Int]
-esc = do
-  p1 <-
-    P.many $
-      P.choice $
-        escChars
-          ++ [ octalEsc
-             , hexEsc
-             , lowerUEsc
-             , upperUEsc
-             , P.anyChar >>= fromEnum .> parserReturn
-             ]
-  p2 <- P.eof >> parserReturn []
-  return (p1 ++ p2)
+esc =
+  (++)
+    <$> P.many
+      ( P.choice $
+          escChars
+            ++ [ octalEsc
+               , hexEsc
+               , lowerUEsc
+               , upperUEsc
+               , P.anyChar >>= fromEnum .> parserReturn
+               ]
+      )
+    <*> (P.eof >> parserReturn [])
 
 readEscapes :: TL.Text -> TL.Text
 readEscapes =
