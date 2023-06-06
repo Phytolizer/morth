@@ -2,21 +2,33 @@
 10 20 30 print print print
 10 print 20 print 30 print
 
+"------------------------------\n" 1 1 syscall3
+
 // push str
 "Hello, world\n" 1 1 syscall3
+
+"------------------------------\n" 1 1 syscall3
 
 // dup
 300 dup dup print print print
 80 dup print dup print print
 
+"------------------------------\n" 1 1 syscall3
+
 // 2dup
 80 300 2dup print print print print
+
+"------------------------------\n" 1 1 syscall3
 
 // swap
 80 300 swap print print
 
+"------------------------------\n" 1 1 syscall3
+
 // drop
 80 300 drop print
+
+"------------------------------\n" 1 1 syscall3
 
 // big number
 1234567890987654321 print

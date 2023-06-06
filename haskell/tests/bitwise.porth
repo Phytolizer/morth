@@ -1,11 +1,17 @@
 // shl
 1 3 shl print
 
+"------------------------------\n" 1 1 syscall3
+
 // shr
 32 3 shr print
 
+"------------------------------\n" 1 1 syscall3
+
 // bor
 1 2 bor print
+
+"------------------------------\n" 1 1 syscall3
 
 // band
 1 2 band print

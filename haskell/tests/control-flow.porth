@@ -2,6 +2,8 @@
 20 40 + 60 = if 80 else 100 end print
 20 40 + 59 = if 80 else 100 end print
 
+"------------------------------\n" 1 1 syscall3
+
 // while
 10 while dup 0 > do
   dup print
