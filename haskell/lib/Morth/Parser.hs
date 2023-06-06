@@ -5,7 +5,7 @@ import qualified Data.Text.Lazy as TL
 import Formatting (text, (%))
 import Morth.Errors (MorthError (ParseError))
 import Morth.Logger (logErrLoc)
-import Morth.Op (Op (..), OpCode (..))
+import Morth.Op (Jump (JumpNil), Op (..), OpCode (..), Value (..))
 import Morth.Token (Token (..), TokenKind (..))
 
 builtinWords :: TL.Text -> Maybe OpCode
@@ -33,11 +33,11 @@ builtinWords "shr" = Just OpShr
 builtinWords "band" = Just OpBand
 builtinWords "bor" = Just OpBor
 builtinWords "print" = Just OpPrint
-builtinWords "if" = Just (OpIf (-1))
-builtinWords "else" = Just (OpElse (-1))
+builtinWords "if" = Just (OpIf JumpNil)
+builtinWords "else" = Just (OpElse JumpNil)
 builtinWords "while" = Just OpWhile
-builtinWords "do" = Just (OpDo (-1))
-builtinWords "end" = Just (OpEnd (-1))
+builtinWords "do" = Just (OpDo JumpNil)
+builtinWords "end" = Just (OpEnd JumpNil)
 builtinWords "dup" = Just OpDup
 builtinWords "2dup" = Just Op2Dup
 builtinWords "swap" = Just OpSwap
@@ -54,8 +54,8 @@ parseWord token =
           Nothing -> do
             logErrLoc loc ("Unknown word: " % text) w
             throw ParseError
-        TokenInt n -> return $ Op (OpPushInt n) loc
-        TokenStr s -> return $ Op (OpPushStr s) loc
+        TokenInt n -> return $ Op (OpPush (ValInt n)) loc
+        TokenStr s -> return $ Op (OpPush (ValStr s)) loc
 
 parseProgram :: [Token] -> IO [Op]
 parseProgram = mapM parseWord

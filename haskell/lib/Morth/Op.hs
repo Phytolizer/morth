@@ -1,11 +1,20 @@
-module Morth.Op (OpCode (..), Op (..)) where
+module Morth.Op (Jump (..), OpCode (..), Op (..), Value (..)) where
 
 import qualified Data.Text.Lazy as TL
 import Morth.Token (Location)
 
+data Value
+  = ValInt Int
+  | ValStr TL.Text
+  deriving (Eq, Show)
+
+data Jump
+  = JumpNil
+  | JumpTo Int
+  deriving (Eq, Show)
+
 data OpCode
-  = OpPushInt Int
-  | OpPushStr TL.Text
+  = OpPush Value
   | OpDup
   | Op2Dup
   | OpSwap
@@ -35,11 +44,11 @@ data OpCode
   | OpBand
   | OpBor
   | OpPrint
-  | OpIf Int
-  | OpElse Int
+  | OpIf Jump
+  | OpElse Jump
   | OpWhile
-  | OpDo Int
-  | OpEnd Int
+  | OpDo Jump
+  | OpEnd Jump
   deriving (Eq, Show)
 
 data Op = Op

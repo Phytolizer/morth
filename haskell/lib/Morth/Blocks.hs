@@ -6,7 +6,7 @@ import Data.List (uncons)
 import Data.Primitive (Array, MutableArray, readArray, sizeofMutableArray, unsafeFreezeArray, writeArray)
 import Morth.Errors (MorthError (BlockError))
 import Morth.Logger (logErrLoc)
-import Morth.Op (Op (..), OpCode (..))
+import Morth.Op (Jump (JumpTo), Op (..), OpCode (..))
 
 resolveBlocks :: MutableArray RealWorld Op -> IO (Array Op)
 resolveBlocks = loop 0 []
@@ -34,7 +34,7 @@ resolveBlocks = loop 0 []
           ifOp <- readArray ops ifIp
           case opCode ifOp of
             OpIf _ -> do
-              writeArray ops ifIp ifOp{opCode = OpIf (ip + 1)}
+              writeArray ops ifIp ifOp{opCode = OpIf (JumpTo $ ip + 1)}
               loop (ip + 1) (ip : stack') ops
             _ -> do
               logErrLoc (opLocation op) "expected if"
@@ -43,7 +43,7 @@ resolveBlocks = loop 0 []
       OpDo _ -> case uncons stack of
         Nothing -> error "stack underflow"
         Just (whileIp, stack') -> do
-          writeArray ops ip op{opCode = OpDo whileIp}
+          writeArray ops ip op{opCode = OpDo (JumpTo whileIp)}
           loop (ip + 1) (ip : stack') ops
       OpEnd _ -> case uncons stack of
         Nothing -> error "stack underflow"
@@ -51,16 +51,16 @@ resolveBlocks = loop 0 []
           blockOp <- readArray ops blockIp
           case opCode blockOp of
             OpIf _ -> do
-              writeArray ops blockIp blockOp{opCode = OpIf ip}
-              writeArray ops ip op{opCode = OpEnd (ip + 1)}
+              writeArray ops blockIp blockOp{opCode = OpIf (JumpTo ip)}
+              writeArray ops ip op{opCode = OpEnd (JumpTo $ ip + 1)}
               loop (ip + 1) stack' ops
             OpElse _ -> do
-              writeArray ops blockIp blockOp{opCode = OpElse ip}
-              writeArray ops ip op{opCode = OpEnd (ip + 1)}
+              writeArray ops blockIp blockOp{opCode = OpElse (JumpTo ip)}
+              writeArray ops ip op{opCode = OpEnd (JumpTo $ ip + 1)}
               loop (ip + 1) stack' ops
             OpDo dest -> do
               writeArray ops ip op{opCode = OpEnd dest}
-              writeArray ops blockIp blockOp{opCode = OpDo (ip + 1)}
+              writeArray ops blockIp blockOp{opCode = OpDo (JumpTo $ ip + 1)}
               loop (ip + 1) stack' ops
             _ -> do
               logErrLoc (opLocation op) "mismatched 'end': expected if, else, or do"

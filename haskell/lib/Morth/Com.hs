@@ -8,7 +8,7 @@ import Data.Text.Lazy.Encoding (encodeUtf8)
 import Data.Word (Word8)
 import Morth.Config (memCapacity)
 import Morth.OS (OS (Linux))
-import Morth.Op (Op (..), OpCode (..))
+import Morth.Op (Jump (..), Op (..), OpCode (..), Value (..))
 import Text.Printf (printf)
 
 data Target = NasmX86_64
@@ -89,14 +89,14 @@ instHeader ip op =
 
 genInst :: Int -> Op -> [BL.ByteString] -> ([BL.ByteString], [TL.Text])
 genInst ip op strs = case opCode op of
-  OpPushInt x ->
+  OpPush (ValInt x) ->
     ( strs
     ,
       [ TL.concat ["mov rax, " <> TL.pack (show x)]
       , "push rax"
       ]
     )
-  OpPushStr s ->
+  OpPush (ValStr s) ->
     let bs = encodeUtf8 s
      in ( strs ++ [bs]
         ,
@@ -386,8 +386,8 @@ genInst ip op strs = case opCode op of
       , "call print"
       ]
     )
-  OpIf (-1) -> error "invalid jump target"
-  OpIf dest ->
+  OpIf JumpNil -> error "invalid jump target"
+  OpIf (JumpTo dest) ->
     ( strs
     ,
       [ "pop rax"
@@ -395,16 +395,16 @@ genInst ip op strs = case opCode op of
       , "je .L" <> TL.pack (show dest)
       ]
     )
-  OpElse (-1) -> error "invalid jump target"
-  OpElse dest ->
+  OpElse JumpNil -> error "invalid jump target"
+  OpElse (JumpTo dest) ->
     ( strs
     ,
       [ "jmp .L" <> TL.pack (show dest)
       ]
     )
   OpWhile -> (strs, [])
-  OpDo (-1) -> error "invalid jump target"
-  OpDo dest ->
+  OpDo JumpNil -> error "invalid jump target"
+  OpDo (JumpTo dest) ->
     ( strs
     ,
       [ "pop rax"
@@ -412,8 +412,8 @@ genInst ip op strs = case opCode op of
       , "je .L" <> TL.pack (show dest)
       ]
     )
-  OpEnd (-1) -> error "invalid jump target"
-  OpEnd dest ->
+  OpEnd JumpNil -> error "invalid jump target"
+  OpEnd (JumpTo dest) ->
     ( strs
     , [ "jmp .L" <> TL.pack (show dest) | dest /= (ip + 1)
       ]

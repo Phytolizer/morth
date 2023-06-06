@@ -9,7 +9,7 @@ import Data.Text.Lazy.Encoding (decodeUtf8, encodeUtf8)
 import qualified Data.Text.Lazy.IO as TLIO
 import Morth.Config (memCapacity, strCapacity)
 import Morth.OS (OS (Linux))
-import Morth.Op (Op (..), OpCode (..))
+import Morth.Op (Jump (..), Op (..), OpCode (..), Value (..))
 import System.IO (Handle, hPrint, stderr)
 import System.Process (getCurrentPid)
 import Text.Printf (hPrintf)
@@ -47,8 +47,8 @@ iter f ip state ops
 
 step :: Handle -> StepFunc
 step h ip op state = case opCode op of
-  OpPushInt x -> return (ip + 1, state{stack = x : stack state})
-  OpPushStr s ->
+  OpPush (ValInt x) -> return (ip + 1, state{stack = x : stack state})
+  OpPush (ValStr s) ->
     let bs = encodeUtf8 s
         n = fromIntegral $ BL.length bs
         (offset, mem', strOffsets') = case Map.lookup n (strOffsets state) of
@@ -160,8 +160,8 @@ step h ip op state = case opCode op of
     x : stack' -> do
       hPrint h x
       return (ip + 1, state{stack = stack'})
-  OpIf (-1) -> error "invalid jump target"
-  OpIf dest -> case stack state of
+  OpIf JumpNil -> error "invalid jump target"
+  OpIf (JumpTo dest) -> case stack state of
     [] -> error "stack underflow"
     x : stack' ->
       return
@@ -170,11 +170,11 @@ step h ip op state = case opCode op of
             else ip + 1
         , state{stack = stack'}
         )
-  OpElse (-1) -> error "invalid jump target"
-  OpElse dest -> return (dest, state)
+  OpElse JumpNil -> error "invalid jump target"
+  OpElse (JumpTo dest) -> return (dest, state)
   OpWhile -> return (ip + 1, state)
-  OpDo (-1) -> error "invalid jump target"
-  OpDo dest -> case stack state of
+  OpDo JumpNil -> error "invalid jump target"
+  OpDo (JumpTo dest) -> case stack state of
     [] -> error "stack underflow"
     x : stack' ->
       return
@@ -183,8 +183,8 @@ step h ip op state = case opCode op of
             else ip + 1
         , state{stack = stack'}
         )
-  OpEnd (-1) -> error "invalid jump target"
-  OpEnd dest -> return (dest, state)
+  OpEnd JumpNil -> error "invalid jump target"
+  OpEnd (JumpTo dest) -> return (dest, state)
 
 simulateProgram :: ByteOrder -> OS -> Handle -> Array Op -> IO ()
 simulateProgram LittleEndian Linux h =
