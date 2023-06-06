@@ -1,6 +1,7 @@
-module Morth.Token (Location (..), Token (..), fmtLoc) where
+module Morth.Token (Location (..), Token (..), TokenKind (..), fmtLoc) where
 
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 import Data.Text.Lazy.Builder (Builder)
 import Formatting (bformat, int, stext, (%))
 
@@ -11,9 +12,14 @@ data Location = Location
   }
   deriving (Show)
 
+data TokenKind
+  = TokenWord TL.Text
+  | TokenInt Int
+  deriving (Show)
+
 data Token = Token
   { location :: Location
-  , value :: T.Text
+  , kind :: TokenKind
   }
   deriving (Show)
 

@@ -3,7 +3,13 @@ module Morth.Lexer (lexFile) where
 import Data.Function ((&))
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
-import Morth.Token (Location (..), Token (..))
+import Morth.Token (Location (..), Token (..), TokenKind (..))
+import Text.Read (readMaybe)
+
+lexWord :: TL.Text -> TokenKind
+lexWord w = case readMaybe (TL.unpack w) of
+  Nothing -> TokenWord w
+  Just n -> TokenInt n
 
 lexLine :: T.Text -> Int -> TL.Text -> [Token]
 lexLine fp ln = loop 0
@@ -23,7 +29,7 @@ lexLine fp ln = loop 0
     | otherwise =
         TL.span (/= ' ') s & \(w, rest) ->
           let wWidth = fromEnum $ TL.length w
-           in Token loc (TL.toStrict w)
+           in Token loc (lexWord w)
                 : loop (col + wWidth) rest
 
 lexFile :: T.Text -> TL.Text -> [Token]

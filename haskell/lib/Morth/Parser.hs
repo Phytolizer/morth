@@ -3,59 +3,60 @@ module Morth.Parser (parseProgram) where
 import Control.Exception (throw)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
-import Formatting (string, (%))
+import Formatting (text, (%))
 import Morth.Errors (MorthError (ParseError))
 import Morth.Lexer (lexFile)
 import Morth.Logger (logErrLoc)
 import Morth.Op (Op (..), OpCode (..))
-import Morth.Token (Token (..))
-import Text.Read (readEither)
+import Morth.Token (Token (..), TokenKind (..))
+
+builtinWords :: TL.Text -> Maybe OpCode
+builtinWords "mem" = Just OpMem
+builtinWords "." = Just OpStore
+builtinWords "," = Just OpLoad
+builtinWords "syscall0" = Just OpSyscall0
+builtinWords "syscall1" = Just OpSyscall1
+builtinWords "syscall2" = Just OpSyscall2
+builtinWords "syscall3" = Just OpSyscall3
+builtinWords "syscall4" = Just OpSyscall4
+builtinWords "syscall5" = Just OpSyscall5
+builtinWords "syscall6" = Just OpSyscall6
+builtinWords "+" = Just OpPlus
+builtinWords "-" = Just OpMinus
+builtinWords "mod" = Just OpMod
+builtinWords "=" = Just OpEq
+builtinWords "!=" = Just OpNe
+builtinWords ">" = Just OpGt
+builtinWords "<" = Just OpLt
+builtinWords ">=" = Just OpGe
+builtinWords "<=" = Just OpLe
+builtinWords "shl" = Just OpShl
+builtinWords "shr" = Just OpShr
+builtinWords "band" = Just OpBand
+builtinWords "bor" = Just OpBor
+builtinWords "print" = Just OpPrint
+builtinWords "if" = Just (OpIf (-1))
+builtinWords "else" = Just (OpElse (-1))
+builtinWords "while" = Just OpWhile
+builtinWords "do" = Just (OpDo (-1))
+builtinWords "end" = Just (OpEnd (-1))
+builtinWords "dup" = Just OpDup
+builtinWords "2dup" = Just Op2Dup
+builtinWords "swap" = Just OpSwap
+builtinWords "drop" = Just OpDrop
+builtinWords "over" = Just OpOver
+builtinWords _ = Nothing
 
 parseWord :: Token -> IO Op
 parseWord token =
   let loc = location token
-   in case value token of
-        "mem" -> return $ Op OpMem loc
-        "." -> return $ Op OpStore loc
-        "," -> return $ Op OpLoad loc
-        "syscall0" -> return $ Op OpSyscall0 loc
-        "syscall1" -> return $ Op OpSyscall1 loc
-        "syscall2" -> return $ Op OpSyscall2 loc
-        "syscall3" -> return $ Op OpSyscall3 loc
-        "syscall4" -> return $ Op OpSyscall4 loc
-        "syscall5" -> return $ Op OpSyscall5 loc
-        "syscall6" -> return $ Op OpSyscall6 loc
-        "+" -> return $ Op OpPlus loc
-        "-" -> return $ Op OpMinus loc
-        "mod" -> return $ Op OpMod loc
-        "=" -> return $ Op OpEq loc
-        "!=" -> return $ Op OpNe loc
-        ">" -> return $ Op OpGt loc
-        "<" -> return $ Op OpLt loc
-        ">=" -> return $ Op OpGe loc
-        "<=" -> return $ Op OpLe loc
-        "shl" -> return $ Op OpShl loc
-        "shr" -> return $ Op OpShr loc
-        "band" -> return $ Op OpBand loc
-        "bor" -> return $ Op OpBor loc
-        "print" -> return $ Op OpPrint loc
-        "if" -> return $ Op (OpIf (-1)) loc
-        "else" -> return $ Op (OpElse (-1)) loc
-        "while" -> return $ Op OpWhile loc
-        "do" -> return $ Op (OpDo (-1)) loc
-        "end" -> return $ Op (OpEnd (-1)) loc
-        "dup" -> return $ Op OpDup loc
-        "2dup" -> return $ Op Op2Dup loc
-        "swap" -> return $ Op OpSwap loc
-        "drop" -> return $ Op OpDrop loc
-        "over" -> return $ Op OpOver loc
-        ntext -> do
-          n <- case readEither (T.unpack ntext) of
-            Right n -> return n
-            Left err -> do
-              logErrLoc loc ("Invalid number: " % string) err
-              throw ParseError
-          return $ Op (OpPush n) loc
+   in case kind token of
+        TokenWord w -> case builtinWords w of
+          Just op -> return $ Op op loc
+          Nothing -> do
+            logErrLoc loc ("Unknown word: " % text) w
+            throw ParseError
+        TokenInt n -> return $ Op (OpPush n) loc
 
 parseProgram :: T.Text -> TL.Text -> IO [Op]
 parseProgram fp s = mapM parseWord $ lexFile fp s
