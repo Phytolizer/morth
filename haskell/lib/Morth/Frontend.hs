@@ -1,7 +1,6 @@
 module Morth.Frontend (readProgram) where
 
 import Control.Monad.Primitive (PrimMonad (PrimState))
-import Data.Function ((&))
 import Data.Primitive (Array, MutableArray, arrayFromList, unsafeThawArray)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
@@ -16,6 +15,6 @@ mutableArrayFromList = unsafeThawArray . arrayFromList
 readProgram :: T.Text -> TL.Text -> IO (Array Op)
 readProgram fp text =
   lexFile fp text
-    & parseProgram
+    >>= parseProgram
     >>= mutableArrayFromList
     >>= resolveBlocks

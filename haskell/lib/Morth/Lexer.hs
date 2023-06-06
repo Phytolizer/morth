@@ -1,12 +1,16 @@
 module Morth.Lexer (lexFile) where
 
+import Control.Applicative (liftA2)
+import Control.Exception (throw)
 import Control.Monad (liftM2, replicateM)
 import Data.Bifunctor (second)
 import Data.Char (isDigit)
 import Data.Function ((&))
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
+import Morth.Errors (MorthError (LexError))
 import Morth.Location (Location (..))
+import Morth.Logger (logErrLoc)
 import Morth.Token (Token (..), TokenKind (..))
 import Support.Composition ((.>))
 import Text.Parsec (parserReturn, (<|>))
@@ -107,10 +111,10 @@ lexWord w = case readMaybe (TL.unpack w) of
 mapFst :: (a -> a') -> (a, b) -> (a', b)
 mapFst f (a, b) = (f a, b)
 
-lexLine :: T.Text -> Int -> TL.Text -> [Token]
+lexLine :: T.Text -> Int -> TL.Text -> IO [Token]
 lexLine fp ln = loop 0
  where
-  loop :: Int -> TL.Text -> [Token]
+  loop :: Int -> TL.Text -> IO [Token]
   loop col s =
     TL.span (== ' ') s & \(ws, rest) ->
       let wsWidth = fromEnum $ TL.length ws
@@ -120,28 +124,38 @@ lexLine fp ln = loop 0
                     TL.span (/= '"') (TL.tail rest)
                       & mapFst readEscapes
                   strWidth = fromEnum $ TL.length str
-               in Token (Location fp (ln + 1) (col + 1)) (TokenStr str)
-                    : loop (col + wsWidth + strWidth + 2) (TL.drop 1 rest')
+                  loc = Location fp (ln + 1) (col + 1)
+               in if not $ TL.isPrefixOf "\"" rest'
+                    then do
+                      logErrLoc loc "unterminated string literal"
+                      throw LexError
+                    else
+                      fmap
+                        (Token loc (TokenStr str) :)
+                        (loop (col + wsWidth + strWidth + 2) (TL.drop 1 rest'))
             else
               readWord
                 (Location fp (ln + 1) (col + wsWidth + 1))
                 (col + wsWidth)
                 rest
 
-  readWord :: Location -> Int -> TL.Text -> [Token]
+  readWord :: Location -> Int -> TL.Text -> IO [Token]
   readWord loc col s
-    | TL.null s = []
+    | TL.null s = return []
     | otherwise =
         TL.span (/= ' ') s & \(w, rest) ->
           let wWidth = fromEnum $ TL.length w
-           in Token loc (lexWord w)
-                : loop (col + wWidth) rest
+           in fmap
+                (Token loc (lexWord w) :)
+                (loop (col + wWidth) rest)
 
-lexFile :: T.Text -> TL.Text -> [Token]
+lexFile :: T.Text -> TL.Text -> IO [Token]
 lexFile fp s = loop 0 (TL.lines s)
  where
-  loop :: Int -> [TL.Text] -> [Token]
-  loop _ [] = []
+  loop :: Int -> [TL.Text] -> IO [Token]
+  loop _ [] = return []
   loop ln (l : ls) =
-    lexLine fp ln (head $ TL.splitOn "//" l)
-      ++ loop (ln + 1) ls
+    liftA2
+      (++)
+      (lexLine fp ln (head $ TL.splitOn "//" l))
+      (loop (ln + 1) ls)
