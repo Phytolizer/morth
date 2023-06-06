@@ -1,4 +1,4 @@
-module Morth.Sim (simulateProgram) where
+module Morth.Sim (simulateProgram, ByteOrder (..)) where
 
 import Data.Bits (shiftL, shiftR, (.&.), (.|.))
 import qualified Data.ByteString.Lazy as BL
@@ -8,10 +8,13 @@ import Data.Primitive (Array, indexArray, sizeofArray)
 import Data.Text.Lazy.Encoding (decodeUtf8, encodeUtf8)
 import qualified Data.Text.Lazy.IO as TLIO
 import Morth.Config (memCapacity, strCapacity)
+import Morth.OS (OS (Linux))
 import Morth.Op (Op (..), OpCode (..))
 import System.IO (Handle, hPrint, stderr)
 import System.Process (getCurrentPid)
 import Text.Printf (hPrintf)
+
+data ByteOrder = LittleEndian | BigEndian
 
 type Stack = [Int]
 
@@ -183,8 +186,8 @@ step h ip op state = case opCode op of
   OpEnd (-1) -> error "invalid jump target"
   OpEnd dest -> return (dest, state)
 
-simulateProgram :: Handle -> Array Op -> IO ()
-simulateProgram h =
+simulateProgram :: ByteOrder -> OS -> Handle -> Array Op -> IO ()
+simulateProgram LittleEndian Linux h =
   iter (step h) 0 $
     State
       { mem = BL.replicate (fromIntegral (memCapacity + strCapacity)) 0
@@ -192,3 +195,4 @@ simulateProgram h =
       , strOffsets = Map.empty
       , stack = []
       }
+simulateProgram _ _ _ = error "unimplemented"

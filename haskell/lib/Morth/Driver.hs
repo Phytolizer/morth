@@ -3,16 +3,15 @@ module Morth.Driver (run) where
 import Control.Exception (throw)
 import qualified Data.ByteString.Char8 as B
 import Data.Functor ((<&>))
-import Data.Primitive (arrayFromList, unsafeThawArray)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.IO as TLIO
 import Formatting (int, string, text, (%))
-import Morth.Blocks (resolveBlocks)
-import Morth.Com (compileProgram)
+import Morth.Com (Target (NasmX86_64), compileProgram)
 import Morth.Errors (MorthError (BadUsage, CommandFailed))
+import Morth.Frontend (readProgram)
 import Morth.Logger (logCmd, logErr, logInfo)
-import Morth.Parser (parseProgram)
-import Morth.Sim (simulateProgram)
+import Morth.OS (OS (Linux))
+import Morth.Sim (ByteOrder (LittleEndian), simulateProgram)
 import System.Environment (getProgName)
 import System.Exit (ExitCode (..))
 import System.FilePath (isAbsolute, (-<.>), (<.>), (</>))
@@ -94,12 +93,8 @@ run args = do
   case map TL.pack args of
     ["sim", path] -> do
       raw <- TLIO.readFile $ TL.unpack path
-      program <-
-        parseProgram (TL.toStrict path) raw
-          >>= unsafeThawArray . arrayFromList
-          >>= resolveBlocks
-
-      simulateProgram stdout program
+      readProgram (TL.toStrict path) raw
+        >>= simulateProgram LittleEndian Linux stdout
       return ExitSuccess
     ["sim"] -> do
       usage ()
@@ -116,10 +111,8 @@ run args = do
         parseComArgs comArgs
       raw <- TLIO.readFile $ TL.unpack input
       asmText <-
-        parseProgram (TL.toStrict input) raw
-          >>= unsafeThawArray . arrayFromList
-          >>= resolveBlocks
-          <&> compileProgram
+        readProgram (TL.toStrict input) raw
+          <&> compileProgram NasmX86_64 Linux
       let outPath' = maybe (TL.unpack input -<.> "") TL.unpack outPath
           asmPath = outPath' <.> "asm"
           objPath = outPath' <.> "o"

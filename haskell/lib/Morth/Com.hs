@@ -1,4 +1,4 @@
-module Morth.Com (compileProgram) where
+module Morth.Com (compileProgram, Target (..)) where
 
 import qualified Data.ByteString.Lazy as BL
 import Data.Foldable (toList)
@@ -7,8 +7,11 @@ import qualified Data.Text.Lazy as TL
 import Data.Text.Lazy.Encoding (encodeUtf8)
 import Data.Word (Word8)
 import Morth.Config (memCapacity)
+import Morth.OS (OS (Linux))
 import Morth.Op (Op (..), OpCode (..))
 import Text.Printf (printf)
+
+data Target = NasmX86_64
 
 indent :: TL.Text -> TL.Text
 indent line = TL.concat ["    ", line]
@@ -432,11 +435,12 @@ stepAll ops =
         (finalStrs, finalInsts) = stepOp strs' rest
      in (finalStrs, inst ++ finalInsts)
 
-compileProgram :: Array Op -> TL.Text
-compileProgram ops =
+compileProgram :: Target -> OS -> Array Op -> TL.Text
+compileProgram NasmX86_64 Linux ops =
   let (strs, insts) = stepAll (toList ops)
    in TL.unlines
         ( header
             ++ insts
             ++ footer (length ops) strs
         )
+compileProgram _ _ _ = error "unimplemented"

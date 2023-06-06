@@ -1,11 +1,9 @@
 module Morth.Parser (parseProgram) where
 
 import Control.Exception (throw)
-import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import Formatting (text, (%))
 import Morth.Errors (MorthError (ParseError))
-import Morth.Lexer (lexFile)
 import Morth.Logger (logErrLoc)
 import Morth.Op (Op (..), OpCode (..))
 import Morth.Token (Token (..), TokenKind (..))
@@ -59,5 +57,5 @@ parseWord token =
         TokenInt n -> return $ Op (OpPushInt n) loc
         TokenStr s -> return $ Op (OpPushStr s) loc
 
-parseProgram :: T.Text -> TL.Text -> IO [Op]
-parseProgram fp s = mapM parseWord $ lexFile fp s
+parseProgram :: [Token] -> IO [Op]
+parseProgram = mapM parseWord

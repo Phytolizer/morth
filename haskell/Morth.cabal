@@ -17,9 +17,11 @@ library morth-language
     hs-source-dirs: lib
     exposed-modules: Morth.Driver
                    , Morth.Errors
+                   , Morth.OS
     other-modules: Morth.Blocks
                  , Morth.Com
                  , Morth.Config
+                 , Morth.Frontend
                  , Morth.Lexer
                  , Morth.Logger
                  , Morth.Op
