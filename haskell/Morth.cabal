@@ -29,6 +29,7 @@ library morth-language
                  , Morth.Config
                  , Morth.Frontend
                  , Morth.Lexer
+                 , Morth.Location
                  , Morth.Logger
                  , Morth.Op
                  , Morth.Parser
@@ -37,11 +38,13 @@ library morth-language
     default-language: Haskell2010
     default-extensions: OverloadedStrings
     ghc-options: -Wall -Werror=incomplete-patterns
-    build-depends: base >= 4.7 && < 5,
+    build-depends: Support,
+                   base >= 4.7 && < 5,
                    bytestring >= 0.11.4 && < 0.12,
                    containers >= 0.6.7 && < 0.7,
                    filepath >= 1.4.2 && < 1.5,
                    formatting >= 7.2.0 && < 7.3,
+                   parsec >= 3.1.11 && < 3.2,
                    primitive >= 0.8.0 && < 0.9,
                    process >= 1.6.16 && < 1.7,
                    shell-escape >= 0.2.0 && < 0.3,

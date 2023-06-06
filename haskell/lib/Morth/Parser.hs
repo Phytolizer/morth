@@ -5,7 +5,13 @@ import qualified Data.Text.Lazy as TL
 import Formatting (text, (%))
 import Morth.Errors (MorthError (ParseError))
 import Morth.Logger (logErrLoc)
-import Morth.Op (Jump (JumpNil), Op (..), OpCode (..), Value (..))
+import Morth.Op (
+  Jump (JumpNil),
+  Op (..),
+  OpCode (..),
+  pushInt,
+  pushStr,
+ )
 import Morth.Token (Token (..), TokenKind (..))
 
 builtinWords :: TL.Text -> Maybe OpCode
@@ -54,8 +60,8 @@ parseWord token =
           Nothing -> do
             logErrLoc loc ("Unknown word: " % text) w
             throw ParseError
-        TokenInt n -> return $ Op (OpPush (ValInt n)) loc
-        TokenStr s -> return $ Op (OpPush (ValStr s)) loc
+        TokenInt n -> return $ pushInt n loc
+        TokenStr s -> return $ pushStr s loc
 
 parseProgram :: [Token] -> IO [Op]
 parseProgram = mapM parseWord

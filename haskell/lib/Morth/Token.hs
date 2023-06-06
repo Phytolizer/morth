@@ -1,16 +1,7 @@
-module Morth.Token (Location (..), Token (..), TokenKind (..), fmtLoc) where
+module Morth.Token (Token (..), TokenKind (..)) where
 
-import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
-import Data.Text.Lazy.Builder (Builder)
-import Formatting (bformat, int, stext, (%))
-
-data Location = Location
-  { filePath :: T.Text
-  , line :: Int
-  , column :: Int
-  }
-  deriving (Show)
+import Morth.Location (Location (..))
 
 data TokenKind
   = TokenWord TL.Text
@@ -23,11 +14,3 @@ data Token = Token
   , kind :: TokenKind
   }
   deriving (Show)
-
-fmtLoc :: Location -> Builder
-fmtLoc loc =
-  bformat
-    (stext % ":" % int % ":" % int)
-    (filePath loc)
-    (line loc)
-    (column loc)

@@ -9,7 +9,7 @@ import Data.Text.Lazy.Builder (Builder)
 import qualified Data.Text.Lazy.Builder as TLB
 import qualified Data.Text.Lazy.IO as TLIO
 import Formatting (Format, formatted, prefixed)
-import Morth.Token (Location (..), fmtLoc)
+import Morth.Location (Location, fmtLoc)
 import System.IO (stderr)
 
 out :: Format (IO ()) a -> a

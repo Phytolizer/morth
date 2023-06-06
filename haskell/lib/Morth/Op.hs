@@ -1,7 +1,14 @@
-module Morth.Op (Jump (..), OpCode (..), Op (..), Value (..)) where
+module Morth.Op (
+  Jump (..),
+  OpCode (..),
+  Op (..),
+  Value (..),
+  pushInt,
+  pushStr,
+) where
 
 import qualified Data.Text.Lazy as TL
-import Morth.Token (Location)
+import Morth.Location (Location)
 
 data Value
   = ValInt Int
@@ -55,3 +62,9 @@ data Op = Op
   { opCode :: OpCode
   , opLocation :: Location
   }
+
+pushInt :: Int -> Location -> Op
+pushInt n = Op $ OpPush $ ValInt n
+
+pushStr :: TL.Text -> Location -> Op
+pushStr s = Op $ OpPush $ ValStr s
