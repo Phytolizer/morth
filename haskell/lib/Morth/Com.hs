@@ -8,7 +8,7 @@ import Data.Text.Lazy.Encoding (encodeUtf8)
 import Data.Word (Word8)
 import Morth.Config (memCapacity)
 import Morth.Op (Op (..), OpCode (..))
-import Numeric (showHex)
+import Text.Printf (printf)
 
 indent :: TL.Text -> TL.Text
 indent line = TL.concat ["    ", line]
@@ -76,7 +76,7 @@ footer len strs =
   hexify bs = TL.intercalate "," $ map hexifyByte $ BL.unpack bs
 
   hexifyByte :: Word8 -> TL.Text
-  hexifyByte b = TL.pack $ showHex b ""
+  hexifyByte b = TL.pack $ printf "0x%02x" b
 
 instHeader :: Int -> Op -> [TL.Text]
 instHeader ip op =
