@@ -15,6 +15,7 @@ data Location = Location
 data TokenKind
   = TokenWord TL.Text
   | TokenInt Int
+  | TokenStr TL.Text
   deriving (Show)
 
 data Token = Token

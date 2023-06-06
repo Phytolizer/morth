@@ -1,10 +1,14 @@
 module Morth.Com (compileProgram) where
 
+import qualified Data.ByteString.Lazy as BL
 import Data.Foldable (toList)
 import Data.Primitive (Array)
 import qualified Data.Text.Lazy as TL
+import Data.Text.Lazy.Encoding (encodeUtf8)
+import Data.Word (Word8)
 import Morth.Config (memCapacity)
 import Morth.Op (Op (..), OpCode (..))
+import Numeric (showHex)
 
 indent :: TL.Text -> TL.Text
 indent line = TL.concat ["    ", line]
@@ -49,15 +53,30 @@ header =
   , "_start:"
   ]
 
-footer :: Int -> [TL.Text]
-footer len =
+footer :: Int -> [BL.ByteString] -> [TL.Text]
+footer len strs =
   [ ".L" <> TL.pack (show len) <> ":"
   , "    mov rax, 60"
   , "    mov rdi, 0"
   , "    syscall"
-  , "segment .bss"
-  , "mem: resb " <> TL.pack (show memCapacity)
+  , "segment .data"
   ]
+    ++ emitStrs (zip [0 ..] strs)
+    ++ [ "segment .bss"
+       , "mem: resb " <> TL.pack (show memCapacity)
+       ]
+ where
+  emitStrs :: [(Int, BL.ByteString)] -> [TL.Text]
+  emitStrs [] = []
+  emitStrs ((i, bs) : rest) =
+    ["porth_str_" <> TL.pack (show i) <> ": db " <> hexify bs]
+      <> emitStrs rest
+
+  hexify :: BL.ByteString -> TL.Text
+  hexify bs = TL.intercalate "," $ map hexifyByte $ BL.unpack bs
+
+  hexifyByte :: Word8 -> TL.Text
+  hexifyByte b = TL.pack $ showHex b ""
 
 instHeader :: Int -> Op -> [TL.Text]
 instHeader ip op =
@@ -65,235 +84,359 @@ instHeader ip op =
   , indent $ ";; -- " <> TL.pack (show $ opCode op) <> " --"
   ]
 
-genInst :: Int -> Op -> [TL.Text]
-genInst ip op = case opCode op of
-  OpPush x ->
-    [ TL.concat ["mov rax, " <> TL.pack (show x)]
-    , "push rax"
-    ]
+genInst :: Int -> Op -> [BL.ByteString] -> ([BL.ByteString], [TL.Text])
+genInst ip op strs = case opCode op of
+  OpPushInt x ->
+    ( strs
+    ,
+      [ TL.concat ["mov rax, " <> TL.pack (show x)]
+      , "push rax"
+      ]
+    )
+  OpPushStr s ->
+    let bs = encodeUtf8 s
+     in ( strs ++ [bs]
+        ,
+          [ "mov rax, " <> TL.pack (show $ BL.length bs)
+          , "push rax"
+          , "push porth_str_" <> TL.pack (show $ length strs)
+          ]
+        )
   OpDup ->
-    [ "pop rax"
-    , "push rax"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rax"
+      , "push rax"
+      , "push rax"
+      ]
+    )
   Op2Dup ->
-    [ "pop rbx"
-    , "pop rax"
-    , "push rax"
-    , "push rbx"
-    , "push rax"
-    , "push rbx"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "push rax"
+      , "push rbx"
+      , "push rax"
+      , "push rbx"
+      ]
+    )
   OpSwap ->
-    [ "pop rbx"
-    , "pop rax"
-    , "push rbx"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "push rbx"
+      , "push rax"
+      ]
+    )
   OpDrop ->
-    [ "pop rax"
-    ]
+    ( strs
+    ,
+      [ "pop rax"
+      ]
+    )
   OpOver ->
-    [ "pop rbx"
-    , "pop rax"
-    , "push rax"
-    , "push rbx"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "push rax"
+      , "push rbx"
+      , "push rax"
+      ]
+    )
   OpMem ->
-    [ "push mem"
-    ]
+    ( strs
+    ,
+      [ "push mem"
+      ]
+    )
   OpLoad ->
-    [ "pop rax"
-    , "xor rbx, rbx"
-    , "mov bl, [rax]"
-    , "push rbx"
-    ]
+    ( strs
+    ,
+      [ "pop rax"
+      , "xor rbx, rbx"
+      , "mov bl, [rax]"
+      , "push rbx"
+      ]
+    )
   OpStore ->
-    [ "pop rbx"
-    , "pop rax"
-    , "mov [rax], bl"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "mov [rax], bl"
+      ]
+    )
   OpSyscall0 ->
-    [ "pop rax"
-    , "syscall"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rax"
+      , "syscall"
+      , "push rax"
+      ]
+    )
   OpSyscall1 ->
-    [ "pop rax"
-    , "pop rdi"
-    , "syscall"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rax"
+      , "pop rdi"
+      , "syscall"
+      , "push rax"
+      ]
+    )
   OpSyscall2 ->
-    [ "pop rax"
-    , "pop rdi"
-    , "pop rsi"
-    , "syscall"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rax"
+      , "pop rdi"
+      , "pop rsi"
+      , "syscall"
+      , "push rax"
+      ]
+    )
   OpSyscall3 ->
-    [ "pop rax"
-    , "pop rdi"
-    , "pop rsi"
-    , "pop rdx"
-    , "syscall"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rax"
+      , "pop rdi"
+      , "pop rsi"
+      , "pop rdx"
+      , "syscall"
+      , "push rax"
+      ]
+    )
   OpSyscall4 ->
-    [ "pop rax"
-    , "pop rdi"
-    , "pop rsi"
-    , "pop rdx"
-    , "pop r10"
-    , "syscall"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rax"
+      , "pop rdi"
+      , "pop rsi"
+      , "pop rdx"
+      , "pop r10"
+      , "syscall"
+      , "push rax"
+      ]
+    )
   OpSyscall5 ->
-    [ "pop rax"
-    , "pop rdi"
-    , "pop rsi"
-    , "pop rdx"
-    , "pop r10"
-    , "pop r8"
-    , "syscall"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rax"
+      , "pop rdi"
+      , "pop rsi"
+      , "pop rdx"
+      , "pop r10"
+      , "pop r8"
+      , "syscall"
+      , "push rax"
+      ]
+    )
   OpSyscall6 ->
-    [ "pop rax"
-    , "pop rdi"
-    , "pop rsi"
-    , "pop rdx"
-    , "pop r10"
-    , "pop r8"
-    , "pop r9"
-    , "syscall"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rax"
+      , "pop rdi"
+      , "pop rsi"
+      , "pop rdx"
+      , "pop r10"
+      , "pop r8"
+      , "pop r9"
+      , "syscall"
+      , "push rax"
+      ]
+    )
   OpPlus ->
-    [ "pop rbx"
-    , "pop rax"
-    , "add rax, rbx"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "add rax, rbx"
+      , "push rax"
+      ]
+    )
   OpMinus ->
-    [ "pop rbx"
-    , "pop rax"
-    , "sub rax, rbx"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "sub rax, rbx"
+      , "push rax"
+      ]
+    )
   OpMod ->
-    [ "pop rbx"
-    , "pop rax"
-    , "xor rdx, rdx"
-    , "div rbx"
-    , "push rdx"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "xor rdx, rdx"
+      , "div rbx"
+      , "push rdx"
+      ]
+    )
   OpEq ->
-    [ "pop rbx"
-    , "pop rax"
-    , "cmp rax, rbx"
-    , "sete al"
-    , "movzx rax, al"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "cmp rax, rbx"
+      , "sete al"
+      , "movzx rax, al"
+      , "push rax"
+      ]
+    )
   OpNe ->
-    [ "pop rbx"
-    , "pop rax"
-    , "cmp rax, rbx"
-    , "setne al"
-    , "movzx rax, al"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "cmp rax, rbx"
+      , "setne al"
+      , "movzx rax, al"
+      , "push rax"
+      ]
+    )
   OpGt ->
-    [ "pop rbx"
-    , "pop rax"
-    , "cmp rax, rbx"
-    , "setg al"
-    , "movzx rax, al"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "cmp rax, rbx"
+      , "setg al"
+      , "movzx rax, al"
+      , "push rax"
+      ]
+    )
   OpLt ->
-    [ "pop rbx"
-    , "pop rax"
-    , "cmp rax, rbx"
-    , "setl al"
-    , "movzx rax, al"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "cmp rax, rbx"
+      , "setl al"
+      , "movzx rax, al"
+      , "push rax"
+      ]
+    )
   OpGe ->
-    [ "pop rbx"
-    , "pop rax"
-    , "cmp rax, rbx"
-    , "setge al"
-    , "movzx rax, al"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "cmp rax, rbx"
+      , "setge al"
+      , "movzx rax, al"
+      , "push rax"
+      ]
+    )
   OpLe ->
-    [ "pop rbx"
-    , "pop rax"
-    , "cmp rax, rbx"
-    , "setle al"
-    , "movzx rax, al"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "cmp rax, rbx"
+      , "setle al"
+      , "movzx rax, al"
+      , "push rax"
+      ]
+    )
   OpShl ->
-    [ "pop rcx"
-    , "pop rax"
-    , "shl rax, cl"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rcx"
+      , "pop rax"
+      , "shl rax, cl"
+      , "push rax"
+      ]
+    )
   OpShr ->
-    [ "pop rcx"
-    , "pop rax"
-    , "shr rax, cl"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rcx"
+      , "pop rax"
+      , "shr rax, cl"
+      , "push rax"
+      ]
+    )
   OpBand ->
-    [ "pop rbx"
-    , "pop rax"
-    , "and rax, rbx"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "and rax, rbx"
+      , "push rax"
+      ]
+    )
   OpBor ->
-    [ "pop rbx"
-    , "pop rax"
-    , "or rax, rbx"
-    , "push rax"
-    ]
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "or rax, rbx"
+      , "push rax"
+      ]
+    )
   OpPrint ->
-    [ "pop rdi"
-    , "call print"
-    ]
+    ( strs
+    ,
+      [ "pop rdi"
+      , "call print"
+      ]
+    )
   OpIf (-1) -> error "invalid jump target"
   OpIf dest ->
-    [ "pop rax"
-    , "cmp rax, 0"
-    , "je .L" <> TL.pack (show dest)
-    ]
+    ( strs
+    ,
+      [ "pop rax"
+      , "cmp rax, 0"
+      , "je .L" <> TL.pack (show dest)
+      ]
+    )
   OpElse (-1) -> error "invalid jump target"
   OpElse dest ->
-    [ "jmp .L" <> TL.pack (show dest)
-    ]
-  OpWhile -> []
+    ( strs
+    ,
+      [ "jmp .L" <> TL.pack (show dest)
+      ]
+    )
+  OpWhile -> (strs, [])
   OpDo (-1) -> error "invalid jump target"
   OpDo dest ->
-    [ "pop rax"
-    , "cmp rax, 0"
-    , "je .L" <> TL.pack (show dest)
-    ]
+    ( strs
+    ,
+      [ "pop rax"
+      , "cmp rax, 0"
+      , "je .L" <> TL.pack (show dest)
+      ]
+    )
   OpEnd (-1) -> error "invalid jump target"
   OpEnd dest ->
-    [ "jmp .L" <> TL.pack (show dest) | dest /= (ip + 1)
-    ]
+    ( strs
+    , [ "jmp .L" <> TL.pack (show dest) | dest /= (ip + 1)
+      ]
+    )
 
-step :: (Int, Op) -> [TL.Text]
-step (ip, op) = instHeader ip op <> map indent (genInst ip op)
+step :: Int -> Op -> [BL.ByteString] -> ([BL.ByteString], [TL.Text])
+step ip op strs =
+  let (strs', inst) = genInst ip op strs
+   in (strs', instHeader ip op <> map indent inst)
+
+stepAll :: [Op] -> ([BL.ByteString], [TL.Text])
+stepAll ops =
+  stepOp [] (zip [0 ..] ops)
+ where
+  stepOp :: [BL.ByteString] -> [(Int, Op)] -> ([BL.ByteString], [TL.Text])
+  stepOp strs [] = (strs, [])
+  stepOp strs ((ip, op) : rest) =
+    let (strs', inst) = step ip op strs
+        (finalStrs, finalInsts) = stepOp strs' rest
+     in (finalStrs, inst ++ finalInsts)
 
 compileProgram :: Array Op -> TL.Text
 compileProgram ops =
-  TL.unlines
-    ( header
-        ++ concatMap step (zip [0 ..] (toList ops))
-        ++ footer (length ops)
-    )
+  let (strs, insts) = stepAll (toList ops)
+   in TL.unlines
+        ( header
+            ++ insts
+            ++ footer (length ops) strs
+        )

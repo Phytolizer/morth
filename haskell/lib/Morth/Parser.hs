@@ -56,7 +56,8 @@ parseWord token =
           Nothing -> do
             logErrLoc loc ("Unknown word: " % text) w
             throw ParseError
-        TokenInt n -> return $ Op (OpPush n) loc
+        TokenInt n -> return $ Op (OpPushInt n) loc
+        TokenStr s -> return $ Op (OpPushStr s) loc
 
 parseProgram :: T.Text -> TL.Text -> IO [Op]
 parseProgram fp s = mapM parseWord $ lexFile fp s

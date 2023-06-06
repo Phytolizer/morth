@@ -1,9 +1,11 @@
 module Morth.Op (OpCode (..), Op (..)) where
 
+import qualified Data.Text.Lazy as TL
 import Morth.Token (Location)
 
 data OpCode
-  = OpPush Int
+  = OpPushInt Int
+  | OpPushStr TL.Text
   | OpDup
   | Op2Dup
   | OpSwap
