@@ -412,6 +412,7 @@ genInst ip op strs = case opCode op of
       , "je .L" <> TL.pack (show dest)
       ]
     )
+  OpMacro -> undefined
   OpEnd JumpNil -> error "invalid jump target"
   OpEnd (JumpTo dest) ->
     ( strs

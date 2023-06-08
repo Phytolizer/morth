@@ -5,6 +5,7 @@ module Morth.Op (
   Value (..),
   pushInt,
   pushStr,
+  mapJmp,
 ) where
 
 import qualified Data.Text.Lazy as TL
@@ -55,16 +56,28 @@ data OpCode
   | OpElse Jump
   | OpWhile
   | OpDo Jump
+  | OpMacro
   | OpEnd Jump
   deriving (Eq, Show)
 
+mapJmp :: Jump -> Op -> Op
+mapJmp j op =
+  op
+    { opCode = case opCode op of
+        (OpIf _) -> OpIf j
+        (OpElse _) -> OpElse j
+        (OpDo _) -> OpDo j
+        (OpEnd _) -> OpEnd j
+        _ -> opCode op
+    }
+
 data Op = Op
-  { opCode :: OpCode
-  , opLocation :: Location
+  { opLocation :: Location
+  , opCode :: OpCode
   }
 
-pushInt :: Int -> Location -> Op
-pushInt n = Op $ OpPush $ ValInt n
+pushInt :: Location -> Int -> Op
+pushInt loc n = Op loc $ OpPush $ ValInt n
 
-pushStr :: TL.Text -> Location -> Op
-pushStr s = Op $ OpPush $ ValStr s
+pushStr :: Location -> TL.Text -> Op
+pushStr loc s = Op loc $ OpPush $ ValStr s

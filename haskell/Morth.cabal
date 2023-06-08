@@ -24,8 +24,7 @@ library morth-language
     exposed-modules: Morth.Driver
                    , Morth.Errors
                    , Morth.OS
-    other-modules: Morth.Blocks
-                 , Morth.Com
+    other-modules: Morth.Com
                  , Morth.Config
                  , Morth.Frontend
                  , Morth.Lexer

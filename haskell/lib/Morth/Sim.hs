@@ -183,6 +183,7 @@ step h ip op state = case opCode op of
             else ip + 1
         , state{stack = stack'}
         )
+  OpMacro -> undefined
   OpEnd JumpNil -> error "invalid jump target"
   OpEnd (JumpTo dest) -> return (dest, state)
 
