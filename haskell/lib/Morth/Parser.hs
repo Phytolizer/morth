@@ -223,8 +223,7 @@ processOp st token op = case opCode op of
               `catch` \e -> do
                 logErrLoc
                   (location nameTok)
-                  ("include of " % text % " failed: " % shown)
-                  name
+                  ("include failed: " % shown)
                   (e :: IOException)
                 throw ParseError
           return st{stTokens = tokens}
