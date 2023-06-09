@@ -39,6 +39,7 @@ builtinWords "syscall5" = Just OpSyscall5
 builtinWords "syscall6" = Just OpSyscall6
 builtinWords "+" = Just OpPlus
 builtinWords "-" = Just OpMinus
+builtinWords "*" = Just OpMul
 builtinWords "mod" = Just OpMod
 builtinWords "=" = Just OpEq
 builtinWords "!=" = Just OpNe

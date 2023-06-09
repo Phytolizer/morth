@@ -267,6 +267,15 @@ genInst ip op strs = case opCode op of
       , "push rax"
       ]
     )
+  OpMul ->
+    ( strs
+    ,
+      [ "pop rbx"
+      , "pop rax"
+      , "imul rax, rbx"
+      , "push rax"
+      ]
+    )
   OpMod ->
     ( strs
     ,

@@ -40,6 +40,7 @@ data OpCode
   | OpSyscall6
   | OpPlus
   | OpMinus
+  | OpMul
   | OpMod
   | OpEq
   | OpNe

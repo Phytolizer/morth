@@ -144,6 +144,7 @@ step h ip op state = case opCode op of
   OpSyscall6 -> error "unimplemented"
   OpPlus -> return (ip + 1, bop (+) state)
   OpMinus -> return (ip + 1, bop (-) state)
+  OpMul -> return (ip + 1, bop (*) state)
   OpMod -> return (ip + 1, bop mod state)
   OpEq -> return (ip + 1, bop (==) state)
   OpNe -> return (ip + 1, bop (/=) state)
