@@ -20,7 +20,7 @@ import qualified Text.Parsec.Text.Lazy as PL
 import Text.Read (readMaybe)
 
 escChar :: Char -> Int -> PL.Parser Int
-escChar c res = P.char '\\' >> P.char c >> parserReturn res
+escChar c res = P.char c >> parserReturn res
 
 escChars :: [PL.Parser Int]
 escChars =
@@ -65,7 +65,7 @@ valDigit base c
 
 octalEsc :: PL.Parser Int
 octalEsc =
-  (P.char '\\' >> uptoN1 3 P.octDigit)
+  uptoN1 3 P.octDigit
     >>= readInt 8 (valDigit 8) .> parserReturn
 
 parseHex :: Int -> PL.Parser Int
@@ -74,27 +74,30 @@ parseHex n =
     >>= readInt 16 (valDigit 16) .> parserReturn
 
 hexEsc :: PL.Parser Int
-hexEsc = P.string "\\x" >> parseHex 2
+hexEsc = P.char 'x' >> parseHex 2
 
 lowerUEsc :: PL.Parser Int
-lowerUEsc = P.string "\\u" >> parseHex 4
+lowerUEsc = P.char 'u' >> parseHex 4
 
 upperUEsc :: PL.Parser Int
-upperUEsc = P.string "\\U" >> parseHex 8
+upperUEsc = P.char 'U' >> parseHex 8
 
 esc :: PL.Parser [Int]
 esc =
   (++)
     <$> P.many
-      ( P.choice $
-          map P.try $
-            escChars
-              ++ [ octalEsc
-                 , hexEsc
-                 , lowerUEsc
-                 , upperUEsc
-                 , P.anyChar >>= fromEnum .> parserReturn
-                 ]
+      ( P.choice
+          [ P.char '\\'
+              >> P.choice
+                ( escChars
+                    ++ [ octalEsc
+                       , hexEsc
+                       , lowerUEsc
+                       , upperUEsc
+                       ]
+                )
+          , P.anyChar >>= fromEnum .> parserReturn
+          ]
       )
     <*> (P.eof >> parserReturn [])
 
