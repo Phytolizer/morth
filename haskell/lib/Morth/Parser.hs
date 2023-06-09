@@ -122,6 +122,7 @@ step st =
                     )
           TokenInt n -> return $ Right $ pushInt (location token) n
           TokenStr s -> return $ Right $ pushStr (location token) s
+          TokenChar c -> return $ Right $ pushInt (location token) (fromEnum c)
       )
         >>= either return (processOp st{stTokens = tl} token)
 

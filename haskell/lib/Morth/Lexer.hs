@@ -8,6 +8,7 @@ import Data.Char (isDigit)
 import Data.Function ((&))
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
+import Formatting (text, (%))
 import Morth.Errors (MorthError (LexError))
 import Morth.Location (Location (..))
 import Morth.Logger (logErrLoc)
@@ -111,6 +112,26 @@ lexWord w = case readMaybe (TL.unpack w) of
 mapFst :: (a -> a') -> (a, b) -> (a', b)
 mapFst f (a, b) = (f a, b)
 
+data Quote = SingleQuote | DoubleQuote
+
+isQuote :: TL.Text -> Maybe Quote
+isQuote s
+  | TL.isPrefixOf "'" s = Just SingleQuote
+  | TL.isPrefixOf "\"" s = Just DoubleQuote
+  | otherwise = Nothing
+
+quoteChar :: Quote -> Char
+quoteChar SingleQuote = '\''
+quoteChar DoubleQuote = '"'
+
+quoteStr :: Quote -> TL.Text
+quoteStr SingleQuote = "'"
+quoteStr DoubleQuote = "\""
+
+litName :: Quote -> TL.Text
+litName SingleQuote = "character"
+litName DoubleQuote = "string"
+
 lexLine :: T.Text -> Int -> TL.Text -> IO [Token]
 lexLine fp ln = loop 0
  where
@@ -118,22 +139,29 @@ lexLine fp ln = loop 0
   loop col s =
     TL.span (== ' ') s & \(ws, rest) ->
       let wsWidth = fromEnum $ TL.length ws
-       in if TL.isPrefixOf "\"" rest
-            then
+       in case isQuote rest of
+            Just q ->
               let (str, rest') =
-                    TL.span (/= '"') (TL.tail rest)
+                    TL.span (/= quoteChar q) (TL.tail rest)
                       & mapFst readEscapes
                   strWidth = fromEnum $ TL.length str
                   loc = Location fp (ln + 1) (col + 1)
-               in if not $ TL.isPrefixOf "\"" rest'
+               in if TL.isPrefixOf (quoteStr q) rest'
                     then do
-                      logErrLoc loc "unterminated string literal"
-                      throw LexError
-                    else
+                      tokenKind <- case q of
+                        DoubleQuote -> return $ TokenStr str
+                        SingleQuote -> case TL.uncons str of
+                          Just (c, tl) | TL.null tl -> return $ TokenChar c
+                          _ -> do
+                            logErrLoc loc ("invalid " % text % " literal") (litName q)
+                            throw LexError
                       fmap
-                        (Token loc (TokenStr str) :)
+                        (Token loc tokenKind :)
                         (loop (col + wsWidth + strWidth + 2) (TL.drop 1 rest'))
-            else
+                    else do
+                      logErrLoc loc ("unterminated " % text % "literal") (litName q)
+                      throw LexError
+            Nothing ->
               readWord
                 (Location fp (ln + 1) (col + wsWidth + 1))
                 (col + wsWidth)
