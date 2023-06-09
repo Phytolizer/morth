@@ -24,15 +24,15 @@ library morth-language
     exposed-modules: Morth.Driver
                    , Morth.Errors
                    , Morth.OS
-    other-modules: Morth.Com
+    other-modules: Morth.Compiler
                  , Morth.Config
                  , Morth.Frontend
+                 , Morth.Interpreter
                  , Morth.Lexer
                  , Morth.Location
                  , Morth.Logger
                  , Morth.Op
                  , Morth.Parser
-                 , Morth.Sim
                  , Morth.Token
     default-language: Haskell2010
     default-extensions: OverloadedStrings

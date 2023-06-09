@@ -1,4 +1,4 @@
-module Morth.Sim (simulateProgram, ByteOrder (..)) where
+module Morth.Interpreter (interpretProgram, ByteOrder (..)) where
 
 import Data.Bits (shiftL, shiftR, (.&.), (.|.))
 import qualified Data.ByteString.Lazy as BL
@@ -189,8 +189,8 @@ step h ip op state = case opCode op of
   OpEnd JumpNil -> error "invalid jump target"
   OpEnd (JumpTo dest) -> return (dest, state)
 
-simulateProgram :: ByteOrder -> OS -> Handle -> Array Op -> IO ()
-simulateProgram LittleEndian Linux h =
+interpretProgram :: ByteOrder -> OS -> Handle -> Array Op -> IO ()
+interpretProgram LittleEndian Linux h =
   iter (step h) 0 $
     State
       { mem = BL.replicate (fromIntegral (memCapacity + strCapacity)) 0
@@ -198,4 +198,4 @@ simulateProgram LittleEndian Linux h =
       , strOffsets = Map.empty
       , stack = []
       }
-simulateProgram _ _ _ = error "unimplemented"
+interpretProgram _ _ _ = error "unimplemented"

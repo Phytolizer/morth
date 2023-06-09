@@ -1,4 +1,4 @@
-module Morth.Com (compileProgram, Target (..)) where
+module Morth.Compiler (compileProgram, Target (..)) where
 
 import qualified Data.ByteString.Lazy as BL
 import Data.Foldable (toList)

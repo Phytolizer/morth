@@ -8,12 +8,12 @@ import Data.Functor ((<&>))
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.IO as TLIO
 import Formatting (int, string, text, (%))
-import Morth.Com (Target (NasmX86_64), compileProgram)
+import Morth.Compiler (Target (NasmX86_64), compileProgram)
 import Morth.Errors (MorthError (BadUsage, CommandFailed))
 import Morth.Frontend (readProgram)
 import Morth.Logger (logCmd, logErr, logInfo)
 import Morth.OS (OS (Linux))
-import Morth.Sim (ByteOrder (LittleEndian), simulateProgram)
+import Morth.Interpreter (ByteOrder (LittleEndian), interpretProgram)
 import System.Environment (getProgName)
 import System.Exit (ExitCode (..))
 import System.FilePath (isAbsolute, (-<.>), (<.>), (</>))
@@ -118,7 +118,7 @@ run args = do
     ["sim", path] -> do
       raw <- TLIO.readFile $ TL.unpack path
       readProgram (confIncludePaths conf) (TL.toStrict path) raw
-        >>= simulateProgram LittleEndian Linux stdout
+        >>= interpretProgram LittleEndian Linux stdout
       return ExitSuccess
     ["sim"] -> do
       usage ()
