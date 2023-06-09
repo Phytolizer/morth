@@ -1,7 +1,7 @@
 module Morth.Parser (parseProgram) where
 
 import Control.Applicative ((<|>))
-import Control.Exception (IOException, catch, throw)
+import Control.Exception (catch, throw)
 import Data.Foldable (toList)
 import Data.Function ((&))
 import Data.Functor (($>), (<&>))
@@ -11,7 +11,8 @@ import Data.Primitive (Array)
 import Data.Primitive.Array (fromList)
 import qualified Data.Sequence as Seq
 import qualified Data.Text.Lazy as TL
-import Formatting (shown, text, (%))
+import Formatting (string, text, (%))
+import GHC.IO.Exception (IOException (ioe_description))
 import Morth.Errors (MorthError (ParseError))
 import Morth.Lexer (lexFile)
 import Morth.Location (Location)
@@ -223,8 +224,9 @@ processOp st token op = case opCode op of
               `catch` \e -> do
                 logErrLoc
                   (location nameTok)
-                  ("include failed: " % shown)
-                  (e :: IOException)
+                  ("include of '" % text % "' failed: " % string)
+                  name
+                  (ioe_description e)
                 throw ParseError
           return st{stTokens = tokens}
         _ -> do
