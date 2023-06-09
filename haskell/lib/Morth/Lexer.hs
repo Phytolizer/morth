@@ -82,22 +82,23 @@ lowerUEsc = P.char 'u' >> parseHex 4
 upperUEsc :: PL.Parser Int
 upperUEsc = P.char 'U' >> parseHex 8
 
+someEsc :: PL.Parser Int
+someEsc =
+  P.choice
+    ( escChars
+        ++ [ octalEsc
+           , hexEsc
+           , lowerUEsc
+           , upperUEsc
+           ]
+    )
+
 esc :: PL.Parser [Int]
 esc =
   (++)
     <$> P.many
-      ( P.choice
-          [ P.char '\\'
-              >> P.choice
-                ( escChars
-                    ++ [ octalEsc
-                       , hexEsc
-                       , lowerUEsc
-                       , upperUEsc
-                       ]
-                )
-          , P.anyChar >>= fromEnum .> parserReturn
-          ]
+      ( (P.char '\\' >> someEsc)
+          <|> (P.anyChar >>= fromEnum .> parserReturn)
       )
     <*> (P.eof >> parserReturn [])
 
