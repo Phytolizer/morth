@@ -25,7 +25,7 @@ escChar c res = P.char '\\' >> P.char c >> parserReturn res
 escChars :: [PL.Parser Int]
 escChars =
   map
-    (P.try . uncurry escChar . second (fromIntegral . fromEnum))
+    (uncurry escChar . second (fromIntegral . fromEnum))
     [ ('\\', '\\')
     , ('\'', '\'')
     , ('"', '"')
@@ -87,13 +87,14 @@ esc =
   (++)
     <$> P.many
       ( P.choice $
-          escChars
-            ++ [ octalEsc
-               , hexEsc
-               , lowerUEsc
-               , upperUEsc
-               , P.anyChar >>= fromEnum .> parserReturn
-               ]
+          map P.try $
+            escChars
+              ++ [ octalEsc
+                 , hexEsc
+                 , lowerUEsc
+                 , upperUEsc
+                 , P.anyChar >>= fromEnum .> parserReturn
+                 ]
       )
     <*> (P.eof >> parserReturn [])
 
