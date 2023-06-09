@@ -185,17 +185,6 @@ processOp st token op = case opCode op of
                     , stProgram = program'
                     }
           _ -> undefined
-   where
-    handleIfElseEnd st' blockIp newDest =
-      let program' =
-            stProgram st'
-              & Seq.adjust (mapJmp $ JumpTo newDest) blockIp
-              & Seq.adjust (mapJmp $ JumpTo (newDest + 1)) newDest
-       in return
-            st'
-              { stIP = stIP st + 1
-              , stProgram = program'
-              }
   OpWhile ->
     return
       st
@@ -236,6 +225,18 @@ processOp st token op = case opCode op of
         { stIP = stIP st + 1
         , stProgram = stProgram st <> Seq.singleton op
         }
+
+handleIfElseEnd :: (Monad m) => State -> Int -> Int -> m State
+handleIfElseEnd st blockIp newDest =
+  let program =
+        stProgram st
+          & Seq.adjust (mapJmp $ JumpTo newDest) blockIp
+          & Seq.adjust (mapJmp $ JumpTo (newDest + 1)) newDest
+   in return
+        st
+          { stIP = stIP st + 1
+          , stProgram = program
+          }
 
 readMacro :: State -> TL.Text -> Macro -> IO State
 readMacro st name macro = case unconsSeq (stTokens st) of
