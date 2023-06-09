@@ -1,7 +1,10 @@
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Morth.Parser (parseProgram) where
 
 import Control.Applicative ((<|>))
-import Control.Exception (catch, throw)
+import Control.Exception (catch, throw, try)
 import Data.Foldable (toList)
 import Data.Function ((&))
 import Data.Functor (($>), (<&>))
@@ -11,8 +14,8 @@ import Data.Primitive (Array)
 import Data.Primitive.Array (fromList)
 import qualified Data.Sequence as Seq
 import qualified Data.Text.Lazy as TL
-import Formatting (string, text, (%))
-import GHC.IO.Exception (IOException (ioe_description))
+import Formatting (dquoted, text, (%))
+import GHC.IO.Exception (IOException)
 import Morth.Errors (MorthError (ParseError))
 import Morth.Lexer (lexFile)
 import Morth.Location (Location)
@@ -25,7 +28,8 @@ import Morth.Op (
   pushInt,
   pushStr,
  )
-import Morth.Token (Token (..), TokenKind (..))
+import Morth.Token (Token (..), TokenKind (..), kindReadableName)
+import System.FilePath ((</>))
 
 builtinWords :: TL.Text -> Maybe OpCode
 builtinWords "mem" = Just OpMem
@@ -77,12 +81,13 @@ data State = State
   , stStack :: [Int]
   , stProgram :: Seq.Seq Op
   , stTokens :: Seq.Seq Token
+  , stIncludePath :: [FilePath]
   , stMacros :: Map.Map TL.Text Macro
   }
 
-parseProgram :: [Token] -> IO (Array Op)
-parseProgram ts =
-  untilM inputEmpty step (initState ts)
+parseProgram :: [FilePath] -> [Token] -> IO (Array Op)
+parseProgram path ts =
+  untilM inputEmpty step (initState ts path)
     >>= \st ->
       case stStack st of
         [] -> return (stProgram st & toList & fromList)
@@ -90,8 +95,15 @@ parseProgram ts =
           logErrLoc (location (stTokens st `Seq.index` x)) "Unclosed block"
           throw ParseError
  where
-  initState :: [Token] -> State
-  initState tokens = State 0 [] Seq.empty (Seq.fromList tokens) Map.empty
+  initState :: [Token] -> [FilePath] -> State
+  initState tokens includePath =
+    State
+      0
+      []
+      Seq.empty
+      (Seq.fromList tokens)
+      includePath
+      Map.empty
 
   inputEmpty :: State -> Bool
   inputEmpty = Seq.null . stTokens
@@ -216,21 +228,20 @@ processOp st token op = case opCode op of
       Just (nameTok, tl) -> case kind nameTok of
         TokenStr name -> do
           tokens <-
-            ( readFile (TL.unpack name)
-                >>= lexFile (TL.toStrict name) . TL.pack
-                <&> Seq.fromList
-                <&> (<> tl)
-              )
-              `catch` \e -> do
+            (includeFile (stIncludePath st) name <&> (<> tl))
+              `catch` \(_ :: MorthError) -> do
                 logErrLoc
                   (location nameTok)
-                  ("include of '" % text % "' failed: " % string)
+                  ("include of " % dquoted text % " failed: could not be found")
                   name
-                  (ioe_description e)
                 throw ParseError
           return st{stTokens = tokens}
         _ -> do
-          logErrLoc (location nameTok) "expected file name as string literal"
+          logErrLoc
+            (location nameTok)
+            ("expected file name to be " % text % " but found " % text)
+            (kindReadableName (TokenStr ""))
+            (kindReadableName $ kind nameTok)
           throw ParseError
   OpMacro ->
     case unconsSeq (stTokens st) of
@@ -246,7 +257,11 @@ processOp st token op = case opCode op of
           Nothing ->
             readMacro st{stTokens = tl} w (Macro (opLocation op) [])
         _ -> do
-          logErrLoc (location name) "expected macro name"
+          logErrLoc
+            (location name)
+            ("expected macro name to be " % text % " but found " % text)
+            (kindReadableName (TokenWord ""))
+            (kindReadableName $ kind name)
           throw ParseError
   _ ->
     return
@@ -254,6 +269,20 @@ processOp st token op = case opCode op of
         { stIP = stIP st + 1
         , stProgram = stProgram st <> Seq.singleton op
         }
+
+includeFile :: [FilePath] -> TL.Text -> IO (Seq.Seq Token)
+includeFile includePath name =
+  case includePath of
+    (x : xs) ->
+      try
+        ( readFile (x </> TL.unpack name)
+            >>= lexFile (TL.toStrict name) . TL.pack
+            <&> Seq.fromList
+        )
+        >>= \case
+          Left (_ :: IOException) -> includeFile xs name
+          Right tokens -> return tokens
+    [] -> throw ParseError
 
 handleIfElseEnd :: (Monad m) => State -> Int -> Int -> m State
 handleIfElseEnd st blockIp newDest =

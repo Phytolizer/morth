@@ -11,10 +11,10 @@ data TokenKind
   deriving (Show)
 
 kindReadableName :: TokenKind -> TL.Text
-kindReadableName (TokenWord _) = "word"
-kindReadableName (TokenInt _) = "integer"
-kindReadableName (TokenStr _) = "string"
-kindReadableName (TokenChar _) = "character"
+kindReadableName (TokenWord _) = "a word"
+kindReadableName (TokenInt _) = "an integer"
+kindReadableName (TokenStr _) = "a string"
+kindReadableName (TokenChar _) = "a character"
 
 data Token = Token
   { location :: Location

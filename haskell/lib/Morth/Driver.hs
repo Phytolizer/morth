@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
 module Morth.Driver (run) where
 
 import Control.Exception (throw)
@@ -70,6 +72,27 @@ data ComArgs = ComArgs
   , comInput :: TL.Text
   }
 
+newtype Conf = Conf
+  { confIncludePaths :: [FilePath]
+  }
+
+defaultIncludePath :: [FilePath]
+defaultIncludePath = [".", "std"]
+
+parseArgs :: [TL.Text] -> IO ([TL.Text], Conf)
+parseArgs args = loop args (Conf defaultIncludePath)
+ where
+  loop :: [TL.Text] -> Conf -> IO ([TL.Text], Conf)
+  loop [] conf = return ([], conf)
+  loop ("-I" : path : args') conf =
+    loop
+      args'
+      conf{confIncludePaths = TL.unpack path : confIncludePaths conf}
+  loop ["-I"] _ = do
+    logErr "no path given for '-I'"
+    throw BadUsage
+  loop passthroughArgs conf = return (passthroughArgs, conf)
+
 parseComArgs :: [TL.Text] -> IO ([TL.Text], ComArgs)
 parseComArgs args = loop args False Nothing
  where
@@ -90,10 +113,11 @@ toRelative path
 
 run :: [String] -> IO ExitCode
 run args = do
-  case map TL.pack args of
+  (args', conf) <- parseArgs $ TL.pack <$> args
+  case args' of
     ["sim", path] -> do
       raw <- TLIO.readFile $ TL.unpack path
-      readProgram (TL.toStrict path) raw
+      readProgram (confIncludePaths conf) (TL.toStrict path) raw
         >>= simulateProgram LittleEndian Linux stdout
       return ExitSuccess
     ["sim"] -> do
@@ -111,7 +135,7 @@ run args = do
         parseComArgs comArgs
       raw <- TLIO.readFile $ TL.unpack input
       asmText <-
-        readProgram (TL.toStrict input) raw
+        readProgram (confIncludePaths conf) (TL.toStrict input) raw
           <&> compileProgram NasmX86_64 Linux
       let outPath' = maybe (TL.unpack input -<.> "") TL.unpack outPath
           asmPath = outPath' <.> "asm"

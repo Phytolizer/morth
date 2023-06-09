@@ -7,7 +7,7 @@ import Morth.Lexer (lexFile)
 import Morth.Op (Op)
 import Morth.Parser (parseProgram)
 
-readProgram :: T.Text -> TL.Text -> IO (Array Op)
-readProgram fp text =
+readProgram :: [FilePath] -> T.Text -> TL.Text -> IO (Array Op)
+readProgram includePath fp text =
   lexFile fp text
-    >>= parseProgram
+    >>= parseProgram includePath
