@@ -58,6 +58,7 @@ data OpCode
   | OpDo Jump
   | OpMacro
   | OpEnd Jump
+  | OpInclude
   deriving (Eq, Show)
 
 mapJmp :: Jump -> Op -> Op

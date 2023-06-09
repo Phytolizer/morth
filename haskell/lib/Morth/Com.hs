@@ -413,6 +413,7 @@ genInst ip op strs = case opCode op of
       ]
     )
   OpMacro -> undefined
+  OpInclude -> undefined
   OpEnd JumpNil -> error "invalid jump target"
   OpEnd (JumpTo dest) ->
     ( strs

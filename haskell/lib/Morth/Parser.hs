@@ -1,7 +1,7 @@
 module Morth.Parser (parseProgram) where
 
 import Control.Applicative ((<|>))
-import Control.Exception (throw)
+import Control.Exception (IOException, catch, throw)
 import Data.Foldable (toList)
 import Data.Function ((&))
 import Data.Functor (($>), (<&>))
@@ -11,8 +11,9 @@ import Data.Primitive (Array)
 import Data.Primitive.Array (fromList)
 import qualified Data.Sequence as Seq
 import qualified Data.Text.Lazy as TL
-import Formatting (text, (%))
+import Formatting (shown, text, (%))
 import Morth.Errors (MorthError (ParseError))
+import Morth.Lexer (lexFile)
 import Morth.Location (Location)
 import Morth.Logger (logErrLoc)
 import Morth.Op (
@@ -56,6 +57,7 @@ builtinWords "while" = Just OpWhile
 builtinWords "do" = Just (OpDo JumpNil)
 builtinWords "macro" = Just OpMacro
 builtinWords "end" = Just (OpEnd JumpNil)
+builtinWords "include" = Just OpInclude
 builtinWords "dup" = Just OpDup
 builtinWords "2dup" = Just Op2Dup
 builtinWords "swap" = Just OpSwap
@@ -203,6 +205,30 @@ processOp st token op = case opCode op of
             , stStack = stIP st : stack
             , stProgram = program'
             }
+  OpInclude ->
+    case unconsSeq (stTokens st) of
+      Nothing -> do
+        logErrLoc (location token) "include without filename"
+        throw ParseError
+      Just (nameTok, tl) -> case kind nameTok of
+        TokenStr name -> do
+          tokens <-
+            ( readFile (TL.unpack name)
+                >>= lexFile (TL.toStrict name) . TL.pack
+                <&> Seq.fromList
+                <&> (<> tl)
+              )
+              `catch` \e -> do
+                logErrLoc
+                  (location nameTok)
+                  ("include of " % text % " failed: " % shown)
+                  name
+                  (e :: IOException)
+                throw ParseError
+          return st{stTokens = tokens}
+        _ -> do
+          logErrLoc (location nameTok) "expected file name as string literal"
+          throw ParseError
   OpMacro ->
     case unconsSeq (stTokens st) of
       Nothing -> do
