@@ -12,7 +12,10 @@
 #include <string.h>
 
 static void usage(char* program_name) {
-    printf("Usage: %s <SUBCOMMAND> [ARGS]\n", program_name);
+    printf("Usage: %s [OPTIONS] <SUBCOMMAND> [ARGS]\n", program_name);
+    printf("OPTIONS:\n");
+    printf("  -t <TARGET>               Specify the output target (default: 'generic-c')\n");
+    printf("    TARGET is one of: 'x86-64-linux-nasm', 'x64-linux-nasm' (alias), 'generic-c'\n");
     printf("SUBCOMMANDS:\n");
     printf("  sim <FILE>                Simulate the program\n");
     printf("  com [ARGS] <FILE>         Compile the program\n");
@@ -24,13 +27,33 @@ int main(int argc, char** argv) {
     args_t args = args_new(argc, argv);
     char* program_name = args_next(&args);
 
-    if (argc <= 1) {
-        usage(program_name);
-        printf("ERROR: no subcommand provided\n");
-        return EXIT_FAILURE;
+    char* subcommand = NULL;
+    compile_target_t target = COMPILE_TARGET_C;
+    while (true) {
+        char* arg = args_next(&args);
+        if (arg == NULL) {
+            usage(program_name);
+            printf("ERROR: no subcommand provided\n");
+            return EXIT_FAILURE;
+        }
+        if (arg[0] == '-') {
+            if (strcmp(arg, "-t") == 0) {
+                char* raw_target = args_next(&args);
+                if (raw_target == NULL || !parse_compile_target(raw_target, &target)) {
+                    usage(program_name);
+                    printf("ERROR: invalid argument to `-t`\n");
+                    return EXIT_FAILURE;
+                }
+            } else {
+                usage(program_name);
+                printf("ERROR: unrecognized option: '%s'\n", arg);
+                return EXIT_FAILURE;
+            }
+        } else {
+            subcommand = arg;
+            break;
+        }
     }
-
-    char* subcommand = args_next(&args);
 
     if (strcmp(subcommand, "sim") == 0) {
         if (args_curr(&args) == NULL) {
@@ -57,10 +80,8 @@ int main(int argc, char** argv) {
         char* input_file_path = args_next(&args);
         program_t program = load_program_from_file(input_file_path);
         cross_reference_blocks(program);
-        compile_program(program, COMPILE_TARGET_C, "output.c");
+        compile_program_native(program, target, "output");
         free(program.begin);
-        RUN_COMMAND("cc", "-O2", "-c", "-o", "output.o", "output.c");
-        RUN_COMMAND("cc", "-o", "output", "output.o");
         if (run) {
             RUN_COMMAND("./output");
         }

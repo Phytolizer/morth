@@ -1,9 +1,11 @@
 #include "compile.h"
 
+#include "alloc_printf.h"
 #include "c_emitter.h"
 #include "generic_io.h"
 #include "memory.h"
 #include "nasm_emitter.h"
+#include "run_command.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -16,6 +18,18 @@
 static void compile_program_nasm(program_t program, generic_file_t f);
 static void compile_program_c(program_t program, generic_file_t f);
 
+bool parse_compile_target(const char* text, compile_target_t* out_target) {
+    if (strcmp(text, "x86-64-linux-nasm") == 0 || strcmp(text, "x64-linux-nasm") == 0) {
+        *out_target = COMPILE_TARGET_NASM;
+        return true;
+    }
+    if (strcmp(text, "generic-c") == 0) {
+        *out_target = COMPILE_TARGET_C;
+        return true;
+    }
+    return false;
+}
+
 void compile_program(program_t program, compile_target_t target, const char* out_file_path) {
     generic_file_t f = generic_open(out_file_path);
     switch (target) {
@@ -27,6 +41,53 @@ void compile_program(program_t program, compile_target_t target, const char* out
             break;
     }
     generic_close(f);
+}
+
+void compile_program_native(
+        program_t program, compile_target_t target, const char* out_file_basename) {
+#ifdef _WIN32
+#define OBJ_EXT ".obj"
+#define NASM_FORMAT "win64"
+#else // _WIN32
+#define OBJ_EXT ".o"
+#define NASM_FORMAT "elf64"
+#endif // !_WIN32
+
+#ifdef _MSC_VER
+#define LINK_CMD "link.exe"
+#define LINK_OUT_FMT "/out:%s"
+#else // _MSC_VER
+#define LINK_CMD "ld"
+#define LINK_OUT_FMT "-o%s"
+#endif // !_MSC_VER
+
+    switch (target) {
+        case COMPILE_TARGET_C: {
+            char* c_path = NULL;
+            alloc_sprintf(&c_path, "%s.c", out_file_basename);
+            compile_program(program, target, c_path);
+            char* obj_path = NULL;
+            alloc_sprintf(&obj_path, "%s" OBJ_EXT, out_file_basename);
+            RUN_COMMAND("cc", "-O2", "-c", "-o", obj_path, c_path);
+            free(c_path);
+            RUN_COMMAND("cc", "-o", out_file_basename, obj_path);
+            free(obj_path);
+        } break;
+        case COMPILE_TARGET_NASM: {
+            char* asm_path = NULL;
+            alloc_sprintf(&asm_path, "%s.asm", out_file_basename);
+            compile_program(program, target, asm_path);
+            char* obj_path = NULL;
+            alloc_sprintf(&obj_path, "%s" OBJ_EXT, out_file_basename);
+            RUN_COMMAND("nasm", "-f", NASM_FORMAT, "-o", obj_path, asm_path);
+            free(asm_path);
+            char* link_args = NULL;
+            alloc_sprintf(&link_args, LINK_OUT_FMT, out_file_basename);
+            RUN_COMMAND(LINK_CMD, link_args, obj_path);
+            free(obj_path);
+            free(link_args);
+        } break;
+    }
 }
 
 static void compile_program_nasm(program_t program, generic_file_t f) {
