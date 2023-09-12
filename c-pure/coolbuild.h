@@ -2,7 +2,6 @@
 #define COOLBUILD_H_
 
 #include <assert.h>
-#include <dirent.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdbool.h>
