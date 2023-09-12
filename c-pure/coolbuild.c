@@ -67,6 +67,7 @@ char* objPath(size_t i, Target target) {
         case TARGET_MINGW:
             return coolTempPrintf("obj/%s.o", COOL_ARRAY_GET(morth_sources, i));
     }
+    return "";
 }
 
 char* srcPath(size_t i) {
@@ -82,6 +83,8 @@ bool compileObjects(Target target) {
         coolCmdAppend(&cmd, "-c", srcPath(i));
         if (strcmp(cmd.items[0], "cl.exe") != 0) {
             coolCmdAppend(&cmd, "-o", objPath(i, target));
+        } else {
+            coolCmdAppend(&cmd, coolTempPrintf("/Fo%s", objPath(i, target)));
         }
         bool result = coolCmdRunSync(cmd);
         coolCmdFree(cmd);
