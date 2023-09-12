@@ -11,7 +11,9 @@ typedef enum {
 static const char* cc(const char* default_cc) {
     const char* result;
 #ifdef _WIN32
-    _dupenv_s(&result, NULL, "CC");
+    char* temp;
+    _dupenv_s(&temp, NULL, "CC");
+    result = temp;
 #else // _WIN32
     result = getenv("CC");
 #endif // !_WIN32
@@ -21,21 +23,20 @@ static const char* cc(const char* default_cc) {
     return result;
 }
 
-void target_compiler(CoolCmd* cmd, Target target) {
+char const* target_compiler(Target target) {
     switch (target) {
         case TARGET_WINDOWS_MSVC:
-            coolCmdAppend(cmd, cc("cl.exe"));
-            break;
+            return cc("cl.exe");
         case TARGET_WINDOWS_CLANG:
-            coolCmdAppend(cmd, cc("clang"));
-            break;
+            return cc("clang");
         case TARGET_MINGW:
-            coolCmdAppend(cmd, "x86_64-w64-mingw32-gcc");
-            break;
+            // don't use env here, just in case
+            return "x86_64-w64-mingw32-gcc";
         case TARGET_LINUX:
-            coolCmdAppend(cmd, cc("gcc"));
-            break;
+            return cc("gcc");
     }
+    COOL_ASSERT(false, "unreachable");
+    return "";
 }
 
 void cflags(CoolCmd* cmd, Target target) {
@@ -90,7 +91,7 @@ bool compileObjects(Target target) {
     for (size_t i = 0; i < COOL_ARRAY_LEN(morth_sources); i += 1) {
         size_t checkpoint = coolTempSave();
         CoolCmd cmd = {0};
-        target_compiler(&cmd, target);
+        coolCmdAppend(&cmd, target_compiler(target));
         cflags(&cmd, target);
         coolCmdAppend(&cmd, "-c", srcPath(i));
         if (strcmp(cmd.items[0], "cl.exe") != 0) {
@@ -110,7 +111,7 @@ bool compileObjects(Target target) {
 
 bool compileExe(Target target) {
     CoolCmd cmd = {0};
-    target_compiler(&cmd, target);
+    coolCmdAppend(&cmd, target_compiler(target));
     switch (target) {
         case TARGET_LINUX:
         case TARGET_MINGW:
@@ -136,14 +137,15 @@ int main(int argc, char** argv) {
     coolMkdirExistOk("obj");
 
 #ifdef _WIN32
-#ifdef _MSC_VER
-    Target const target = TARGET_WINDOWS_MSVC;
-#else // _MSC_VER
-    Target const target = TARGET_WINDOWS_CLANG;
-#endif // !_MSC_VER
+    Target target = TARGET_WINDOWS_MSVC;
 #else // _WIN32
-    Target const target = TARGET_LINUX;
+    Target target = TARGET_LINUX;
 #endif // !_WIN32
+
+    char const* compiler = target_compiler(target);
+    if (strcmp(compiler, "clang") == 0) {
+        target = TARGET_WINDOWS_CLANG;
+    }
 
     const char** objects;
     if (!compileObjects(target)) {
