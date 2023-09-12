@@ -244,8 +244,11 @@ static char cool_temp_buf[COOL_TEMP_CAPACITY] = {0};
 static char cool_strerror_buf[COOL_STRERROR_SIZE];
 
 #ifdef _WIN32
-#define strerror(err) \
-    ((char*)strerror_s(cool_strerror_buf, COOL_STRERROR_SIZE, err), cool_strerror_buf)
+static inline char* cool_override_strerror(int err) {
+    strerror_s(cool_strerror_buf, COOL_STRERROR_SIZE, err);
+    return cool_strerror_buf;
+}
+#define strerror(err) cool_override_strerror(err)
 #endif // _WIN32
 
 bool coolMkdirExistOk(char const* path) {
