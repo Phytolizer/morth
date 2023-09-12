@@ -71,7 +71,10 @@ bool compileObjects(Target target) {
         CoolCmd cmd = {0};
         target_compiler(&cmd, target);
         cflags(&cmd, target);
-        coolCmdAppend(&cmd, "-c", "-o", objPath(i), srcPath(i));
+        coolCmdAppend(&cmd, "-c", srcPath(i));
+        if (strcmp(cmd.items[0], "cl.exe") != 0) {
+            coolCmdAppend(&cmd, "-o", objPath(i));
+        }
         bool result = coolCmdRunSync(cmd);
         coolCmdFree(cmd);
         coolTempRewind(checkpoint);
