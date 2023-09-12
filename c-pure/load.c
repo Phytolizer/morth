@@ -16,38 +16,38 @@ static size_t getline(char** lineptr, size_t* n, FILE* stream) {
     int c;
 
     if (lineptr == NULL) {
-        return -1;
+        return SIZE_MAX;
     }
     if (stream == NULL) {
-        return -1;
+        return SIZE_MAX;
     }
     if (n == NULL) {
-        return -1;
+        return SIZE_MAX;
     }
     bufptr = *lineptr;
     size = *n;
 
     c = fgetc(stream);
     if (c == EOF) {
-        return -1;
+        return SIZE_MAX;
     }
     if (bufptr == NULL) {
         bufptr = malloc(128);
         if (bufptr == NULL) {
-            return -1;
+            return SIZE_MAX;
         }
         size = 128;
     }
     p = bufptr;
     while (c != EOF) {
-        if ((p - bufptr) > (size - 1)) {
+        if ((uintptr_t)(p - bufptr) > (size - 1)) {
             size = size + 128;
             bufptr = realloc(bufptr, size);
             if (bufptr == NULL) {
-                return -1;
+                return SIZE_MAX;
             }
         }
-        *p++ = c;
+        *p++ = (char)c;
         if (c == '\n') {
             break;
         }
@@ -60,6 +60,7 @@ static size_t getline(char** lineptr, size_t* n, FILE* stream) {
 
     return p - bufptr - 1;
 }
+#define strtok_r strtok_s
 #endif // _WIN32
 
 program_t load_program_from_file(const char* input_file_path) {

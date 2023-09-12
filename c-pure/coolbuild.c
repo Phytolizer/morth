@@ -36,7 +36,7 @@ void cflags(CoolCmd* cmd, Target target) {
             coolCmdAppend(cmd, "-std=gnu99", "-Wall", "-Wextra", "-ggdb3", "-Wmissing-prototypes");
             break;
         case TARGET_WINDOWS:
-            coolCmdAppend(cmd, "/std:c11", "/W4", "/Zi", "/permissive-");
+            coolCmdAppend(cmd, "/std:c11", "/W4", "/Zi", "/permissive-", "/nologo");
             break;
     }
 }

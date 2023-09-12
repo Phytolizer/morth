@@ -66,7 +66,7 @@ static proc_t cmd_run_async(va_list args) {
 
     if (!success) {
         fprintf(stderr, "[ERR] could not create child process: %lu\n", GetLastError());
-        return COOL_INVALID_PROC;
+        return INVALID_PROC;
     }
 
     CloseHandle(proc_info.hThread);
