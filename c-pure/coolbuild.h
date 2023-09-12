@@ -216,10 +216,8 @@ bool coolRename(char const* src_path, char const* dest_path);
             } \
             CoolCmd cmd = {0}; \
             coolDaAppendMany(&cmd, argv, argc); \
-            if (!coolCmdRunSync(cmd)) { \
-                coolRename(sb.items, binary_path); \
+            if (!coolCmdRunSync(cmd)) \
                 exit(1); \
-            } \
             exit(0); \
         } \
     } while (false)
