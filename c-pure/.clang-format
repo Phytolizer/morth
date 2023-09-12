@@ -10,3 +10,4 @@ AlignAfterOpenBracket: false
 IncludeBlocks: Regroup
 AlignEscapedNewlines: DontAlign
 IndentCaseLabels: true
+AlignTrailingComments: false
