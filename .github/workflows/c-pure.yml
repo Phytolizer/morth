@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - { os: windows-latest, mkcoolbuild: cl.exe -NoLogo }
+          - { os: windows-latest, mkcoolbuild: cl.exe /nologo }
           - { os: ubuntu-latest, mkcoolbuild: cc -o coolbuild }
 
     runs-on: ${{ matrix.os }}
@@ -32,4 +32,5 @@ jobs:
     - name: configure
       run: ${{ matrix.mkcoolbuild }} coolbuild.c
     - name: build
+      if: matrix.os == 'ubuntu-latest'
       run: ./coolbuild
