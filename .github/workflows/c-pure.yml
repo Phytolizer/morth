@@ -18,7 +18,7 @@ jobs:
       matrix:
         include:
           - { os: windows-latest, mkcoolbuild: cl.exe -NoLogo }
-          - { os: ubuntu-latest, cc: cc -o coolbuild }
+          - { os: ubuntu-latest, mkcoolbuild: cc -o coolbuild }
 
     runs-on: ${{ matrix.os }}
 
