@@ -240,7 +240,12 @@ int closedir(DIR* dirp);
 
 static size_t cool_temp_size = 0;
 static char cool_temp_buf[COOL_TEMP_CAPACITY] = {0};
-static char cool_strerror_buf[1024];
+#define COOL_STRERROR_SIZE 1024
+static char cool_strerror_buf[COOL_STRERROR_SIZE];
+
+#ifdef _WIN32
+#define strerror(err) (strerror_s(cool_strerror_buf, COOL_STRERROR_SIZE, err), cool_strerror_buf)
+#endif // _WIN32
 
 bool coolMkdirExistOk(char const* path) {
 #ifdef _WIN32
@@ -253,8 +258,7 @@ bool coolMkdirExistOk(char const* path) {
             coolLog(COOL_INFO, "directory '%s' already exists", path);
             return true;
         }
-        strerror_s(cool_strerror_buf, sizeof(cool_strerror_buf), errno);
-        coolLog(COOL_ERROR, "could not create directory '%s': %s", path, cool_strerror_buf);
+        coolLog(COOL_ERROR, "could not create directory '%s': %s", path, strerror(errno));
         return false;
     }
 
@@ -509,8 +513,7 @@ bool coolReadEntireDir(char const* parent, CoolFilePaths* children) {
 
     dir = opendir(parent);
     if (dir == NULL) {
-        strerror_s(cool_strerror_buf, sizeof(cool_strerror_buf), errno);
-        coolLog(COOL_ERROR, "Could not open directory '%s': %s", parent, cool_strerror_buf);
+        coolLog(COOL_ERROR, "Could not open directory '%s': %s", parent, strerror(errno));
         COOL_GOTO_CLEANUP(false);
     }
 
@@ -522,8 +525,7 @@ bool coolReadEntireDir(char const* parent, CoolFilePaths* children) {
     }
 
     if (errno != 0) {
-        strerror_s(cool_strerror_buf, sizeof(cool_strerror_buf), errno);
-        coolLog(COOL_ERROR, "Could not read directory '%s': %s", parent, cool_strerror_buf);
+        coolLog(COOL_ERROR, "Could not read directory '%s': %s", parent, strerror(errno));
         COOL_GOTO_CLEANUP(false);
     }
 
