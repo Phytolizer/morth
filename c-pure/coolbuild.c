@@ -7,10 +7,10 @@ typedef enum {
     TARGET_WINDOWS,
 } Target;
 
-static const char* cc(void) {
+static const char* cc(const char* default_cc) {
     const char* result = getenv("CC");
     if (result == NULL) {
-        result = "cc";
+        result = default_cc;
     }
     return result;
 }
@@ -18,13 +18,13 @@ static const char* cc(void) {
 void target_compiler(CoolCmd* cmd, Target target) {
     switch (target) {
         case TARGET_WINDOWS:
-            coolCmdAppend(cmd, "cl.exe");
+            coolCmdAppend(cmd, cc("cl.exe"));
             break;
         case TARGET_MINGW:
             coolCmdAppend(cmd, "x86_64-w64-mingw32-gcc");
             break;
         case TARGET_LINUX:
-            coolCmdAppend(cmd, cc());
+            coolCmdAppend(cmd, cc("gcc"));
             break;
     }
 }

@@ -181,12 +181,12 @@ bool coolRename(char const* src_path, char const* dest_path);
 
 #ifndef COOL_REBUILD_URSELF
 #ifdef _WIN32
-#if defined(__GNUC__)
-#define COOL_REBUILD_URSELF(binary_path, source_path) \
-    COOL_CMD("gcc", "-o", binary_path, source_path)
-#elif defined(__clang__)
+#if defined(__clang__)
 #define COOL_REBUILD_URSELF(binary_path, source_path) \
     COOL_CMD("clang", "-o", binary_path, source_path)
+#elif defined(__GNUC__)
+#define COOL_REBUILD_URSELF(binary_path, source_path) \
+    COOL_CMD("gcc", "-o", binary_path, source_path)
 #elif defined(_MSC_VER)
 #define COOL_REBUILD_URSELF(binary_path, source_path) COOL_CMD("cl.exe", source_path)
 #endif // __GNUC__ || __clang__ || _MSC_VER
@@ -243,7 +243,7 @@ static char cool_temp_buf[COOL_TEMP_CAPACITY] = {0};
 
 bool coolMkdirExistOk(char const* path) {
 #ifdef _WIN32
-    int result = mkdir(path);
+    int result = _mkdir(path);
 #else
     int result = mkdir(path, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 #endif
