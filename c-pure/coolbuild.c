@@ -51,6 +51,9 @@ void cflags(CoolCmd* cmd, Target target) {
                     "/D_CRT_SECURE_NO_WARNINGS");
             break;
     }
+    if (target == TARGET_WINDOWS_CLANG) {
+        coolCmdAppend(cmd, "-D_CRT_SECURE_NO_WARNINGS");
+    }
 }
 
 const char* const morth_sources[] = {
