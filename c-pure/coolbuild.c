@@ -59,8 +59,14 @@ const char* const morth_sources[] = {
         "token",
 };
 
-char* objPath(size_t i) {
-    return coolTempPrintf("obj/%s.o", COOL_ARRAY_GET(morth_sources, i));
+char* objPath(size_t i, Target target) {
+    switch (target) {
+        case TARGET_WINDOWS:
+            return coolTempPrintf("obj/%s.obj", COOL_ARRAY_GET(morth_sources, i));
+        case TARGET_LINUX:
+        case TARGET_MINGW:
+            return coolTempPrintf("obj/%s.o", COOL_ARRAY_GET(morth_sources, i));
+    }
 }
 
 char* srcPath(size_t i) {
@@ -75,7 +81,7 @@ bool compileObjects(Target target) {
         cflags(&cmd, target);
         coolCmdAppend(&cmd, "-c", srcPath(i));
         if (strcmp(cmd.items[0], "cl.exe") != 0) {
-            coolCmdAppend(&cmd, "-o", objPath(i));
+            coolCmdAppend(&cmd, "-o", objPath(i, target));
         }
         bool result = coolCmdRunSync(cmd);
         coolCmdFree(cmd);
@@ -90,10 +96,17 @@ bool compileObjects(Target target) {
 bool compileExe(Target target) {
     CoolCmd cmd = {0};
     target_compiler(&cmd, target);
-    coolCmdAppend(&cmd, "-o", "build/morth");
+    switch (target) {
+        case TARGET_LINUX:
+        case TARGET_MINGW:
+            coolCmdAppend(&cmd, "-o", "build/morth");
+            break;
+        case TARGET_WINDOWS:
+            coolCmdAppend(&cmd, "/Febuild/morth");
+    }
     size_t checkpoint = coolTempSave();
     for (size_t i = 0; i < COOL_ARRAY_LEN(morth_sources); i += 1) {
-        coolCmdAppend(&cmd, objPath(i));
+        coolCmdAppend(&cmd, objPath(i, target));
     }
     bool result = coolCmdRunSync(cmd);
     coolCmdFree(cmd);
