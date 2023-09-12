@@ -4,7 +4,8 @@
 typedef enum {
     TARGET_LINUX,
     TARGET_MINGW,
-    TARGET_WINDOWS,
+    TARGET_WINDOWS_MSVC,
+    TARGET_WINDOWS_CLANG,
 } Target;
 
 static const char* cc(const char* default_cc) {
@@ -22,8 +23,11 @@ static const char* cc(const char* default_cc) {
 
 void target_compiler(CoolCmd* cmd, Target target) {
     switch (target) {
-        case TARGET_WINDOWS:
+        case TARGET_WINDOWS_MSVC:
             coolCmdAppend(cmd, cc("cl.exe"));
+            break;
+        case TARGET_WINDOWS_CLANG:
+            coolCmdAppend(cmd, cc("clang"));
             break;
         case TARGET_MINGW:
             coolCmdAppend(cmd, "x86_64-w64-mingw32-gcc");
@@ -38,9 +42,10 @@ void cflags(CoolCmd* cmd, Target target) {
     switch (target) {
         case TARGET_LINUX:
         case TARGET_MINGW:
+        case TARGET_WINDOWS_CLANG:
             coolCmdAppend(cmd, "-std=gnu99", "-Wall", "-Wextra", "-ggdb3", "-Wmissing-prototypes");
             break;
-        case TARGET_WINDOWS:
+        case TARGET_WINDOWS_MSVC:
             coolCmdAppend(cmd, "/std:c11", "/W4", "/Zi", "/permissive-", "/nologo",
                     "/D_CRT_SECURE_NO_WARNINGS");
             break;
@@ -67,7 +72,8 @@ const char* const morth_sources[] = {
 
 char* objPath(size_t i, Target target) {
     switch (target) {
-        case TARGET_WINDOWS:
+        case TARGET_WINDOWS_MSVC:
+        case TARGET_WINDOWS_CLANG:
             return coolTempPrintf("obj/%s.obj", COOL_ARRAY_GET(morth_sources, i));
         case TARGET_LINUX:
         case TARGET_MINGW:
@@ -108,9 +114,10 @@ bool compileExe(Target target) {
     switch (target) {
         case TARGET_LINUX:
         case TARGET_MINGW:
+        case TARGET_WINDOWS_CLANG:
             coolCmdAppend(&cmd, "-o", "build/morth");
             break;
-        case TARGET_WINDOWS:
+        case TARGET_WINDOWS_MSVC:
             coolCmdAppend(&cmd, "/Febuild/morth");
     }
     size_t checkpoint = coolTempSave();
@@ -129,7 +136,11 @@ int main(int argc, char** argv) {
     coolMkdirExistOk("obj");
 
 #ifdef _WIN32
-    Target const target = TARGET_WINDOWS;
+#ifdef _MSC_VER
+    Target const target = TARGET_WINDOWS_MSVC;
+#else // _MSC_VER
+    Target const target = TARGET_WINDOWS_CLANG;
+#endif // !_MSC_VER
 #else // _WIN32
     Target const target = TARGET_LINUX;
 #endif // !_WIN32
