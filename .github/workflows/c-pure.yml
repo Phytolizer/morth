@@ -14,8 +14,13 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        include:
+          - { os: windows-latest, cc: cl.exe }
+          - { os: ubuntu-latest, cc: cc }
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     defaults:
       run:
@@ -24,6 +29,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: configure
-      run: cc -o coolbuild coolbuild.c
+      run: ${{ matrix.cc }} -o coolbuild coolbuild.c
     - name: build
       run: ./coolbuild
