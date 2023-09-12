@@ -17,8 +17,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - { os: windows-latest, mkcoolbuild: cl.exe /nologo }
-          - { os: ubuntu-latest, mkcoolbuild: cc -o coolbuild }
+          - { id: win-msvc, os: windows-latest, mkcoolbuild: cl.exe /nologo }
+          - { id: win-clang, os: windows-latest, mkcoolbuild: clang -o coolbuild }
+          - { id: linux-gcc, os: ubuntu-latest, mkcoolbuild: cc -o coolbuild }
+          - { id: linux-clang, os: ubuntu-latest, mkcoolbuild: clang -o coolbuild }
 
     runs-on: ${{ matrix.os }}
 
@@ -28,7 +30,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Install Clang
+      uses: egor-tensin/setup-clang@v1.4
+      if: contains(matrix.id, 'clang')
     - uses: ilammy/msvc-dev-cmd@v1
+      if: contains(matrix.id, 'msvc')
     - name: configure
       run: ${{ matrix.mkcoolbuild }} coolbuild.c
     - name: build
