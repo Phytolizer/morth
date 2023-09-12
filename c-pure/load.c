@@ -7,6 +7,61 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+/* This code is public domain -- Will Hartung 4/9/09 */
+static size_t getline(char** lineptr, size_t* n, FILE* stream) {
+    char* bufptr = NULL;
+    char* p = bufptr;
+    size_t size;
+    int c;
+
+    if (lineptr == NULL) {
+        return -1;
+    }
+    if (stream == NULL) {
+        return -1;
+    }
+    if (n == NULL) {
+        return -1;
+    }
+    bufptr = *lineptr;
+    size = *n;
+
+    c = fgetc(stream);
+    if (c == EOF) {
+        return -1;
+    }
+    if (bufptr == NULL) {
+        bufptr = malloc(128);
+        if (bufptr == NULL) {
+            return -1;
+        }
+        size = 128;
+    }
+    p = bufptr;
+    while (c != EOF) {
+        if ((p - bufptr) > (size - 1)) {
+            size = size + 128;
+            bufptr = realloc(bufptr, size);
+            if (bufptr == NULL) {
+                return -1;
+            }
+        }
+        *p++ = c;
+        if (c == '\n') {
+            break;
+        }
+        c = fgetc(stream);
+    }
+
+    *p++ = '\0';
+    *lineptr = bufptr;
+    *n = size;
+
+    return p - bufptr - 1;
+}
+#endif // _WIN32
+
 program_t load_program_from_file(const char* input_file_path) {
     FILE* input_file = fopen(input_file_path, "r");
     if (input_file == NULL) {
@@ -18,9 +73,9 @@ program_t load_program_from_file(const char* input_file_path) {
 
     char* line = NULL;
     size_t line_size = 0;
-    ssize_t line_cap;
+    size_t line_cap;
     size_t row = 1;
-    while ((line_cap = getline(&line, &line_size, input_file)) >= 0) {
+    while ((line_cap = getline(&line, &line_size, input_file)) != SIZE_MAX) {
         char* save;
         char* word = strtok_r(line, " \t\r\n", &save);
         char* pword = line;
