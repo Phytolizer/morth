@@ -244,7 +244,8 @@ static char cool_temp_buf[COOL_TEMP_CAPACITY] = {0};
 static char cool_strerror_buf[COOL_STRERROR_SIZE];
 
 #ifdef _WIN32
-#define strerror(err) (strerror_s(cool_strerror_buf, COOL_STRERROR_SIZE, err), cool_strerror_buf)
+#define strerror(err) \
+    ((char*)strerror_s(cool_strerror_buf, COOL_STRERROR_SIZE, err), cool_strerror_buf)
 #endif // _WIN32
 
 bool coolMkdirExistOk(char const* path) {
@@ -795,7 +796,8 @@ struct dirent* readdir(DIR* dirp) {
     }
 
     memset(dirp->dirent->d_name, 0, sizeof(dirp->dirent->d_name));
-    strncpy_s(dirp->dirent->d_name, dirp->data.cFileName, sizeof(dirp->dirent->d_name) - 1);
+    strncpy_s(dirp->dirent->d_name, sizeof(dirp->dirent->d_name), dirp->data.cFileName,
+            sizeof(dirp->dirent->d_name) - 1);
     return dirp->dirent;
 }
 
