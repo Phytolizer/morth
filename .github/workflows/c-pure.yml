@@ -17,8 +17,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { os: windows-latest, cc: cl.exe }
-          - { os: ubuntu-latest, cc: cc }
+          - { os: windows-latest, mkcoolbuild: cl.exe -NoLogo }
+          - { os: ubuntu-latest, cc: cc -o coolbuild }
 
     runs-on: ${{ matrix.os }}
 
@@ -30,6 +30,6 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ilammy/msvc-dev-cmd@v1
     - name: configure
-      run: ${{ matrix.cc }} -o coolbuild coolbuild.c
+      run: ${{ matrix.mkcoolbuild }} coolbuild.c
     - name: build
       run: ./coolbuild
