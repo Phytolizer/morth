@@ -95,7 +95,7 @@ void simulate_program(program_t program) {
             case op_code_store: {
                 int64_t value = stack_pop(&stack);
                 int64_t address = stack_pop(&stack);
-                mem[address] = value;
+                mem[address] = (uint8_t)value;
                 ip++;
             } break;
             case op_code_syscall1:

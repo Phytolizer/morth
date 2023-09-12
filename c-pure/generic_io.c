@@ -44,7 +44,7 @@ void generic_write(generic_file_t f, const char* text) {
 
 #ifdef _WIN32
     DWORD trash;
-    if (!WriteFile(f.fh, text, strlen(text), &trash, NULL)) {
+    if (!WriteFile(f.fh, text, (DWORD)strlen(text), &trash, NULL)) {
         fprintf(stderr, "could not write to file: %lu", GetLastError());
         generic_close(f);
         exit(EXIT_FAILURE);
