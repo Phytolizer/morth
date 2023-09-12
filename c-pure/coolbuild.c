@@ -8,7 +8,12 @@ typedef enum {
 } Target;
 
 static const char* cc(const char* default_cc) {
-    const char* result = getenv("CC");
+    const char* result;
+#ifdef _WIN32
+    _dupenv_s(&result, NULL, "CC");
+#else // _WIN32
+    result = getenv("CC");
+#endif // !_WIN32
     if (result == NULL) {
         result = default_cc;
     }

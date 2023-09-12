@@ -18,7 +18,7 @@ jobs:
       matrix:
         include:
           - { id: win-msvc, os: windows-latest, cc: cl.exe, buildargs: /nologo /Fecoolbuild.exe }
-          - { id: win-clang, os: windows-latest, cc: clang, buildargs: -o coolbuild }
+          - { id: win-clang, os: windows-latest, cc: clang, buildargs: -o coolbuild.exe }
           - { id: linux-gcc, os: ubuntu-latest, cc: gcc, buildargs: -o coolbuild }
           - { id: linux-clang, os: ubuntu-latest, cc: clang, buildargs: -o coolbuild }
 
