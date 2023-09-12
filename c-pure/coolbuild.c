@@ -122,7 +122,8 @@ bool compileExe(Target target) {
             coolCmdAppend(&cmd, "-o", "build/morth");
             break;
         case TARGET_WINDOWS_MSVC:
-            coolCmdAppend(&cmd, "/Febuild/morth");
+            coolCmdAppend(&cmd, "/Febuild/morth", "/nologo");
+            break;
     }
     size_t checkpoint = coolTempSave();
     for (size_t i = 0; i < COOL_ARRAY_LEN(morth_sources); i += 1) {
