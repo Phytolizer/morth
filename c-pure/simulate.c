@@ -6,7 +6,6 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
-#include <unistd.h>
 
 void simulate_program(program_t program) {
     stack_t stack = STACK_INIT;
@@ -111,7 +110,18 @@ void simulate_program(program_t program) {
                     int64_t buf = arg2;
                     int64_t count = arg3;
                     uint8_t* s = &mem[buf];
-                    write(fd, s, count);
+                    FILE* fp = NULL;
+                    switch (fd) {
+                        case 1:
+                            fp = stdout;
+                            break;
+                        case 2:
+                            fp = stderr;
+                            break;
+                        default:
+                            assert(false && "invalid fd");
+                    }
+                    fwrite(s, 1, count, fp);
                 } else {
                     assert(false && "unhandled syscall");
                 }

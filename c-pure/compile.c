@@ -1,28 +1,36 @@
 #include "compile.h"
 
+#include "c_emitter.h"
+#include "generic_io.h"
 #include "memory.h"
 #include "nasm_emitter.h"
 
 #include <assert.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
-void compile_program(program_t program, const char* out_file_path) {
-    int raw_out = open(
-            out_file_path, O_WRONLY | O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
-    if (raw_out < 0) {
-        perror("open");
-        exit(EXIT_FAILURE);
+static void compile_program_nasm(program_t program, generic_file_t f);
+static void compile_program_c(program_t program, generic_file_t f);
+
+void compile_program(program_t program, compile_target_t target, const char* out_file_path) {
+    generic_file_t f = generic_open(out_file_path);
+    switch (target) {
+        case COMPILE_TARGET_NASM:
+            compile_program_nasm(program, f);
+            break;
+        case COMPILE_TARGET_C:
+            compile_program_c(program, f);
+            break;
     }
+    generic_close(f);
+}
 
-    nasm_emitter_t em = nasm_emitter_from_fd(raw_out);
-
+static void compile_program_nasm(program_t program, generic_file_t f) {
+    nasm_emitter_t em = nasm_emitter_open(f);
 #define EMIT(...) nasm_emitter_emit(&em, __VA_ARGS__)
 #define LEFT(...) nasm_emitter_emit_left(&em, __VA_ARGS__)
 #define LABL(...) nasm_emitter_emit_label(&em, __VA_ARGS__)
@@ -225,6 +233,200 @@ void compile_program(program_t program, const char* out_file_path) {
 #undef LINE
 #undef EMIT
 
-    fclose(em.fp);
-    close(raw_out);
+    nasm_emitter_close(em);
+}
+
+static void compile_program_c(program_t program, generic_file_t f) {
+    c_emitter_t em = c_emitter_open(f);
+#define EMIT(...) c_emitter_emit(&em, __VA_ARGS__)
+#define LABL(...) c_emitter_emit_label(&em, __VA_ARGS__)
+#define LINE() \
+    do { \
+        size_t temp_depth = em.indent_depth; \
+        em.indent_depth = 0; \
+        generic_write(em.f, "\n"); \
+        em.indent_depth = temp_depth; \
+    } while (false)
+
+    EMIT("#include <inttypes.h>");
+    EMIT("#include <stddef.h>");
+    EMIT("#include <stdio.h>");
+    EMIT("#include <stdint.h>");
+    EMIT("#include <stdlib.h>");
+    LINE();
+    EMIT("void dump(intptr_t n) {");
+    em.indent_depth += 1;
+    EMIT("printf(\"%%\" PRIdPTR \"\\n\", n);");
+    em.indent_depth -= 1;
+    EMIT("}");
+    LINE();
+    EMIT("static uint8_t mem[%d];", MEM_CAPACITY);
+    EMIT("static intptr_t stack[128];");
+    EMIT("static size_t stack_top = 0;");
+    EMIT("int main(void) {");
+    em.indent_depth += 1;
+    EMIT("intptr_t a, b, c, d;");
+
+    for (size_t i = 0; i < program.length; i++) {
+        op_t op = program.begin[i];
+        LINE();
+        LABL("addr_%zu", i);
+        EMIT("// -- '%s' --", op.tok.text);
+        switch (op.code) {
+            case op_code_push:
+                EMIT("stack[stack_top++] = %" PRId64 ";\n", op.operand);
+                break;
+            case op_code_plus:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("a += b;");
+                EMIT("stack[stack_top++] = a;");
+                break;
+            case op_code_minus:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("a -= b;");
+                EMIT("stack[stack_top++] = a;");
+                break;
+            case op_code_eq:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("a = (a == b);");
+                EMIT("stack[stack_top++] = a;");
+                break;
+            case op_code_if:
+                EMIT("a = stack[--stack_top];");
+                EMIT("if (!a) {");
+                em.indent_depth += 1;
+                EMIT("goto addr_%zu;", op.operand);
+                em.indent_depth -= 1;
+                EMIT("}");
+                break;
+            case op_code_else:
+                EMIT("goto addr_%zu;", op.operand);
+                break;
+            case op_code_end:
+                EMIT("goto addr_%zu;", op.operand);
+                break;
+            case op_code_dump:
+                EMIT("a = stack[--stack_top];");
+                EMIT("dump(a);");
+                break;
+            case op_code_dup:
+                EMIT("a = stack[--stack_top];");
+                EMIT("stack[stack_top++] = a;");
+                EMIT("stack[stack_top++] = a;");
+                break;
+            case op_code_while:
+                break;
+            case op_code_do:
+                EMIT("a = stack[--stack_top];");
+                EMIT("if (!a) {");
+                em.indent_depth += 1;
+                EMIT("goto addr_%zu;", op.operand);
+                em.indent_depth -= 1;
+                EMIT("}");
+                break;
+            case op_code_gt:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("a = (a > b);");
+                EMIT("stack[stack_top++] = a;");
+                break;
+            case op_code_lt:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("a = (a < b);");
+                EMIT("stack[stack_top++] = a;");
+                break;
+            case op_code_mem:
+                EMIT("stack[stack_top++] = (intptr_t)mem;");
+                break;
+            case op_code_load:
+                EMIT("a = stack[--stack_top];");
+                EMIT("b = *(const uint8_t*)a;");
+                EMIT("stack[stack_top++] = b;");
+                break;
+            case op_code_store:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("*(uint8_t*)a = b;");
+                break;
+            case op_code_syscall1:
+                assert(false && "unhandled syscall");
+                break;
+            case op_code_syscall3:
+                EMIT("a = stack[--stack_top];  // syscall number");
+                EMIT("b = stack[--stack_top];  // arg1");
+                EMIT("c = stack[--stack_top];  // arg2");
+                EMIT("d = stack[--stack_top];  // arg3");
+                EMIT("if (a == 1) {");
+                em.indent_depth += 1;
+                EMIT("const char* s = (const char*)c;");
+                EMIT("a = (intptr_t)fwrite(s, 1, d, stdout);");
+                em.indent_depth -= 1;
+                EMIT("} else {");
+                em.indent_depth += 1;
+                EMIT("abort();");
+                em.indent_depth -= 1;
+                EMIT("}");
+                break;
+            case op_code_dup2:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("stack[stack_top++] = a;");
+                EMIT("stack[stack_top++] = b;");
+                EMIT("stack[stack_top++] = a;");
+                EMIT("stack[stack_top++] = b;");
+                break;
+            case op_code_drop:
+                EMIT("--stack_top;");
+                break;
+            case op_code_shr:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("a = (intptr_t)((uintptr_t)a >> (uintptr_t)b);");
+                EMIT("stack[stack_top++] = a;");
+                break;
+            case op_code_shl:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("a = (intptr_t)((uintptr_t)a << (uintptr_t)b);");
+                EMIT("stack[stack_top++] = a;");
+                break;
+            case op_code_bor:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("a = (intptr_t)((uintptr_t)a | (uintptr_t)b);");
+                EMIT("stack[stack_top++] = a;");
+                break;
+            case op_code_band:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("a = (intptr_t)((uintptr_t)a & (uintptr_t)b);");
+                EMIT("stack[stack_top++] = a;");
+                break;
+            case op_code_swap:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("stack[stack_top++] = b;");
+                EMIT("stack[stack_top++] = a;");
+                break;
+            case op_code_over:
+                EMIT("b = stack[--stack_top];");
+                EMIT("a = stack[--stack_top];");
+                EMIT("stack[stack_top++] = a;");
+                EMIT("stack[stack_top++] = b;");
+                EMIT("stack[stack_top++] = a;");
+                break;
+            default:
+                assert(false && "unhandled opcode");
+        }
+    }
+
+    LABL("addr_%zu", program.length);
+    em.indent_depth -= 1;
+    EMIT("}");
+
+    c_emitter_close(em);
 }

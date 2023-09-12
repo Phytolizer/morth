@@ -29,23 +29,25 @@ void target_compiler(CoolCmd* cmd, Target target) {
     }
 }
 
-#define STD "gnu99"
 void cflags(CoolCmd* cmd, Target target) {
     switch (target) {
         case TARGET_LINUX:
         case TARGET_MINGW:
-            coolCmdAppend(cmd, "-std=" STD, "-Wall", "-Wextra", "-ggdb3", "-Wmissing-prototypes");
+            coolCmdAppend(cmd, "-std=gnu99", "-Wall", "-Wextra", "-ggdb3", "-Wmissing-prototypes");
             break;
         case TARGET_WINDOWS:
-            coolCmdAppend(cmd, "/std:" STD, "/W4", "/Zi", "/permissive-");
+            coolCmdAppend(cmd, "/std:c11", "/W4", "/Zi", "/permissive-");
             break;
     }
 }
 
 const char* const morth_sources[] = {
+        "alloc_printf",
         "args_iterator",
+        "c_emitter",
         "compile",
         "cross_reference",
+        "generic_io",
         "load",
         "main",
         "nasm_emitter",

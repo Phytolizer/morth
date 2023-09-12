@@ -57,10 +57,10 @@ int main(int argc, char** argv) {
         char* input_file_path = args_next(&args);
         program_t program = load_program_from_file(input_file_path);
         cross_reference_blocks(program);
-        compile_program(program, "output.asm");
+        compile_program(program, COMPILE_TARGET_C, "output.c");
         free(program.begin);
-        RUN_COMMAND("nasm", "-f", "elf64", "-o", "output.o", "output.asm");
-        RUN_COMMAND("ld", "-o", "output", "output.o");
+        RUN_COMMAND("cc", "-O2", "-c", "-o", "output.o", "output.c");
+        RUN_COMMAND("cc", "-o", "output", "output.o");
         if (run) {
             RUN_COMMAND("./output");
         }

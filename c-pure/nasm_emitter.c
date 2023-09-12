@@ -1,35 +1,62 @@
 #include "nasm_emitter.h"
 
+#include "alloc_printf.h"
+
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-nasm_emitter_t nasm_emitter_from_fd(int fd) {
-    nasm_emitter_t emitter;
-    emitter.fp = fdopen(fd, "w");
-    return emitter;
+#ifndef _WIN32
+#include <fcntl.h>
+#include <unistd.h>
+#endif // !_WIN32
+
+nasm_emitter_t nasm_emitter_open(generic_file_t f) {
+    nasm_emitter_t em;
+    em.f = f;
+    return em;
 }
 
-void nasm_emitter_emit_label(nasm_emitter_t* emitter, const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-    vfprintf(emitter->fp, format, args);
-    va_end(args);
-    fputs(":\n", emitter->fp);
+void nasm_emitter_close(nasm_emitter_t em) {
+    (void)em;
 }
 
-void nasm_emitter_emit_left(nasm_emitter_t* emitter, const char* format, ...) {
+void nasm_emitter_emit_label(nasm_emitter_t* em, const char* format, ...) {
+    char* temp = NULL;
     va_list args;
     va_start(args, format);
-    vfprintf(emitter->fp, format, args);
+    alloc_vsprintf(&temp, format, args);
     va_end(args);
-    fputc('\n', emitter->fp);
+
+    if (temp)
+        generic_printf(em->f, "%s:\n", temp);
+
+    free(temp);
 }
 
-void nasm_emitter_emit(nasm_emitter_t* emitter, const char* format, ...) {
-    fputs("    ", emitter->fp);
+void nasm_emitter_emit_left(nasm_emitter_t* em, const char* format, ...) {
+    char* temp = NULL;
     va_list args;
     va_start(args, format);
-    vfprintf(emitter->fp, format, args);
+    alloc_vsprintf(&temp, format, args);
     va_end(args);
-    fputc('\n', emitter->fp);
+
+    if (temp)
+        generic_printf(em->f, "%s\n", temp);
+
+    free(temp);
+}
+
+void nasm_emitter_emit(nasm_emitter_t* em, const char* format, ...) {
+    char* temp = NULL;
+    va_list args;
+    va_start(args, format);
+    alloc_vsprintf(&temp, format, args);
+    va_end(args);
+
+    if (temp)
+        generic_printf(em->f, "    %s\n", temp);
+
+    free(temp);
 }

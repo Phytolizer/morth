@@ -32,5 +32,4 @@ jobs:
     - name: configure
       run: ${{ matrix.mkcoolbuild }} coolbuild.c
     - name: build
-      if: matrix.os == 'ubuntu-latest'
       run: ./coolbuild
