@@ -369,11 +369,11 @@ void coolCmdAppendNull(CoolCmd* cmd, ...) {
 }
 
 CoolProc coolCmdRunAsync(CoolCmd cmd) {
-    CoolStringBuilder sb = {0};
-    coolCmdRender(cmd, &sb);
-    coolSbAppendNul(&sb);
-    coolLog(COOL_INFO, "[CMD] %s", sb.items);
-    coolSbFree(sb);
+    CoolStringBuilder cmd_sb = {0};
+    coolCmdRender(cmd, &cmd_sb);
+    coolSbAppendNul(&cmd_sb);
+    coolLog(COOL_INFO, "[CMD] %s", cmd_sb.items);
+    coolSbFree(cmd_sb);
 #ifdef _WIN32
     STARTUPINFO start_info = {
             .cb = sizeof(STARTUPINFO),
@@ -388,7 +388,7 @@ CoolProc coolCmdRunAsync(CoolCmd cmd) {
     coolCmdRender(cmd, &sb);
     coolSbAppendNul(&sb);
     BOOL success =
-            CreateProcess(NULL, sb.items, NULL, NULL, TRUE, 0, NULL, &start_info, &proc_info);
+            CreateProcess(NULL, sb.items, NULL, NULL, TRUE, 0, NULL, NULL, &start_info, &proc_info);
     coolSbFree(sb);
 
     if (!success) {
@@ -706,7 +706,7 @@ int coolIsPath1ModifiedAfterPath2(char const* path1, char const* path2) {
 bool coolRename(char const* src_path, char const* dest_path) {
     coolLog(COOL_INFO, "renaming '%s' -> '%s'", src_path, dest_path);
 #ifdef _WIN32
-    if (!MoveFileEx(old_path, new_path, MOVEFILE_REPLACE_EXISTING)) {
+    if (!MoveFileEx(src_path, dest_path, MOVEFILE_REPLACE_EXISTING)) {
         coolLog(COOL_ERROR, "could not rename '%s' to '%s': %lu", src_path, dest_path,
                 GetLastError());
         return false;
