@@ -53,17 +53,17 @@ void compile_program_native(
 #define NASM_FORMAT "elf64"
 #endif // !_WIN32
 
-#ifdef _MSC_VER
-#define CC_CMD "cl"
-#define COFLAG(path) "/c"
-#define LINK_CMD "link.exe"
-#define LINK_OUT_FMT "/out:%s"
-#else // _MSC_VER
+#ifdef __clang__
 #define CC_CMD "clang"
 #define COFLAG(path) "-c", "-o", path
 #define LINK_CMD "ld"
 #define LINK_OUT_FMT "-o%s"
-#endif // !_MSC_VER
+#else // __clang__
+#define CC_CMD "cl"
+#define COFLAG(path) "/c"
+#define LINK_CMD "link.exe"
+#define LINK_OUT_FMT "/out:%s"
+#endif // !__clang__
 
     switch (target) {
         case COMPILE_TARGET_C: {

@@ -44,7 +44,7 @@ char const* target_linker(Target target) {
         case TARGET_WINDOWS_MSVC:
             return env("LD", "link.exe");
         case TARGET_WINDOWS_CLANG:
-            return env("LD", "lld");
+            return env("LD", "lld-link");
         case TARGET_MINGW:
             // don't use env here, just in case
             return "x86_64-w64-mingw32-gcc";
@@ -134,11 +134,11 @@ bool compileExe(Target target) {
     switch (target) {
         case TARGET_LINUX:
         case TARGET_MINGW:
-        case TARGET_WINDOWS_CLANG:
             coolCmdAppend(&cmd, "-o", "build/morth");
             break;
+        case TARGET_WINDOWS_CLANG:
         case TARGET_WINDOWS_MSVC:
-            coolCmdAppend(&cmd, "/out:build/morth.exe", "/nologo", "/debug");
+            coolCmdAppend(&cmd, "/out:build/morth.exe", "/nologo", "/debug", "libcmt.lib");
             break;
     }
     size_t checkpoint = coolTempSave();
