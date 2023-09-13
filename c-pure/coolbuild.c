@@ -158,14 +158,13 @@ int main(int argc, char** argv) {
 
 #ifdef _WIN32
     Target target = TARGET_WINDOWS_MSVC;
-#else // _WIN32
-    Target target = TARGET_LINUX;
-#endif // !_WIN32
-
     char const* compiler = target_compiler(target);
     if (strcmp(compiler, "clang") == 0) {
         target = TARGET_WINDOWS_CLANG;
     }
+#else // _WIN32
+    Target target = TARGET_LINUX;
+#endif // !_WIN32
 
     const char** objects;
     if (!compileObjects(target)) {
