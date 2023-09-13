@@ -113,7 +113,7 @@ bool compileObjects(Target target) {
         coolCmdAppend(&cmd, target_compiler(target));
         cflags(&cmd, target);
         coolCmdAppend(&cmd, "-c", srcPath(i));
-        if (strcmp(cmd.items[0], "cl.exe") != 0) {
+        if (strcmp(cmd.items[0], "cl.exe") != 0 && strcmp(cmd.items[0], "cl") != 0) {
             coolCmdAppend(&cmd, "-o", objPath(i, target));
         } else {
             coolCmdAppend(&cmd, coolTempPrintf("/Fo%s", objPath(i, target)));

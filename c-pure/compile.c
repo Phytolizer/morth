@@ -58,11 +58,13 @@ void compile_program_native(
 #define COFLAG(path) "-c", "-o", path
 #define LINK_CMD "ld"
 #define LINK_OUT_FMT "-o%s"
+#define CC_OUT_FMT "-o%s"
 #else // __clang__
-#define CC_CMD "cl"
+#define CC_CMD "cl", "/nologo"
 #define COFLAG(path) "/c"
 #define LINK_CMD "link.exe"
 #define LINK_OUT_FMT "/out:%s"
+#define CC_OUT_FMT "/Fe%s"
 #endif // !__clang__
 
     switch (target) {
@@ -74,7 +76,10 @@ void compile_program_native(
             alloc_sprintf(&obj_path, "%s" OBJ_EXT, out_file_basename);
             RUN_COMMAND(CC_CMD, "-O2", COFLAG(obj_path), c_path);
             free(c_path);
-            RUN_COMMAND(CC_CMD, "-o", out_file_basename, obj_path);
+            char* out_arg = NULL;
+            alloc_sprintf(&out_arg, CC_OUT_FMT, out_file_basename);
+            RUN_COMMAND(CC_CMD, out_arg, obj_path);
+            free(out_arg);
             free(obj_path);
         } break;
         case COMPILE_TARGET_NASM: {

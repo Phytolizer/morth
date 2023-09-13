@@ -42,7 +42,6 @@ static proc_t cmd_run_async(va_list args) {
 #ifdef _WIN32
     STARTUPINFO start_info = {
             .cb = sizeof(STARTUPINFO),
-            .dwFlags = STARTF_USESTDHANDLES,
     };
     PROCESS_INFORMATION proc_info = {0};
 
@@ -64,7 +63,7 @@ static proc_t cmd_run_async(va_list args) {
     }
     text[i] = '\0';
     BOOL success = CreateProcessA(
-            program_name, text, NULL, NULL, TRUE, 0, NULL, NULL, &start_info, &proc_info);
+            NULL, text, NULL, NULL, TRUE, 0, NULL, NULL, &start_info, &proc_info);
     free(text);
 
     if (!success) {
