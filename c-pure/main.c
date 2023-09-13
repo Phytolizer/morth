@@ -1,3 +1,4 @@
+#include "alloc_printf.h"
 #include "args_iterator.h"
 #include "compile.h"
 #include "cross_reference.h"
@@ -102,11 +103,14 @@ int main(int argc, char** argv) {
         cross_reference_blocks(program);
         output_file_path = compute_output_path(input_file_path, output_file_path);
         compile_program_native(program, target, output_file_path);
-        free(output_file_path);
         free(program.begin);
         if (run) {
-            RUN_COMMAND("./output");
+            char* full_path = NULL;
+            alloc_sprintf(&full_path, "./%s", output_file_path);
+            RUN_COMMAND(full_path);
+            free(full_path);
         }
+        free(output_file_path);
     } else {
         printf("Unknown subcommand: %s\n", argv[1]);
         return EXIT_FAILURE;
