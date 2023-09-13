@@ -37,7 +37,7 @@ jobs:
       uses: egor-tensin/setup-clang@v1.4
       if: matrix.cc == 'clang'
     - uses: ilammy/msvc-dev-cmd@v1
-      if: matrix.cc == 'cl.exe'
+      if: matrix.os == 'windows-latest'
     - name: configure
       run: ${{ matrix.cc }} ${{ matrix.buildargs }} coolbuild.c
     - name: build
