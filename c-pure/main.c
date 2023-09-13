@@ -20,6 +20,7 @@ static void usage(char* program_name) {
     printf("  sim <FILE>                Simulate the program\n");
     printf("  com [ARGS] <FILE>         Compile the program\n");
     printf("    ARGS:\n");
+    printf("      -o <FILE|DIR>         Override the output path\n");
     printf("      -r                    Run the program after compilation\n");
 }
 
@@ -41,7 +42,7 @@ int main(int argc, char** argv) {
                 char* raw_target = args_next(&args);
                 if (raw_target == NULL || !parse_compile_target(raw_target, &target)) {
                     usage(program_name);
-                    printf("ERROR: invalid argument to `-t`\n");
+                    printf("ERROR: invalid argument to '-t'\n");
                     return EXIT_FAILURE;
                 }
             } else {
@@ -68,19 +69,40 @@ int main(int argc, char** argv) {
         free(program.begin);
     } else if (strcmp(subcommand, "com") == 0) {
         bool run = false;
-        if (strcmp(args_curr(&args), "-r") == 0) {
-            args_next(&args);
-            run = true;
+        char* input_file_path = NULL;
+        char* output_file_path = NULL;
+        while (true) {
+            char* arg = args_next(&args);
+            if (arg == NULL) {
+                usage(program_name);
+                printf("ERROR: no input file provided for 'com'\n");
+                return EXIT_FAILURE;
+            }
+            if (arg[0] == '-') {
+                if (strcmp(arg, "-o") == 0) {
+                    output_file_path = args_next(&args);
+                    if (output_file_path == NULL || output_file_path[0] == '-') {
+                        usage(program_name);
+                        printf("ERROR: missing argument to '-o'\n");
+                        return EXIT_FAILURE;
+                    }
+                } else if (strcmp(arg, "-r") == 0) {
+                    run = true;
+                } else {
+                    usage(program_name);
+                    printf("ERROR: unrecognized option: '%s'\n", arg);
+                    return EXIT_FAILURE;
+                }
+            } else {
+                input_file_path = arg;
+                break;
+            }
         }
-        if (args_curr(&args) == NULL) {
-            usage(program_name);
-            printf("ERROR: no input file provided for 'com'\n");
-            return EXIT_FAILURE;
-        }
-        char* input_file_path = args_next(&args);
         program_t program = load_program_from_file(input_file_path);
         cross_reference_blocks(program);
-        compile_program_native(program, target, "output");
+        output_file_path = compute_output_path(input_file_path, output_file_path);
+        compile_program_native(program, target, output_file_path);
+        free(output_file_path);
         free(program.begin);
         if (run) {
             RUN_COMMAND("./output");
