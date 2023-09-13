@@ -122,9 +122,11 @@ void compile_program(program_t program, compile_target_t target, const char* out
 
 #ifdef _WIN32
 #define OBJ_EXT ".obj"
+#define EXE_EXT ".exe"
 #define NASM_FORMAT "win64"
 #else // _WIN32
 #define OBJ_EXT ".o"
+#define EXE_EXT ""
 #define NASM_FORMAT "elf64"
 #endif // !_WIN32
 
@@ -132,19 +134,19 @@ void compile_program(program_t program, compile_target_t target, const char* out
 #define CC_CMD "clang"
 #define COFLAG(path) "-c", "-o", path
 #define LINK_CMD "ld"
-#define LINK_OUT_FMT "-o%s"
+#define LINK_OUT_FMT "-o%s" EXE_EXT
 #define CC_OUT_FMT "-o%s"
 #elif defined(__GNUC__)
 #define CC_CMD "gcc"
 #define COFLAG(path) "-c", "-o", path
 #define LINK_CMD "ld"
-#define LINK_OUT_FMT "-o%s"
+#define LINK_OUT_FMT "-o%s" EXE_EXT
 #define CC_OUT_FMT "-o%s"
 #else // (__clang__ || __GNUC__)
 #define CC_CMD "cl", "/nologo"
 #define COFLAG(path) "/c"
 #define LINK_CMD "link.exe"
-#define LINK_OUT_FMT "/out:%s"
+#define LINK_OUT_FMT "/out:%s" EXE_EXT
 #define CC_OUT_FMT "/Fe%s"
 #endif // !(__clang__ || __GNUC__)
 
