@@ -54,9 +54,13 @@ void compile_program_native(
 #endif // !_WIN32
 
 #ifdef _MSC_VER
+#define CC_CMD "cl"
+#define COFLAG(path) "/c"
 #define LINK_CMD "link.exe"
 #define LINK_OUT_FMT "/out:%s"
 #else // _MSC_VER
+#define CC_CMD "clang"
+#define COFLAG(path) "-c", "-o", path
 #define LINK_CMD "ld"
 #define LINK_OUT_FMT "-o%s"
 #endif // !_MSC_VER
@@ -68,9 +72,9 @@ void compile_program_native(
             compile_program(program, target, c_path);
             char* obj_path = NULL;
             alloc_sprintf(&obj_path, "%s" OBJ_EXT, out_file_basename);
-            RUN_COMMAND("cc", "-O2", "-c", "-o", obj_path, c_path);
+            RUN_COMMAND(CC_CMD, "-O2", COFLAG(obj_path), c_path);
             free(c_path);
-            RUN_COMMAND("cc", "-o", out_file_basename, obj_path);
+            RUN_COMMAND(CC_CMD, "-o", out_file_basename, obj_path);
             free(obj_path);
         } break;
         case COMPILE_TARGET_NASM: {
@@ -486,6 +490,7 @@ static void compile_program_c(program_t program, generic_file_t f) {
     }
 
     LABL("addr_%zu", program.length);
+    EMIT(";");
     em.indent_depth -= 1;
     EMIT("}");
 

@@ -1,6 +1,10 @@
 /build
+/obj
 /.cache
 /coolbuild
 /coolbuild.old
+/coolbuild.obj
+/coolbuild.exe.old
 compile_commands.json
 output.*
+*.pdb

@@ -63,11 +63,11 @@ void simulate_program(program_t program) {
                 if (condition) {
                     ip++;
                 } else {
-                    ip = op.operand;
+                    ip = (size_t)op.operand;
                 }
             } break;
             case op_code_else:
-                ip = op.operand;
+                ip = (size_t)op.operand;
                 break;
             case op_code_while:
                 ip++;
@@ -77,11 +77,11 @@ void simulate_program(program_t program) {
                 if (condition) {
                     ip++;
                 } else {
-                    ip = op.operand;
+                    ip = (size_t)op.operand;
                 }
             } break;
             case op_code_end:
-                ip = op.operand;
+                ip = (size_t)op.operand;
                 break;
             case op_code_mem:
                 stack_push(&stack, 0);
@@ -121,7 +121,7 @@ void simulate_program(program_t program) {
                         default:
                             assert(false && "invalid fd");
                     }
-                    fwrite(s, 1, count, fp);
+                    fwrite(s, 1, (size_t)count, fp);
                 } else {
                     assert(false && "unhandled syscall");
                 }

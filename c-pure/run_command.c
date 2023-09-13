@@ -42,9 +42,6 @@ static proc_t cmd_run_async(va_list args) {
 #ifdef _WIN32
     STARTUPINFO start_info = {
             .cb = sizeof(STARTUPINFO),
-            .hStdError = GetStdHandle(STD_ERROR_HANDLE),
-            .hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE),
-            .hStdInput = GetStdHandle(STD_INPUT_HANDLE),
             .dwFlags = STARTF_USESTDHANDLES,
     };
     PROCESS_INFORMATION proc_info = {0};
@@ -52,16 +49,22 @@ static proc_t cmd_run_async(va_list args) {
     size_t alloc_len = total_len + arg_count * 3 /* whitespace+quotes */ + 1;
     char* text = malloc(alloc_len);
     size_t i = 0;
+    const char* program_name = NULL;
     while (1) {
         const char* arg = va_arg(args, const char*);
-        if (arg == NULL) {
+        if (program_name == NULL) {
+            program_name = arg;
+        } else if (arg == NULL) {
             break;
+        } else {
+            text[i] = ' ';
+            i += 1;
         }
-        snprintf(text + i, alloc_len, "\"%s\" ", arg);
+        i += snprintf(text + i, alloc_len, "\"%s\"", arg);
     }
-    text[alloc_len - 1] = '\0';
-    BOOL success =
-            CreateProcess(NULL, text, NULL, NULL, TRUE, 0, NULL, NULL, &start_info, &proc_info);
+    text[i] = '\0';
+    BOOL success = CreateProcessA(
+            program_name, text, NULL, NULL, TRUE, 0, NULL, NULL, &start_info, &proc_info);
     free(text);
 
     if (!success) {

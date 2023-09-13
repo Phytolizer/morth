@@ -86,7 +86,7 @@ void cross_reference_blocks(program_t program) {
                         program.begin[ip].operand = ip + 1;
                         break;
                     case op_code_do: {
-                        size_t while_ip = program.begin[block_ip].operand;
+                        size_t while_ip = (size_t)program.begin[block_ip].operand;
                         program.begin[block_ip].operand = ip + 1;
                         program.begin[ip].operand = while_ip;
                     } break;

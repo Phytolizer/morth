@@ -8,14 +8,14 @@ typedef enum {
     TARGET_WINDOWS_CLANG,
 } Target;
 
-static const char* cc(const char* default_cc) {
+static const char* env(char const* var, const char* default_cc) {
     const char* result;
 #ifdef _WIN32
     char* temp;
-    _dupenv_s(&temp, NULL, "CC");
+    _dupenv_s(&temp, NULL, var);
     result = temp;
 #else // _WIN32
-    result = getenv("CC");
+    result = getenv(var);
 #endif // !_WIN32
     if (result == NULL) {
         result = default_cc;
@@ -26,14 +26,30 @@ static const char* cc(const char* default_cc) {
 char const* target_compiler(Target target) {
     switch (target) {
         case TARGET_WINDOWS_MSVC:
-            return cc("cl.exe");
+            return env("CC", "cl.exe");
         case TARGET_WINDOWS_CLANG:
-            return cc("clang");
+            return env("CC", "clang");
         case TARGET_MINGW:
             // don't use env here, just in case
             return "x86_64-w64-mingw32-gcc";
         case TARGET_LINUX:
-            return cc("gcc");
+            return env("CC", "gcc");
+    }
+    COOL_ASSERT(false, "unreachable");
+    return "";
+}
+
+char const* target_linker(Target target) {
+    switch (target) {
+        case TARGET_WINDOWS_MSVC:
+            return env("LD", "link.exe");
+        case TARGET_WINDOWS_CLANG:
+            return env("LD", "lld");
+        case TARGET_MINGW:
+            // don't use env here, just in case
+            return "x86_64-w64-mingw32-gcc";
+        case TARGET_LINUX:
+            return env("LD", "gcc");
     }
     COOL_ASSERT(false, "unreachable");
     return "";
@@ -44,10 +60,10 @@ void cflags(CoolCmd* cmd, Target target) {
         case TARGET_LINUX:
         case TARGET_MINGW:
         case TARGET_WINDOWS_CLANG:
-            coolCmdAppend(cmd, "-std=gnu99", "-Wall", "-Wextra", "-ggdb3", "-Wmissing-prototypes");
+            coolCmdAppend(cmd, "-std=gnu99", "-Wall", "-Wextra", "-g3", "-Wmissing-prototypes");
             break;
         case TARGET_WINDOWS_MSVC:
-            coolCmdAppend(cmd, "/std:c11", "/W4", "/Zi", "/permissive-", "/nologo",
+            coolCmdAppend(cmd, "/std:c11", "/W4", "/Z7", "/permissive-", "/nologo",
                     "/D_CRT_SECURE_NO_WARNINGS");
             break;
     }
@@ -114,7 +130,7 @@ bool compileObjects(Target target) {
 
 bool compileExe(Target target) {
     CoolCmd cmd = {0};
-    coolCmdAppend(&cmd, target_compiler(target));
+    coolCmdAppend(&cmd, target_linker(target));
     switch (target) {
         case TARGET_LINUX:
         case TARGET_MINGW:
@@ -122,7 +138,7 @@ bool compileExe(Target target) {
             coolCmdAppend(&cmd, "-o", "build/morth");
             break;
         case TARGET_WINDOWS_MSVC:
-            coolCmdAppend(&cmd, "/Febuild/morth", "/nologo");
+            coolCmdAppend(&cmd, "/out:build/morth.exe", "/nologo", "/debug");
             break;
     }
     size_t checkpoint = coolTempSave();

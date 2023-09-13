@@ -16,7 +16,7 @@
 generic_file_t generic_open(const char* path) {
     generic_file_t f;
 #ifdef _WIN32
-    f.fh = CreateFile(path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,
+    f.fh = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,
             FILE_ATTRIBUTE_NORMAL, NULL);
     if (f.fh == INVALID_HANDLE_VALUE) {
         fprintf(stderr, "could not open '%s' for writing: %lu", path, GetLastError());

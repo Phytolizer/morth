@@ -15,11 +15,12 @@
 c_emitter_t c_emitter_open(generic_file_t f) {
     c_emitter_t em;
     em.f = f;
+    em.indent_depth = 0;
     return em;
 }
 
 void c_emitter_close(c_emitter_t em) {
-    generic_close(em.f);
+    (void)em;
 }
 
 void c_emitter_emit_label(c_emitter_t* em, const char* format, ...) {
