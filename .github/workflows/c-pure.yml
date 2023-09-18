@@ -42,3 +42,5 @@ jobs:
       run: ${{ matrix.cc }} ${{ matrix.buildargs }} coolbuild.c
     - name: build
       run: ./coolbuild
+    - name: test
+      run: ./build/test
