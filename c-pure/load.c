@@ -63,7 +63,7 @@ static size_t getline(char** lineptr, size_t* n, FILE* stream) {
 #define strtok_r strtok_s
 #endif // _WIN32
 
-program_t load_program_from_file(const char* input_file_path) {
+program_t load_program_from_file(char const* input_file_path) {
     FILE* input_file = fopen(input_file_path, "r");
     if (input_file == NULL) {
         fprintf(stderr, "Error: Could not open file %s\n", input_file_path);

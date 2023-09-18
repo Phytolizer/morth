@@ -13,7 +13,7 @@
 #include <unistd.h>
 #endif // !_WIN32
 
-generic_file_t generic_open(const char* path) {
+generic_file_t generic_open(char const* path) {
     generic_file_t f;
 #ifdef _WIN32
     f.fh = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,
@@ -40,8 +40,7 @@ void generic_close(generic_file_t f) {
 #endif // !_WIN32
 }
 
-void generic_write(generic_file_t f, const char* text) {
-
+void generic_write(generic_file_t f, char const* text) {
 #ifdef _WIN32
     DWORD trash;
     if (!WriteFile(f.fh, text, (DWORD)strlen(text), &trash, NULL)) {
@@ -66,7 +65,7 @@ void generic_write(generic_file_t f, const char* text) {
 #endif // !_WIN32
 }
 
-void generic_printf(generic_file_t f, const char* format, ...) {
+void generic_printf(generic_file_t f, char const* format, ...) {
     char* temp = NULL;
     va_list args;
     va_start(args, format);

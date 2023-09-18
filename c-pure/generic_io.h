@@ -16,7 +16,7 @@ typedef struct {
 #endif // !_WIN32
 } generic_file_t;
 
-generic_file_t generic_open(const char* path);
+generic_file_t generic_open(char const* path);
 void generic_close(generic_file_t f);
-void generic_write(generic_file_t f, const char* text);
-void generic_printf(generic_file_t f, const char* format, ...) PRINTF_ATTR(2, 3);
+void generic_write(generic_file_t f, char const* text);
+void generic_printf(generic_file_t f, char const* format, ...) PRINTF_ATTR(2, 3);

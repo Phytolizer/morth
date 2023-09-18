@@ -15,6 +15,6 @@ typedef struct {
 
 nasm_emitter_t nasm_emitter_open(generic_file_t f);
 void nasm_emitter_close(nasm_emitter_t em);
-void nasm_emitter_emit_label(nasm_emitter_t* em, const char* format, ...);
-void nasm_emitter_emit_left(nasm_emitter_t* em, const char* format, ...);
-void nasm_emitter_emit(nasm_emitter_t* em, const char* format, ...);
+void nasm_emitter_emit_label(nasm_emitter_t* em, char const* format, ...);
+void nasm_emitter_emit_left(nasm_emitter_t* em, char const* format, ...);
+void nasm_emitter_emit(nasm_emitter_t* em, char const* format, ...);

@@ -4,5 +4,5 @@
 
 #include <stdarg.h>
 
-int alloc_sprintf(char** out, const char* fmt, ...) PRINTF_ATTR(2, 3);
-int alloc_vsprintf(char** out, const char* fmt, va_list args);
+int alloc_sprintf(char** out, char const* fmt, ...) PRINTF_ATTR(2, 3);
+int alloc_vsprintf(char** out, char const* fmt, va_list args);

@@ -23,7 +23,7 @@ void c_emitter_close(c_emitter_t em) {
     (void)em;
 }
 
-void c_emitter_emit_label(c_emitter_t* em, const char* format, ...) {
+void c_emitter_emit_label(c_emitter_t* em, char const* format, ...) {
     char* temp = NULL;
     va_list args;
     va_start(args, format);
@@ -35,7 +35,7 @@ void c_emitter_emit_label(c_emitter_t* em, const char* format, ...) {
 
     free(temp);
 }
-void c_emitter_emit(c_emitter_t* em, const char* format, ...) {
+void c_emitter_emit(c_emitter_t* em, char const* format, ...) {
     char* temp = NULL;
     va_list args;
     va_start(args, format);

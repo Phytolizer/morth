@@ -8,8 +8,8 @@ typedef enum {
     TARGET_WINDOWS_CLANG,
 } Target;
 
-static const char* env(char const* var, const char* default_cc) {
-    const char* result;
+static char const* env(char const* var, char const* default_cc) {
+    char const* result;
 #ifdef _WIN32
     char* temp;
     _dupenv_s(&temp, NULL, var);
@@ -72,12 +72,13 @@ void cflags(CoolCmd* cmd, Target target) {
     }
 }
 
-const char* const morth_sources[] = {
+char const* const morth_sources[] = {
         "alloc_printf",
         "args_iterator",
         "c_emitter",
         "compile",
         "cross_reference",
+        "fileutil",
         "generic_io",
         "load",
         "main",
@@ -166,7 +167,7 @@ int main(int argc, char** argv) {
     Target target = TARGET_LINUX;
 #endif // !_WIN32
 
-    const char** objects;
+    char const** objects;
     if (!compileObjects(target)) {
         return EXIT_FAILURE;
     }

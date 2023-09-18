@@ -11,3 +11,4 @@ IncludeBlocks: Regroup
 AlignEscapedNewlines: DontAlign
 IndentCaseLabels: true
 AlignTrailingComments: false
+QualifierAlignment: Right

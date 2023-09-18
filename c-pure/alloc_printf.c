@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int alloc_sprintf(char** out, const char* fmt, ...) {
+int alloc_sprintf(char** out, char const* fmt, ...) {
     va_list args;
     va_start(args, fmt);
     int n = vsnprintf(NULL, 0, fmt, args);
@@ -22,7 +22,7 @@ int alloc_sprintf(char** out, const char* fmt, ...) {
     return n;
 }
 
-int alloc_vsprintf(char** out, const char* fmt, va_list args) {
+int alloc_vsprintf(char** out, char const* fmt, va_list args) {
     va_list args2;
     va_copy(args2, args);
     int n = vsnprintf(NULL, 0, fmt, args2);

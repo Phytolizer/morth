@@ -10,10 +10,10 @@ typedef enum {
 /// Set `*out_target` on match.
 ///
 /// return false if it matches none
-bool parse_compile_target(const char* text, compile_target_t* out_target);
+bool parse_compile_target(char const* text, compile_target_t* out_target);
 
-char* compute_output_path(const char* input_file_path, const char* output_file_path);
+char* compute_output_path(char const* input_file_path, char const* output_file_path);
 
-void compile_program(program_t program, compile_target_t target, const char* out_file_path);
+void compile_program(program_t program, compile_target_t target, char const* out_file_path);
 void compile_program_native(
-        program_t program, compile_target_t target, const char* out_file_basename);
+        program_t program, compile_target_t target, char const* out_file_basename);
