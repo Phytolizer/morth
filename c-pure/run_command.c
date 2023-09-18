@@ -131,8 +131,8 @@ static proc_t cmd_run_async(va_list args, bool capture) {
     }
 
     CloseHandle(proc_info.hThread);
+    CloseHandle(pipe_handles[0]);
     CloseHandle(pipe_handles[2]);
-    CloseHandle(pipe_handles[4]);
 
     return (proc_t){
             .pid = proc_info.hProcess,
@@ -210,8 +210,8 @@ static captured_command_t proc_wait(proc_t proc) {
     }
     if (proc.stderr_fd != INVALID_HANDLE_VALUE) {
         result.error = malloc(INITIAL_BUFFER_SIZE);
-        size_t len = 0;
-        size_t cap = INITIAL_BUFFER_SIZE;
+        DWORD len = 0;
+        DWORD cap = INITIAL_BUFFER_SIZE;
         while (true) {
             DWORD nread = 0;
             if (!ReadFile(proc.stderr_fd, result.error + len, cap - len, &nread, NULL)) {
