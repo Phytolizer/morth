@@ -185,12 +185,13 @@ static proc_t cmd_run_async(va_list args, bool capture) {
 static captured_command_t proc_wait(proc_t proc) {
     enum { INITIAL_BUFFER_SIZE = 1024 };
 #ifdef _WIN32
-    DWORD result = WaitForSingleObject(proc.pid, INFINITE);
-    if (result == WAIT_FAILED) {
+    DWORD wait_result = WaitForSingleObject(proc.pid, INFINITE);
+    if (wait_result == WAIT_FAILED) {
         fprintf(stderr, "[ERR] could not wait on child process: %lu\n", GetLastError());
         return (captured_command_t){.exit_code = 1};
     }
 
+    captured_command_t result = {.exit_code = 1};
     if (proc.stdout_fd != INVALID_HANDLE_VALUE) {
         result.output = malloc(INITIAL_BUFFER_SIZE);
         size_t len = 0;
@@ -224,7 +225,6 @@ static captured_command_t proc_wait(proc_t proc) {
         result.error[len] = '\0';
     }
 
-    result.exit_code = 1;
     if (!GetExitCodeProcess(proc, &result.exit_code)) {
         fprintf(stderr, "[ERR] could not get child process exit code: %lu\n", GetLastError());
         return result;
