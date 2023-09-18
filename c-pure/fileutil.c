@@ -53,11 +53,11 @@ struct DIR {
 };
 
 DIR* opendir(char const* dirpath) {
-    COOL_ASSERT(dirpath, "NULL path");
+    assert(dirpath && "NULL path");
     char buffer[_MAX_PATH];
     snprintf(buffer, _MAX_PATH, "%s\\*", dirpath);
 
-    DIR* dir = COOL_REALLOC(NULL, sizeof(DIR));
+    DIR* dir = realloc(NULL, sizeof(DIR));
     memset(dir, 0, sizeof(DIR));
 
     dir->hFind = FindFirstFile(buffer, &dir->data);
@@ -70,14 +70,14 @@ DIR* opendir(char const* dirpath) {
 
 fail:
     if (dir)
-        COOL_FREE(dir);
+        free(dir);
     return NULL;
 }
 
 struct dirent* readdir(DIR* dirp) {
-    COOL_ASSERT(dirp, "NULL dirp");
+    assert(dirp && "NULL dirp");
     if (dirp->dirent == NULL) {
-        dirp->dirent = COOL_REALLOC(NULL, sizeof(struct dirent));
+        dirp->dirent = realloc(NULL, sizeof(struct dirent));
         memset(dirp->dirent, 0, sizeof(struct dirent));
     } else {
         if (!FindNextFile(dirp->hFind, &dirp->data)) {
@@ -96,7 +96,7 @@ struct dirent* readdir(DIR* dirp) {
 }
 
 int closedir(DIR* dirp) {
-    COOL_ASSERT(dirp, "NULL dirp");
+    assert(dirp && "NULL dirp");
 
     if (!FindClose(dirp->hFind)) {
         errno = ENOSYS;
@@ -104,9 +104,9 @@ int closedir(DIR* dirp) {
     }
 
     if (dirp->dirent) {
-        COOL_FREE(dirp->dirent);
+        free(dirp->dirent);
     }
-    COOL_FREE(dirp);
+    free(dirp);
 
     return 0;
 }

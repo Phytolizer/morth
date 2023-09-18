@@ -10,6 +10,8 @@ typedef enum {
 FileType get_file_type(char const* path);
 
 #ifdef _WIN32
+#include <stdlib.h>
+
 struct dirent {
     char d_name[_MAX_PATH + 1];
 };
