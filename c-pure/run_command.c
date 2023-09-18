@@ -131,8 +131,6 @@ static proc_t cmd_run_async(va_list args, bool capture) {
     }
 
     CloseHandle(proc_info.hThread);
-    CloseHandle(pipe_handles[1]);
-    CloseHandle(pipe_handles[3]);
 
     return (proc_t){
             .pid = proc_info.hProcess,
