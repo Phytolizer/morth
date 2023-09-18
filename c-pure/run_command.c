@@ -56,7 +56,7 @@ static proc_t cmd_run_async(va_list args, bool capture) {
     va_end(args2);
 
 #ifdef _WIN32
-    HANDLE pipehandles[4] = {
+    HANDLE pipe_handles[4] = {
             GetStdHandle(STD_OUTPUT_HANDLE),
             INVALID_HANDLE_VALUE,
             GetStdHandle(STD_ERROR_HANDLE),
