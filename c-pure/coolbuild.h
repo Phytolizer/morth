@@ -224,7 +224,7 @@ bool coolRename(char const* src_path, char const* dest_path);
 
 #ifdef _WIN32
 struct dirent {
-    char d_name[MAX_PATH + 1];
+    char d_name[_MAX_PATH + 1];
 };
 typedef struct DIR DIR;
 DIR* opendir(char const* dirpath);
@@ -763,8 +763,8 @@ struct DIR {
 
 DIR* opendir(char const* dirpath) {
     COOL_ASSERT(dirpath, "NULL path");
-    char buffer[MAX_PATH];
-    snprintf(buffer, MAX_PATH, "%s\\*", dirpath);
+    char buffer[_MAX_PATH];
+    snprintf(buffer, _MAX_PATH, "%s\\*", dirpath);
 
     DIR* dir = COOL_REALLOC(NULL, sizeof(DIR));
     memset(dir, 0, sizeof(DIR));
