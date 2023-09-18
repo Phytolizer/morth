@@ -194,8 +194,8 @@ static captured_command_t proc_wait(proc_t proc) {
     captured_command_t result = {.exit_code = 1};
     if (proc.stdout_fd != INVALID_HANDLE_VALUE) {
         result.output = malloc(INITIAL_BUFFER_SIZE);
-        size_t len = 0;
-        size_t cap = INITIAL_BUFFER_SIZE;
+        DWORD len = 0;
+        DWORD cap = INITIAL_BUFFER_SIZE;
         while (true) {
             DWORD nread = 0;
             if (!ReadFile(proc.stdout_fd, result.output + len, cap - len, &nread, NULL)) {
@@ -225,7 +225,7 @@ static captured_command_t proc_wait(proc_t proc) {
         result.error[len] = '\0';
     }
 
-    if (!GetExitCodeProcess(proc, &result.exit_code)) {
+    if (!GetExitCodeProcess(proc.pid, &result.exit_code)) {
         fprintf(stderr, "[ERR] could not get child process exit code: %lu\n", GetLastError());
         return result;
     }
