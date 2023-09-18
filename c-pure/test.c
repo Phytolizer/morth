@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef enum {
@@ -16,7 +17,7 @@ typedef enum {
 } log_level_t;
 
 PRINTF_ATTR(2, 3)
-static void log(log_level_t level, char const* fmt, ...) {
+static void test_log(log_level_t level, char const* fmt, ...) {
     switch (level) {
         case LOG_INFO:
             fputs("[INFO] ", stderr);
@@ -62,9 +63,30 @@ static char const* strrstr(char const* haystack, char const* needle) {
     } while (false)
 
 #define MORTH_EXT ".morth"
+#define MORTH_PATH "build/morth"
 
-static void run_tests_on(char const* path) {
-    log(LOG_INFO, "Testing %s", path);
+static int run_tests_on(char const* path) {
+    test_log(LOG_INFO, "Testing %s", path);
+    captured_command_t sim_output = CAPTURE_COMMAND(MORTH_PATH, "sim", path);
+    RUN_COMMAND(MORTH_PATH, "com", "-o", "./build/temp", path);
+    captured_command_t com_output = CAPTURE_COMMAND("./build/temp");
+    int result = 0;
+    if (strcmp(sim_output.output, com_output.output) == 0) {
+        test_log(LOG_INFO, "%s OK", path);
+    } else {
+        test_log(LOG_ERROR, "Output discrepancy between simulation and compilation");
+        fprintf(stderr, "  Simulation output:\n");
+        fprintf(stderr, "    %s\n", sim_output.output);
+        fprintf(stderr, "  Compilation output:\n");
+        fprintf(stderr, "    %s\n", com_output.output);
+        GOTO_CLEANUP(1);
+    }
+cleanup:
+    free(sim_output.output);
+    free(sim_output.error);
+    free(com_output.output);
+    free(com_output.error);
+    return result;
 }
 
 int main(void) {
@@ -77,12 +99,16 @@ int main(void) {
 
     errno = 0;
     struct dirent* ent = readdir(dirp);
+    char namebuf[sizeof("./tests/") + sizeof(ent->d_name)] = "./tests/";
+    char* const namebuf_start = namebuf + sizeof("./tests/") - 1;
     while (ent != NULL) {
-        FileType type = get_file_type(ent->d_name);
+        memcpy(namebuf_start, ent->d_name, sizeof(ent->d_name));
+        FileType type = get_file_type(namebuf);
         switch (type) {
             case FILE_REGULAR:
                 if (strrstr(ent->d_name, MORTH_EXT) != NULL) {
-                    run_tests_on(ent->d_name);
+                    if (run_tests_on(namebuf) != 0)
+                        exit(1);
                 }
                 break;
             case FILE_DIRECTORY:

@@ -415,6 +415,7 @@ CoolProc coolCmdRunAsync(CoolCmd cmd) {
     }
 
     if (cpid == 0) {
+        coolDaAppend(&cmd, NULL);
         execvp(cmd.items[0], (char* const*)cmd.items);
         coolLog(COOL_ERROR, "Could not exec child process: %s", strerror(errno));
         // only exits the child

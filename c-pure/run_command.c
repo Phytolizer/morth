@@ -57,10 +57,10 @@ static proc_t cmd_run_async(va_list args, bool capture) {
 
 #ifdef _WIN32
     HANDLE pipe_handles[4] = {
+            INVALID_HANDLE_VALUE,
             GetStdHandle(STD_OUTPUT_HANDLE),
             INVALID_HANDLE_VALUE,
             GetStdHandle(STD_ERROR_HANDLE),
-            INVALID_HANDLE_VALUE,
     };
     if (capture) {
         SECURITY_ATTRIBUTES sa_attr = {
@@ -68,24 +68,24 @@ static proc_t cmd_run_async(va_list args, bool capture) {
                 .bInheritHandle = TRUE,
                 .lpSecurityDescriptor = NULL,
         };
-        if (!CreatePipe(&pipe_handles[1], &pipe_handles[0], &sa_attr, 2048)) {
+        if (!CreatePipe(&pipe_handles[0], &pipe_handles[1], &sa_attr, 2048)) {
             fprintf(stderr, "[ERR] could not create pipe for capture: %lu\n", GetLastError());
             return INVALID_PROC;
         }
-        if (!SetHandleInformation(pipe_handles[1], HANDLE_FLAG_INHERIT, 0)) {
+        if (!SetHandleInformation(pipe_handles[0], HANDLE_FLAG_INHERIT, 0)) {
             fprintf(stderr, "[ERR] could not disable inheriting pipe for capture: %lu\n",
                     GetLastError());
             CloseHandle(pipe_handles[0]);
             CloseHandle(pipe_handles[1]);
             return INVALID_PROC;
         }
-        if (!CreatePipe(&pipe_handles[3], &pipe_handles[2], &sa_attr, 2048)) {
+        if (!CreatePipe(&pipe_handles[2], &pipe_handles[3], &sa_attr, 2048)) {
             fprintf(stderr, "[ERR] could not create pipe for capture: %lu\n", GetLastError());
             CloseHandle(pipe_handles[0]);
             CloseHandle(pipe_handles[1]);
             return INVALID_PROC;
         }
-        if (!SetHandleInformation(pipe_handles[3], HANDLE_FLAG_INHERIT, 0)) {
+        if (!SetHandleInformation(pipe_handles[2], HANDLE_FLAG_INHERIT, 0)) {
             fprintf(stderr, "[ERR] could not disable inheriting pipe for capture: %lu\n",
                     GetLastError());
             CloseHandle(pipe_handles[0]);
@@ -97,8 +97,8 @@ static proc_t cmd_run_async(va_list args, bool capture) {
     }
     STARTUPINFO start_info = {
             .hStdInput = GetStdHandle(STD_INPUT_HANDLE),
-            .hStdOutput = pipe_handles[0],
-            .hStdError = pipe_handles[2],
+            .hStdOutput = pipe_handles[1],
+            .hStdError = pipe_handles[3],
             .dwFlags = STARTF_USESTDHANDLES,
             .cb = sizeof(STARTUPINFO),
     };
@@ -131,13 +131,13 @@ static proc_t cmd_run_async(va_list args, bool capture) {
     }
 
     CloseHandle(proc_info.hThread);
-    CloseHandle(pipe_handles[0]);
-    CloseHandle(pipe_handles[2]);
+    CloseHandle(pipe_handles[1]);
+    CloseHandle(pipe_handles[3]);
 
     return (proc_t){
             .pid = proc_info.hProcess,
-            .stdout_fd = pipe_handles[1],
-            .stderr_fd = pipe_handles[3],
+            .stdout_fd = pipe_handles[0],
+            .stderr_fd = pipe_handles[2],
     };
 #else // _WIN32
     (void)total_len;
@@ -165,8 +165,10 @@ static proc_t cmd_run_async(va_list args, bool capture) {
         }
         argv[arg_count] = NULL;
         if (capture) {
-            dup2(pipefds[0], STDOUT_FILENO);
-            dup2(pipefds[2], STDERR_FILENO);
+            close(pipefds[0]);
+            close(pipefds[2]);
+            dup2(pipefds[1], STDOUT_FILENO);
+            dup2(pipefds[3], STDERR_FILENO);
         }
         execvp(argv[0], argv);
         perror("exec");
@@ -174,10 +176,14 @@ static proc_t cmd_run_async(va_list args, bool capture) {
         exit(1);
     }
 
+    if (capture) {
+        close(pipefds[1]);
+        close(pipefds[3]);
+    }
     return (proc_t){
             .pid = cpid,
-            .stdout_fd = pipefds[1],
-            .stderr_fd = pipefds[3],
+            .stdout_fd = pipefds[0],
+            .stderr_fd = pipefds[2],
     };
 #endif // !_WIN32
 }
@@ -333,7 +339,7 @@ void run_command_impl(int ignore, ...) {
 captured_command_t capture_command_impl(int ignore, ...) {
     va_list args;
     va_start(args, ignore);
-    proc_t p = cmd_run_async(args, false);
+    proc_t p = cmd_run_async(args, true);
     va_end(args);
     if (p.pid == INVALID_PID)
         exit(1);

@@ -72,6 +72,25 @@ void cflags(CoolCmd* cmd, Target target) {
     }
 }
 
+char const* const all_sources[] = {
+        "alloc_printf",
+        "args_iterator",
+        "c_emitter",
+        "compile",
+        "cross_reference",
+        "fileutil",
+        "generic_io",
+        "load",
+        "main",
+        "nasm_emitter",
+        "op",
+        "parse",
+        "run_command",
+        "simulate",
+        "stack",
+        "test",
+        "token",
+};
 char const* const morth_sources[] = {
         "alloc_printf",
         "args_iterator",
@@ -91,33 +110,39 @@ char const* const morth_sources[] = {
         "token",
 };
 
-char* objPath(size_t i, Target target) {
+char const* const test_sources[] = {
+        "test",
+        "fileutil",
+        "run_command",
+};
+
+char* objPath(char const* basename, Target target) {
     switch (target) {
         case TARGET_WINDOWS_MSVC:
         case TARGET_WINDOWS_CLANG:
-            return coolTempPrintf("obj/%s.obj", COOL_ARRAY_GET(morth_sources, i));
+            return coolTempPrintf("obj/%s.obj", basename);
         case TARGET_LINUX:
         case TARGET_MINGW:
-            return coolTempPrintf("obj/%s.o", COOL_ARRAY_GET(morth_sources, i));
+            return coolTempPrintf("obj/%s.o", basename);
     }
     return "";
 }
 
 char* srcPath(size_t i) {
-    return coolTempPrintf("%s.c", COOL_ARRAY_GET(morth_sources, i));
+    return coolTempPrintf("%s.c", COOL_ARRAY_GET(all_sources, i));
 }
 
 bool compileObjects(Target target) {
-    for (size_t i = 0; i < COOL_ARRAY_LEN(morth_sources); i += 1) {
+    for (size_t i = 0; i < COOL_ARRAY_LEN(all_sources); i += 1) {
         size_t checkpoint = coolTempSave();
         CoolCmd cmd = {0};
         coolCmdAppend(&cmd, target_compiler(target));
         cflags(&cmd, target);
         coolCmdAppend(&cmd, "-c", srcPath(i));
         if (strcmp(cmd.items[0], "cl.exe") != 0 && strcmp(cmd.items[0], "cl") != 0) {
-            coolCmdAppend(&cmd, "-o", objPath(i, target));
+            coolCmdAppend(&cmd, "-o", objPath(all_sources[i], target));
         } else {
-            coolCmdAppend(&cmd, coolTempPrintf("/Fo%s", objPath(i, target)));
+            coolCmdAppend(&cmd, coolTempPrintf("/Fo%s", objPath(all_sources[i], target)));
         }
         bool result = coolCmdRunSync(cmd);
         coolCmdFree(cmd);
@@ -144,7 +169,30 @@ bool compileExe(Target target) {
     }
     size_t checkpoint = coolTempSave();
     for (size_t i = 0; i < COOL_ARRAY_LEN(morth_sources); i += 1) {
-        coolCmdAppend(&cmd, objPath(i, target));
+        coolCmdAppend(&cmd, objPath(morth_sources[i], target));
+    }
+    bool result = coolCmdRunSync(cmd);
+    coolCmdFree(cmd);
+    coolTempRewind(checkpoint);
+    return result;
+}
+
+bool compileTests(Target target) {
+    CoolCmd cmd = {0};
+    coolCmdAppend(&cmd, target_linker(target));
+    switch (target) {
+        case TARGET_LINUX:
+        case TARGET_MINGW:
+            coolCmdAppend(&cmd, "-o", "build/test");
+            break;
+        case TARGET_WINDOWS_CLANG:
+        case TARGET_WINDOWS_MSVC:
+            coolCmdAppend(&cmd, "/out:build/test.exe", "/nologo", "/debug", "libcmt.lib");
+            break;
+    }
+    size_t checkpoint = coolTempSave();
+    for (size_t i = 0; i < COOL_ARRAY_LEN(test_sources); i += 1) {
+        coolCmdAppend(&cmd, objPath(test_sources[i], target));
     }
     bool result = coolCmdRunSync(cmd);
     coolCmdFree(cmd);
@@ -174,12 +222,25 @@ int main(int argc, char** argv) {
     if (!compileExe(target)) {
         return EXIT_FAILURE;
     }
+    if (!compileTests(target)) {
+        return EXIT_FAILURE;
+    }
 
     if (argc > 1) {
         if (strcmp(argv[1], "run") == 0) {
             int newargc = argc - 2;
             CoolCmd cmd = {0};
             coolCmdAppend(&cmd, "build/morth");
+            for (size_t i = 2; i < argc; i += 1) {
+                coolCmdAppend(&cmd, argv[i]);
+            }
+            if (!coolCmdRunSync(cmd)) {
+                return EXIT_FAILURE;
+            }
+        } else if (strcmp(argv[1], "test") == 0) {
+            int newargc = argc - 2;
+            CoolCmd cmd = {0};
+            coolCmdAppend(&cmd, "build/test");
             for (size_t i = 2; i < argc; i += 1) {
                 coolCmdAppend(&cmd, argv[i]);
             }

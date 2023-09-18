@@ -38,6 +38,16 @@ typedef int printf_str_len_t;
 #endif // !_WIN32
 
 char* compute_output_path(char const* input_file_path, char const* output_file_path) {
+    if (output_file_path == NULL) {
+        // simply remove extension from input
+        char const* extension = strrchr(input_file_path, '.');
+        if (extension == NULL)
+            extension = input_file_path + strlen(input_file_path);
+        char* result = NULL;
+        alloc_sprintf(
+                &result, "%.*s", (printf_str_len_t)(extension - input_file_path), input_file_path);
+        return result;
+    }
     // customize based on directory or not
     FileType type = get_file_type(output_file_path);
     if (type == FILE_DIRECTORY) {
