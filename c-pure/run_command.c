@@ -185,10 +185,10 @@ static proc_t cmd_run_async(va_list args, bool capture) {
 static captured_command_t proc_wait(proc_t proc) {
     enum { INITIAL_BUFFER_SIZE = 1024 };
 #ifdef _WIN32
-    DWORD result = WaitForSingleObject(proc, INFINITE);
+    DWORD result = WaitForSingleObject(proc.pid, INFINITE);
     if (result == WAIT_FAILED) {
         fprintf(stderr, "[ERR] could not wait on child process: %lu\n", GetLastError());
-        return false;
+        return (captured_command_t){.exit_code = 1};
     }
 
     if (proc.stdout_fd != INVALID_HANDLE_VALUE) {
@@ -224,14 +224,14 @@ static captured_command_t proc_wait(proc_t proc) {
         result.error[len] = '\0';
     }
 
-    DWORD exit_status;
-    if (!GetExitCodeProcess(proc, &result.exit_status)) {
+    result.exit_code = 1;
+    if (!GetExitCodeProcess(proc, &result.exit_code)) {
         fprintf(stderr, "[ERR] could not get child process exit code: %lu\n", GetLastError());
-        return false;
+        return result;
     }
 
-    if (exit_status != 0) {
-        fprintf(stderr, "[ERR] command exited with code %lu\n", exit_status);
+    if (result.exit_code != 0) {
+        fprintf(stderr, "[ERR] command exited with code %lu\n", result.exit_code);
     }
 
     CloseHandle(proc.pid);
