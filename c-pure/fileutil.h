@@ -11,7 +11,7 @@ FileType get_file_type(char const* path);
 
 #ifdef _WIN32
 struct dirent {
-    char d_name[MAX_PATH + 1];
+    char d_name[_MAX_PATH + 1];
 };
 typedef struct DIR DIR;
 DIR* opendir(char const* dirpath);
