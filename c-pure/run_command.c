@@ -110,8 +110,8 @@ static proc_t cmd_run_async(command_t cmd, bool capture) {
         i += snprintf(text + i, alloc_len, "\"%s\"", arg);
     }
     text[i] = '\0';
-    BOOL success =
-            CreateProcessA(NULL, text, &sa_attr, NULL, TRUE, 0, NULL, NULL, &start_info, &proc_info);
+    BOOL success = CreateProcessA(
+            NULL, text, &sa_attr, NULL, TRUE, 0, NULL, NULL, &start_info, &proc_info);
     free(text);
 
     if (!success) {
@@ -140,12 +140,13 @@ static proc_t cmd_run_async(command_t cmd, bool capture) {
         perror("fork");
         return INVALID_PROC;
     }
+    BUFFER_PUSH(&cmd, NULL);
 
     if (cpid == 0) {
-        char** argv = malloc(sizeof(char*) * (arg_count + 1));
+        char const** argv = malloc(sizeof(char*) * (arg_count + 1));
         arg_count = 0;
-        while (1) {
-            char* arg = va_arg(args, char*);
+        for (size_t i = 0; i < cmd.length; ++i) {
+            char const* arg = cmd.data[i];
             if (arg == NULL) {
                 break;
             }
@@ -159,7 +160,7 @@ static proc_t cmd_run_async(command_t cmd, bool capture) {
             dup2(pipefds[1], STDOUT_FILENO);
             dup2(pipefds[3], STDERR_FILENO);
         }
-        execvp(argv[0], argv);
+        execvp(argv[0], (char* const*)argv);
         perror("exec");
         // only exits the child
         exit(1);
