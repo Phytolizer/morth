@@ -28,3 +28,9 @@
     } while (false)
 
 #define BUFFER_AS_SPAN(buffer) SPAN_WITH_LENGTH((buffer).data, (buffer).length)
+
+#define BUFFER_PUSH(buffer, item) \
+    do { \
+        BUFFER_EXPAND(buffer); \
+        (buffer)->data[(buffer)->length++] = (item); \
+    } while (false)

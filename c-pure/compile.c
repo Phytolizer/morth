@@ -114,6 +114,17 @@ void compile_program(program_t program, compile_target_t target, char const* out
 #define CC_OUT_FMT "/Fe%s"
 #endif // !(__clang__ || __GNUC__)
 
+static char* coflag(command_t* cmd, char const* path) {
+#if defined(__clang__) || defined(__GNUC__)
+    return NULL;
+#else
+    char* oflag = NULL;
+    alloc_sprintf(&oflag, "/Fo%s", path);
+    command_append(cmd, oflag);
+    return oflag;
+#endif
+}
+
 void compile_program_native(
         program_t program, compile_target_t target, char const* out_file_basename) {
 
@@ -124,11 +135,15 @@ void compile_program_native(
             compile_program(program, target, c_path);
             char* obj_path = NULL;
             alloc_sprintf(&obj_path, "%s" OBJ_EXT, out_file_basename);
-            RUN_COMMAND(CC_CMD, "-O2", COFLAG(obj_path), c_path);
-            free(c_path);
+            command_t cc_cmd = command_inline(CC_CMD, "-O2");
+            char* oflag = coflag(&cc_cmd, obj_path);
+            command_append(&cc_cmd, c_path);
             char* out_arg = NULL;
             alloc_sprintf(&out_arg, CC_OUT_FMT, out_file_basename);
-            RUN_COMMAND(CC_CMD, out_arg, obj_path);
+            command_append(&cc_cmd, out_arg);
+            run_command(cc_cmd);
+            free(oflag);
+            free(c_path);
             free(out_arg);
             free(obj_path);
         } break;

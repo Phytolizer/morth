@@ -37,23 +37,17 @@ typedef struct {
 #define INVALID_PROC ((proc_t){.pid = (-1)})
 #endif
 
-static proc_t cmd_run_async(va_list args, bool capture) {
-    va_list args2;
-    va_copy(args2, args);
+static proc_t cmd_run_async(command_t cmd, bool capture) {
     size_t arg_count = 0;
     size_t total_len = 0;
     fputs("[CMD]", stdout);
-    while (1) {
-        char const* arg = va_arg(args2, char const*);
-        if (arg == NULL) {
-            break;
-        }
+    for (size_t i = 0; i < cmd.length; ++i) {
+        char const* arg = cmd.data[i];
         arg_count++;
         total_len += strlen(arg);
         printf(" %s", arg);
     }
     fputc('\n', stdout);
-    va_end(args2);
 
 #ifdef _WIN32
     HANDLE pipe_handles[4] = {
@@ -62,12 +56,12 @@ static proc_t cmd_run_async(va_list args, bool capture) {
             INVALID_HANDLE_VALUE,
             GetStdHandle(STD_ERROR_HANDLE),
     };
+    SECURITY_ATTRIBUTES sa_attr = {
+            .nLength = sizeof(SECURITY_ATTRIBUTES),
+            .bInheritHandle = TRUE,
+            .lpSecurityDescriptor = NULL,
+    };
     if (capture) {
-        SECURITY_ATTRIBUTES sa_attr = {
-                .nLength = sizeof(SECURITY_ATTRIBUTES),
-                .bInheritHandle = TRUE,
-                .lpSecurityDescriptor = NULL,
-        };
         if (!CreatePipe(&pipe_handles[0], &pipe_handles[1], &sa_attr, 2048)) {
             fprintf(stderr, "[ERR] could not create pipe for capture: %lu\n", GetLastError());
             return INVALID_PROC;
@@ -107,14 +101,9 @@ static proc_t cmd_run_async(va_list args, bool capture) {
     size_t alloc_len = total_len + arg_count * 3 /* whitespace+quotes */ + 1;
     char* text = malloc(alloc_len);
     size_t i = 0;
-    char const* program_name = NULL;
-    while (1) {
-        char const* arg = va_arg(args, char const*);
-        if (program_name == NULL) {
-            program_name = arg;
-        } else if (arg == NULL) {
-            break;
-        } else {
+    for (size_t arg_idx = 0; arg_idx < cmd.length; ++arg_idx) {
+        char const* arg = cmd.data[arg_idx];
+        if (arg_idx > 0) {
             text[i] = ' ';
             i += 1;
         }
@@ -122,7 +111,7 @@ static proc_t cmd_run_async(va_list args, bool capture) {
     }
     text[i] = '\0';
     BOOL success =
-            CreateProcessA(NULL, text, NULL, NULL, TRUE, 0, NULL, NULL, &start_info, &proc_info);
+            CreateProcessA(NULL, text, &sa_attr, NULL, TRUE, 0, NULL, NULL, &start_info, &proc_info);
     free(text);
 
     if (!success) {
@@ -131,6 +120,8 @@ static proc_t cmd_run_async(va_list args, bool capture) {
     }
 
     CloseHandle(proc_info.hThread);
+    CloseHandle(pipe_handles[1]);
+    CloseHandle(pipe_handles[3]);
 
     return (proc_t){
             .pid = proc_info.hProcess,
@@ -189,12 +180,6 @@ static proc_t cmd_run_async(va_list args, bool capture) {
 static captured_command_t proc_wait(proc_t proc) {
     enum { INITIAL_BUFFER_SIZE = 1024 };
 #ifdef _WIN32
-    DWORD wait_result = WaitForSingleObject(proc.pid, INFINITE);
-    if (wait_result == WAIT_FAILED) {
-        fprintf(stderr, "[ERR] could not wait on child process: %lu\n", GetLastError());
-        return (captured_command_t){.exit_code = 1};
-    }
-
     captured_command_t result = {.exit_code = 1};
     if (proc.stdout_fd != INVALID_HANDLE_VALUE) {
         result.output = malloc(INITIAL_BUFFER_SIZE);
@@ -203,12 +188,22 @@ static captured_command_t proc_wait(proc_t proc) {
         while (true) {
             DWORD nread = 0;
             if (!ReadFile(proc.stdout_fd, result.output + len, cap - len, &nread, NULL)) {
+                if (GetLastError() == ERROR_BROKEN_PIPE)
+                    break;
                 fprintf(stderr, "[ERR] could not receive output from command: %lu\n",
                         GetLastError());
                 break;
             }
             if (nread == 0)
                 break;
+
+            len += nread;
+            if (len > cap / 2) {
+                cap *= 2;
+                char* temp = realloc(result.output, cap);
+                assert(temp);
+                result.output = temp;
+            }
         }
         result.output[len] = '\0';
     }
@@ -219,17 +214,33 @@ static captured_command_t proc_wait(proc_t proc) {
         while (true) {
             DWORD nread = 0;
             if (!ReadFile(proc.stderr_fd, result.error + len, cap - len, &nread, NULL)) {
+                if (GetLastError() == ERROR_BROKEN_PIPE)
+                    break;
                 fprintf(stderr, "[ERR] could not receive error output from command: %lu\n",
                         GetLastError());
                 break;
             }
             if (nread == 0)
                 break;
+
+            len += nread;
+            if (len > cap / 2) {
+                cap *= 2;
+                char* temp = realloc(result.output, cap);
+                assert(temp);
+                result.output = temp;
+            }
         }
         result.error[len] = '\0';
     }
 
-    if (!GetExitCodeProcess(proc.pid, &result.exit_code)) {
+    DWORD wait_result = WaitForSingleObject(proc.pid, INFINITE);
+    if (wait_result == WAIT_FAILED) {
+        fprintf(stderr, "[ERR] could not wait on child process: %lu\n", GetLastError());
+        return (captured_command_t){.exit_code = 1};
+    }
+    BOOL exit_code_result = GetExitCodeProcess(proc.pid, &result.exit_code);
+    if (!exit_code_result) {
         fprintf(stderr, "[ERR] could not get child process exit code: %lu\n", GetLastError());
         return result;
     }
@@ -323,22 +334,16 @@ static captured_command_t proc_wait(proc_t proc) {
 #endif // !_WIN32
 }
 
-void run_command_impl(int ignore, ...) {
-    va_list args;
-    va_start(args, ignore);
-    proc_t p = cmd_run_async(args, false);
-    va_end(args);
+void run_command(command_t cmd) {
+    proc_t p = cmd_run_async(cmd, false);
     if (p.pid == INVALID_PID)
         exit(1);
     if (proc_wait(p).exit_code != 0)
         exit(1);
 }
 
-captured_command_t capture_command_impl(int ignore, ...) {
-    va_list args;
-    va_start(args, ignore);
-    proc_t p = cmd_run_async(args, true);
-    va_end(args);
+captured_command_t capture_command(command_t cmd) {
+    proc_t p = cmd_run_async(cmd, true);
     if (p.pid == INVALID_PID)
         exit(1);
     captured_command_t result = proc_wait(p);
@@ -351,4 +356,29 @@ captured_command_t capture_command_impl(int ignore, ...) {
     }
 
     return result;
+}
+
+command_t command_inline_null(void* first, ...) {
+    command_t cmd = {0};
+    va_list args;
+    va_start(args, first);
+    char const* arg = va_arg(args, char const*);
+    while (arg != NULL) {
+        BUFFER_PUSH(&cmd, arg);
+        arg = va_arg(args, char const*);
+    }
+    va_end(args);
+    return cmd;
+}
+
+void command_append_null(command_t* cmd, ...) {
+    va_list args;
+    va_start(args, cmd);
+
+    char const* arg = va_arg(args, char const*);
+    while (arg != NULL) {
+        BUFFER_PUSH(cmd, arg);
+        arg = va_arg(args, char const*);
+    }
+    va_end(args);
 }
