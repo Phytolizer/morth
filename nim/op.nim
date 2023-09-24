@@ -1,88 +1,18 @@
-import lex
+type OpKind* {.pure.} = enum
+  Push
+  Plus
+  Minus
+  Dump
 
-type
-  Word* = uint64
+type Op* = object
+  case kind*: OpKind
+  of Push:
+    push*: int
+  else: discard
 
-  OpCode* {.pure.} = enum
-    PUSH
-    PLUS
-    MINUS
-    DUMP
-    EQ
-    IF
-    END
-    ELSE
-    DUP
-    GT
-    WHILE
-    DO
-    MEM
-    LOAD
-    STORE
-    COUNT
+func push*(x: int): Op = Op(kind: Push, push: x)
+func plus*: Op = Op(kind: Plus)
+func minus*: Op = Op(kind: Minus)
+func dump*: Op = Op(kind: Dump)
 
-  Op* = object
-    token*: Token
-    code*: OpCode
-    operand*: Word
-
-func opPush*(token: Token, x: Word): Op =
-  result.token = token
-  result.code = OpCode.PUSH
-  result.operand = x
-
-func opPlus*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.PLUS
-
-func opMinus*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.MINUS
-
-func opDump*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.DUMP
-
-func opEq*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.EQ
-
-func opIf*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.IF
-
-func opEnd*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.END
-
-func opElse*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.ELSE
-
-func opDup*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.DUP
-
-func opGt*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.GT
-
-func opWhile*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.WHILE
-
-func opDo*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.DO
-
-func opMem*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.MEM
-
-func opLoad*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.LOAD
-
-func opStore*(token: Token): Op =
-  result.token = token
-  result.code = OpCode.STORE
+type Program* = seq[Op]

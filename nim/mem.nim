@@ -1,1 +1,0 @@
-const MEM_CAPACITY* = 640_000
